@@ -29,7 +29,8 @@ class PdfHigieneController extends Controller
 
         abort_if(empty($paginas), 422, 'Nenhuma seção selecionada.');
 
-        $logoPath = $supermercado->logo_caminho
+        // Logo enviada fica no storage; link externo não é baixado para o PDF (sem caminho local)
+        $logoPath = $supermercado->logo_caminho && ! Supermercado::ehLinkExterno($supermercado->logo_caminho)
             ? Storage::disk('public')->path($supermercado->logo_caminho)
             : null;
 

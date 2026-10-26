@@ -16,22 +16,18 @@ class LogoController extends Controller
             'logo' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:4096'],
         ]);
 
-        if ($supermercado->logo_caminho) {
-            Storage::disk('public')->delete($supermercado->logo_caminho);
-        }
+        $supermercado->apagarLogoDoStorage();
 
         $caminho = $request->file('logo')->store("logos/{$supermercado->id}", 'public');
         $supermercado->update(['logo_caminho' => $caminho]);
 
-        return response()->json(['logo_url' => Storage::disk('public')->url($caminho)]);
+        return response()->json(['logo_url' => $supermercado->fresh()->logo_url]);
     }
 
     /** Volta para o padrão (sem logo). */
     public function remover(Supermercado $supermercado): JsonResponse
     {
-        if ($supermercado->logo_caminho) {
-            Storage::disk('public')->delete($supermercado->logo_caminho);
-        }
+        $supermercado->apagarLogoDoStorage();
         $supermercado->update(['logo_caminho' => null]);
 
         return response()->json(['logo_url' => null]);
@@ -39,8 +35,6 @@ class LogoController extends Controller
 
     public function atual(Supermercado $supermercado): JsonResponse
     {
-        return response()->json([
-            'logo_url' => $supermercado->logo_caminho ? Storage::disk('public')->url($supermercado->logo_caminho) : null,
-        ]);
+        return response()->json(['logo_url' => $supermercado->logo_url]);
     }
 }

@@ -38,8 +38,8 @@
             <p class="block text-sm font-medium text-grafite/70">Imagem (logo)</p>
             <div class="mt-2 flex items-center gap-4">
                 <div class="flex h-24 w-40 shrink-0 items-center justify-center rounded-xl bg-offwhite">
-                    @if ($editando && $supermercado->logo_caminho)
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($supermercado->logo_caminho) }}"
+                    @if ($editando && $supermercado->logo_url)
+                        <img src="{{ $supermercado->logo_url }}"
                              class="max-h-20 max-w-full object-contain" alt="Logo atual">
                     @else
                         <span class="text-xs font-bold text-grafite/50 text-center">SEM LOGO</span>

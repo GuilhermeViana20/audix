@@ -7,7 +7,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SupermercadoController extends Controller
@@ -71,9 +70,7 @@ class SupermercadoController extends Controller
     {
         $nome = $supermercado->nome;
 
-        if ($supermercado->logo_caminho) {
-            Storage::disk('public')->delete($supermercado->logo_caminho);
-        }
+        $supermercado->apagarLogoDoStorage();
         $supermercado->delete();
 
         return redirect()->route('supermercados.index')->with('ok', "{$nome} removido.");
@@ -118,9 +115,7 @@ class SupermercadoController extends Controller
             return;
         }
 
-        if ($supermercado->logo_caminho) {
-            Storage::disk('public')->delete($supermercado->logo_caminho);
-        }
+        $supermercado->apagarLogoDoStorage();
 
         $caminho = $request->file('logo')->store("logos/{$supermercado->id}", 'public');
         $supermercado->update(['logo_caminho' => $caminho]);
