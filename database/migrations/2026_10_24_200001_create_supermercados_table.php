@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('supermercados', function (Blueprint $table) {
             $table->id();
             $table->string('nome', 120);
+            $table->string('nome_social', 120)->nullable();
             $table->string('slug', 140)->unique();
             $table->string('logo_caminho', 255)->nullable();
             $table->timestamps();
