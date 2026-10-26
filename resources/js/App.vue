@@ -451,7 +451,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
     color: #000;
     font-family: Times, 'Times New Roman', serif;
     font-size: 9px;
-    padding: 22px 0;
+    box-sizing: border-box;
+    padding: 22px 36px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
 }
 .sheet table { width: 100%; border-collapse: collapse; table-layout: fixed; }
