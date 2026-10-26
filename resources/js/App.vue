@@ -127,6 +127,12 @@ async function carregarSupermercado(id) {
     finally { carregando.value = false; }
 }
 
+async function fechar() {
+    await salvarAgora();
+    atual.value = null;
+    titulo.value = '';
+}
+
 async function abrir(secao) {
     await salvarAgora();
     atual.value = secao;
@@ -333,53 +339,55 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                             <button class="text-azul font-medium" @click="ordenadas.forEach(s => selecionadas[s.id] = false)">Nenhuma</button>
                         </div>
                         <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b class="text-grafite">{{ planilha.nome }}</b></p>
-                    <div class="mt-3 grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
+
+                        <div class="mt-3 space-y-2">
                             <div v-for="s in ordenadas" :key="s.id"
-                                 class="cursor-pointer rounded-xl border p-3 transition hover:border-azul/40"
-                                 :class="atual?.id === s.id ? 'border-azul bg-azul/5' : 'border-transparent bg-offwhite'"
-                                 @click="abrir(s)">
-                                <label class="flex items-center gap-2 font-medium" @click.stop>
-                                    <input type="checkbox" v-model="selecionadas[s.id]" class="accent-azul h-4 w-4">
-                                    {{ s.nome }}
-                                </label>
-                                <div class="mt-2 flex flex-wrap items-center gap-3 text-sm">
+                                 class="rounded-xl border transition"
+                                 :class="atual?.id === s.id ? 'border-azul bg-azul/5' : 'border-transparent bg-offwhite'">
+                                <div class="flex cursor-pointer flex-wrap items-center gap-3 p-3"
+                                     @click="atual?.id === s.id ? fechar() : abrir(s)">
+                                    <label class="flex items-center gap-2 font-medium" @click.stop>
+                                        <input type="checkbox" v-model="selecionadas[s.id]" class="accent-azul h-4 w-4">
+                                        {{ s.nome }}
+                                    </label>
                                     <span class="text-xs text-grafite/50">{{ s.linhas.length }} linhas</span>
-                                    <button class="text-azul" @click.stop="renomear(s)">Renomear</button>
-                                    <button class="ml-auto text-red-500" @click.stop="excluirSecao(s)">×</button>
+                                    <span class="ml-auto text-xs font-semibold text-azul">{{ atual?.id === s.id ? 'Fechar ▲' : 'Editar ▼' }}</span>
+                                    <button class="text-sm text-azul" @click.stop="renomear(s)">Renomear</button>
+                                    <button class="text-red-500" @click.stop="excluirSecao(s)">×</button>
+                                </div>
+
+                                <div v-if="atual?.id === s.id" class="border-t border-grafite/10 p-4">
+                                    <div class="flex items-center justify-end">
+                                        <span class="text-xs font-semibold"
+                                              :class="status === 'Erro ao salvar' ? 'text-red-500' : 'text-grafite/50'">{{ status }}</span>
+                                    </div>
+                                    <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
+                                    <input v-model="titulo" class="mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm">
+
+                                    <div class="mt-4 space-y-2">
+                                        <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" class="flex items-center gap-2">
+                                            <span class="w-12 text-xs text-grafite/50">{{ l.tipo === 'grupo' ? 'Faixa' : 'Linha' }}</span>
+                                            <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
+                                                   :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
+                                            <button class="px-1 text-azul disabled:opacity-30" :disabled="i === 0" @click="moverLinha(i, -1)">↑</button>
+                                            <button class="px-1 text-azul disabled:opacity-30" :disabled="i === atual.linhas.length - 1" @click="moverLinha(i, 1)">↓</button>
+                                            <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                                        <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarLinha">+ Linha</button>
+                                        <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarGrupo">+ Faixa</button>
+                                        <button class="ml-auto rounded-xl bg-white px-3 py-2 font-medium" @click="copiarParaTodas">Copiar para todas</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
                         <form class="mt-3 flex gap-2" @submit.prevent="adicionarSecao">
                             <input v-model="novaSecao" placeholder="Nova seção (ex.: PADARIA)" class="flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
                             <button class="rounded-xl bg-azul px-4 text-sm font-semibold text-white">Adicionar</button>
                         </form>
-                    </div>
-
-                    <div v-if="atual" class="rounded-2xl bg-white p-5 shadow-sm">
-                        <div class="flex items-center justify-between gap-3">
-                            <h2 class="text-lg font-bold">Linhas de {{ atual.nome }}</h2>
-                            <span class="text-xs font-semibold"
-                                  :class="status === 'Erro ao salvar' ? 'text-red-500' : 'text-grafite/50'">{{ status }}</span>
-                        </div>
-                        <label class="mt-3 block text-sm text-grafite/70">Título da primeira coluna</label>
-                        <input v-model="titulo" class="mt-1 w-full rounded-xl bg-offwhite px-3 py-2 text-sm">
-
-                        <div class="mt-4 space-y-2">
-                            <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" class="flex items-center gap-2">
-                                <span class="w-12 text-xs text-grafite/50">{{ l.tipo === 'grupo' ? 'Faixa' : 'Linha' }}</span>
-                                <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
-                                       :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-offwhite'">
-                                <button class="px-1 text-azul disabled:opacity-30" :disabled="i === 0" @click="moverLinha(i, -1)">↑</button>
-                                <button class="px-1 text-azul disabled:opacity-30" :disabled="i === atual.linhas.length - 1" @click="moverLinha(i, 1)">↓</button>
-                                <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 flex flex-wrap gap-2 text-sm">
-                            <button class="rounded-xl bg-offwhite px-3 py-2 font-medium text-azul" @click="adicionarLinha">+ Linha</button>
-                            <button class="rounded-xl bg-offwhite px-3 py-2 font-medium text-azul" @click="adicionarGrupo">+ Faixa</button>
-                            <button class="ml-auto rounded-xl bg-offwhite px-3 py-2 font-medium" @click="copiarParaTodas">Copiar para todas</button>
-                        </div>
                     </div>
                 </template>
 
