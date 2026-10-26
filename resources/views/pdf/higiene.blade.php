@@ -7,22 +7,16 @@
     body { font-family: Times, serif; font-size: 9px; color: #000; }
     .pagina { page-break-after: always; }
     .pagina:last-child { page-break-after: auto; }
-    td, th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
-    .sem-borda { border: 0; }
-    .titulo { font-size: 14px; font-weight: bold; text-align: center; line-height: 1.25; }
-    .logo-acoop { height: 40px; }
-    .logo-mae { height: 40px; }
-    .logo-box { border: 1px dashed #777; font-size: 7px; color: #555; text-align: center; height: 40px; width: 120px; line-height: 40px; }
-    .cab td { height: 30px; vertical-align: top; padding-top: 3px; font-size: 9px; }
-    .cab td.topo { padding-top: 3px; }
-    .cab .esq { text-align: left; padding-left: 4px; vertical-align: middle; height: 20px; }
-    .titulo-cab { padding-left: 4px; }
-    .cab .valor { display: block; font-size: 10px; margin-top: 2px; }
-    .espaco td { border: 0; height: 8px; padding: 0; }
-    .grade th { font-weight: bold; height: 18px; font-size: 9px; }
-    .grade td { height: 18px; font-size: 9px; }
-    .grade td.nome { text-align: center; }
-    .grade tr.grupo td { background: #d9d9d9; font-weight: bold; height: 18px; font-size: 9px; }
+    table.planilha { border-collapse: collapse; table-layout: fixed; }
+    .planilha td, .planilha th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
+    .planilha .sem-borda { border: 0; }
+    .planilha .titulo { font-size: 14px; font-weight: bold; line-height: 1.25; }
+    .planilha .topo td { height: 30px; vertical-align: top; padding-top: 3px; font-size: 9px; }
+    .planilha .esq { text-align: left; padding-left: 4px; vertical-align: middle; height: 24px; }
+    .planilha .valor { display: block; font-size: 10px; }
+    .planilha thead th { font-weight: bold; height: 18px; font-size: 9px; }
+    .planilha tbody td { height: 18px; font-size: 9px; }
+    .planilha .faixa td { background: #d9d9d9; font-weight: bold; height: 18px; font-size: 9px; }
 </style>
 </head>
 <body>
@@ -32,71 +26,63 @@
 @foreach ($paginas as $pagina)
     @php($secao = $pagina['secao'])
     <div class="pagina">
+        {{-- Uma única tabela de 32 colunas (nome + 31 dias): cabeçalho, topo e grade ficam sempre alinhados --}}
+        <table class="planilha" style="width:{{ $LARG_TOTAL }}px;">
+            <colgroup>
+                <col style="width:{{ $LARG_NOME }}px;">
+                @for ($d = 1; $d <= 31; $d++)
+                    <col style="width:{{ $LARG_DIA }}px;">
+                @endfor
+            </colgroup>
 
-        <table style="width:{{ $LARG_TOTAL }}px; margin-bottom:6px; border-collapse:collapse;">
+            {{-- Cabeçalho: logo ACCP | título | logo do supermercado --}}
             <tr>
-                <td class="sem-borda" style="width:200px; text-align:left;">
+                <td class="sem-borda" colspan="5" style="text-align:left; height:50px;">
                     @if (file_exists($acoopPath))
-                        <img src="{{ $acoopPath }}" class="logo-acoop">
+                        <img src="{{ $acoopPath }}" style="height:40px;">
                     @endif
                 </td>
-                <td class="sem-borda titulo" style="width:{{ $LARG_TOTAL - 400 }}px;">PLANILHA DE MONITORAMENTO<br>HIGIENE E LIMPEZA AMBIENTAL</td>
-                <td class="sem-borda" style="width:200px; text-align:right;">
+                <td class="sem-borda titulo" colspan="22">PLANILHA DE MONITORAMENTO<br>HIGIENE E LIMPEZA AMBIENTAL</td>
+                <td class="sem-borda" colspan="5" style="text-align:right; height:50px;">
                     @if ($logoPath)
-                        <img src="{{ $logoPath }}" class="logo-mae">
+                        <img src="{{ $logoPath }}" style="height:40px;">
                     @else
-                        <div class="logo-box">LOGO DO SUPERMERCADO</div>
+                        <div style="border:1px dashed #777; font-size:7px; color:#555; height:40px; line-height:40px; text-align:center;">LOGO DO SUPERMERCADO</div>
                     @endif
                 </td>
             </tr>
-        </table>
 
-        {{-- Bloco 1: ENCARREGADO | SETOR | MÊS/ANO (cada um ~1/3) --}}
-        <table class="grade" style="width:{{ $LARG_TOTAL }}px; border-collapse:collapse; table-layout:fixed;">
-            <colgroup>
-                <col style="width:{{ round($LARG_TOTAL / 3, 2) }}px;">
-                <col style="width:{{ round($LARG_TOTAL / 3, 2) }}px;">
-                <col style="width:{{ $LARG_TOTAL - 2 * round($LARG_TOTAL / 3, 2) }}px;">
-            </colgroup>
-            <tr class="cab">
-                <td style="width:{{ round($LARG_TOTAL / 3, 2) }}px; height:30px; vertical-align:top; text-align:center;"><b>ENCARREGADO:</b></td>
-                <td style="width:{{ round($LARG_TOTAL / 3, 2) }}px; height:30px; vertical-align:top; text-align:center;"><b>SETOR:</b><br>{{ $secao->nome }}</td>
-                <td style="width:{{ $LARG_TOTAL - 2 * round($LARG_TOTAL / 3, 2) }}px; height:30px; vertical-align:top; text-align:center;"><b>MÊS/ANO:</b></td>
+            {{-- Topo: ENCARREGADO | SETOR | MÊS/ANO --}}
+            <tr class="topo">
+                <td colspan="11"><b>ENCARREGADO:</b></td>
+                <td colspan="11"><b>SETOR:</b><span class="valor">{{ $secao->nome }}</span></td>
+                <td colspan="10"><b>MÊS/ANO:</b></td>
             </tr>
-        </table>
-
-        {{-- Bloco 2: LOCAL | DATA --}}
-        <table class="grade" style="width:{{ $LARG_TOTAL }}px; border-collapse:collapse; table-layout:fixed; margin-top:-1px;">
-            <colgroup>
-                <col style="width:{{ round($LARG_TOTAL / 2, 2) }}px;">
-                <col style="width:{{ $LARG_TOTAL - round($LARG_TOTAL / 2, 2) }}px;">
-            </colgroup>
-            <tr class="cab">
-                <td style="width:{{ round($LARG_TOTAL / 2, 2) }}px; height:24px; text-align:left; vertical-align:middle; padding-left:4px;"><b>LOCAL:</b></td>
-                <td style="width:{{ $LARG_TOTAL - round($LARG_TOTAL / 2, 2) }}px; height:24px; text-align:left; vertical-align:middle; padding-left:4px;"><b>DATA:</b></td>
+            {{-- LOCAL | DATA --}}
+            <tr class="topo">
+                <td class="esq" colspan="16"><b>LOCAL:</b></td>
+                <td class="esq" colspan="16"><b>DATA:</b></td>
             </tr>
-        </table>
 
-        <div style="height:8px;"></div>
+            <tr><td colspan="32" class="sem-borda" style="height:8px; padding:0;"></td></tr>
 
-        <table class="grade" style="width:{{ $LARG_TOTAL }}px; border-collapse:collapse; table-layout:auto; margin-top:0;">
             <thead>
                 <tr>
-                    <th style="width:{{ $LARG_NOME }}px;">{{ $secao->titulo_primeira_coluna }}</th>
+                    <th>{{ $secao->titulo_primeira_coluna }}</th>
                     @for ($d = 1; $d <= 31; $d++)
-                        <th style="width:{{ $LARG_DIA - 1 }}px;">{{ $d }}</th>
+                        <th>{{ $d }}</th>
                     @endfor
                 </tr>
             </thead>
             <tbody>
                 @foreach ($pagina['linhas'] as $linha)
                     @if ($linha->tipo === 'grupo')
-                        <tr><td colspan="32" style="background:#d9d9d9; font-weight:bold; height:18px; text-align:center;">{{ $linha->texto }}</td></tr>
+                        <tr class="faixa"><td colspan="32">{{ $linha->texto }}</td></tr>
                     @else
                         <tr>
-                            <td class="nome" style="width:{{ $LARG_NOME }}px;">{{ $linha->texto }}</td>
+                            <td>{{ $linha->texto }}</td>
                             @for ($d = 1; $d <= 31; $d++)
-                                <td style="width:{{ $LARG_DIA - 1 }}px;"></td>
+                                <td></td>
                             @endfor
                         </tr>
                     @endif
