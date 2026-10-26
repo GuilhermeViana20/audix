@@ -10,7 +10,7 @@
 
     <form method="POST"
           action="{{ $editando ? route('supermercados.update', $supermercado) : route('supermercados.store') }}"
-          class="max-w-xl rounded-2xl bg-white p-6 shadow-sm space-y-5">
+          class="flex w-full min-h-[calc(100vh-8rem)] flex-col space-y-5 rounded-2xl bg-white p-6 shadow-sm">
         @csrf
         @if ($editando)
             @method('PUT')
@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-2 text-sm">
+        <div class="mt-auto flex items-center justify-end gap-3 pt-2 text-sm">
             <a href="{{ route('supermercados.index') }}" class="font-medium text-grafite/70">Cancelar</a>
             <button class="rounded-xl bg-azul px-4 py-2 font-semibold text-white">{{ $editando ? 'Salvar alterações' : 'Cadastrar' }}</button>
         </div>
