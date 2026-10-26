@@ -37,8 +37,11 @@ class SupermercadoController extends Controller
 
         $supermercado = Supermercado::create([
             'nome' => $dados['nome'],
+            'nome_social' => $dados['nome_social'] ?? null,
             'slug' => $this->slugUnico($dados['nome']),
         ]);
+
+        $this->guardarLogo($request, $supermercado);
 
         return redirect()->route('supermercados.index')->with('ok', "{$supermercado->nome} cadastrado.");
     }
@@ -54,8 +57,11 @@ class SupermercadoController extends Controller
 
         $supermercado->update([
             'nome' => $dados['nome'],
+            'nome_social' => $dados['nome_social'] ?? null,
             'slug' => $this->slugUnico($dados['nome'], $supermercado->id),
         ]);
+
+        $this->guardarLogo($request, $supermercado);
 
         return redirect()->route('supermercados.index')->with('ok', "{$supermercado->nome} atualizado.");
     }
@@ -98,9 +104,26 @@ class SupermercadoController extends Controller
     {
         return $request->validate([
             'nome' => ['required', 'string', 'max:120'],
+            'nome_social' => ['nullable', 'string', 'max:120'],
+            'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:4096'],
         ], [
-            'nome.required' => 'Informe o nome do supermercado.',
+            'nome.required' => 'Informe o nome fantasia do supermercado.',
         ]);
+    }
+
+    /** Guarda a imagem enviada no formulário, substituindo a anterior. */
+    private function guardarLogo(Request $request, Supermercado $supermercado): void
+    {
+        if (! $request->hasFile('logo')) {
+            return;
+        }
+
+        if ($supermercado->logo_caminho) {
+            Storage::disk('public')->delete($supermercado->logo_caminho);
+        }
+
+        $caminho = $request->file('logo')->store("logos/{$supermercado->id}", 'public');
+        $supermercado->update(['logo_caminho' => $caminho]);
     }
 
     /** Gera o slug a partir do nome, acrescentando -2, -3… se já existir. */

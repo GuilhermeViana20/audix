@@ -38,9 +38,10 @@
                 <span class="w-4 text-center">🌡</span> Temperatura
                 <em class="ml-auto not-italic text-[10px] uppercase tracking-wide text-white/40">em breve</em>
             </span>
-            <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/35 cursor-not-allowed">
+            <a href="{{ route('higiene.index') }}"
+               class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium {{ request()->routeIs('higiene.*') ? 'bg-azul text-white shadow-lg shadow-azul/30' : 'text-white/80 hover:bg-white/5' }}">
                 <span class="w-4 text-center">💧</span> Higiene
-            </span>
+            </a>
             <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/35 cursor-not-allowed">
                 <span class="w-4 text-center">⚙</span> CIP
             </span>

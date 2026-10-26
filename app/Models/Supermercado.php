@@ -10,7 +10,7 @@ class Supermercado extends Model
 {
     protected $table = 'supermercados';
 
-    protected $fillable = ['nome', 'slug', 'logo_caminho'];
+    protected $fillable = ['nome', 'nome_social', 'slug', 'logo_caminho'];
 
     protected static function booted(): void
     {

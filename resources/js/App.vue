@@ -229,17 +229,6 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 
 <template>
     <div class="flex min-h-screen">
-        <aside class="hidden md:flex w-60 shrink-0 flex-col bg-grafite text-white sticky top-0 h-screen px-4 py-7">
-            <a href="/" class="px-2 text-3xl font-extrabold tracking-tight">audi<span class="text-azul">x</span></a>
-            <p class="px-2 pt-1 pb-6 text-xs text-white/55">Inteligência em cada controle.</p>
-            <nav class="grid gap-1">
-                <a href="/" class="rounded-xl px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/5">Visão geral</a>
-                <span class="rounded-xl px-3 py-2.5 text-sm text-white/35">Temperatura</span>
-                <span class="rounded-xl bg-azul px-3 py-2.5 text-sm font-medium text-white shadow-lg shadow-azul/30">Higiene</span>
-                <span class="rounded-xl px-3 py-2.5 text-sm text-white/35">CIP</span>
-            </nav>
-        </aside>
-
         <div class="flex-1 min-w-0 grid xl:grid-cols-[2fr_3fr] h-screen">
             <!-- Coluna da esquerda: controles (rola sozinha) -->
             <section class="overflow-y-auto p-5 md:p-8 space-y-5">
