@@ -15,6 +15,7 @@ const novaSecao = ref('');
 const aviso = ref('');
 const status = ref('Tudo salvo');
 const logoUrl = ref(null);
+const planilha = ref(null); // { id, tipo, nome } da planilha que está sendo editada
 const versaoPreview = ref(0);
 
 // Contador de requisições em andamento: enquanto houver alguma, a tela mostra o loading.
@@ -58,7 +59,8 @@ function mapearSecoes(lista) {
 
 // Carrega seções + linhas do supermercado de uma vez.
 async function recarregarSecoes() {
-    const dados = await api(`/api/supermercados/${supermercadoId.value}/planilha`);
+    const dados = await api(`/api/supermercados/${supermercadoId.value}/planilhas/higiene`);
+    planilha.value = dados.planilha;
     secoes.value = mapearSecoes(dados.secoes);
     dados.secoes.forEach(s => { if (selecionadas.value[s.id] === undefined) selecionadas.value[s.id] = true; });
     if (atual.value) atual.value = secoes.value.find(s => s.id === atual.value.id) || null;
@@ -169,7 +171,7 @@ async function adicionarSecao() {
     const nome = novaSecao.value.trim();
     if (!nome) return;
     try {
-        const nova = await api(`/api/supermercados/${supermercadoId.value}/secoes`, { method: 'POST', body: JSON.stringify({ nome }) });
+        const nova = await api(`/api/planilhas/${planilha.value.id}/secoes`, { method: 'POST', body: JSON.stringify({ nome }) });
         novaSecao.value = '';
         selecionadas.value[nova.id] = true;
         await recarregarSecoes();
@@ -290,7 +292,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                             <button class="text-azul font-medium" @click="ordenadas.forEach(s => selecionadas[s.id] = true)">Marcar todas</button>
                             <button class="text-azul font-medium" @click="ordenadas.forEach(s => selecionadas[s.id] = false)">Nenhuma</button>
                         </div>
-                        <div class="mt-3 grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
+                        <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b class="text-grafite">{{ planilha.nome }}</b></p>
+                    <div class="mt-3 grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
                             <div v-for="s in ordenadas" :key="s.id"
                                  class="rounded-xl border p-3"
                                  :class="atual?.id === s.id ? 'border-azul' : 'border-transparent bg-offwhite'">

@@ -10,15 +10,15 @@ class Secao extends Model
 {
     protected $table = 'secoes';
 
-    protected $fillable = ['supermercado_id', 'nome', 'titulo_primeira_coluna', 'ordem'];
+    protected $fillable = ['planilha_id', 'nome', 'titulo_primeira_coluna', 'ordem'];
 
     protected $attributes = [
         'titulo_primeira_coluna' => 'ÁREA DE ATENDIMENTO',
     ];
 
-    public function supermercado(): BelongsTo
+    public function planilha(): BelongsTo
     {
-        return $this->belongsTo(Supermercado::class, 'supermercado_id');
+        return $this->belongsTo(Planilha::class, 'planilha_id');
     }
 
     public function linhas(): HasMany

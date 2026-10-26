@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Secao;
 use App\Models\Supermercado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -13,14 +14,17 @@ class SupermercadoController extends Controller
 {
     public function index(): View
     {
-        $supermercados = Supermercado::withCount('secoes')->orderBy('nome')->get();
+        $supermercados = Supermercado::with('planilhas')->orderBy('nome')->get();
+        foreach ($supermercados as $supermercado) {
+            $supermercado->secoes_count = Secao::whereIn('planilha_id', $supermercado->planilhas->pluck('id'))->count();
+        }
 
         return view('supermercados.index', compact('supermercados'));
     }
 
     public function show(Supermercado $supermercado): View
     {
-        $supermercado->load('secoes.linhas');
+        $supermercado->load('planilhas.secoes.linhas');
 
         return view('supermercados.show', compact('supermercado'));
     }
@@ -77,10 +81,11 @@ class SupermercadoController extends Controller
     }
 
     /** Seções e linhas do supermercado, em uma só resposta, para montar a planilha. */
-    public function planilha(Supermercado $supermercado): JsonResponse
+    public function planilha(Supermercado $supermercado, string $tipo): JsonResponse
     {
-        $secoes = $supermercado->secoes()
-            ->orderBy('nome')
+        $planilha = $supermercado->planilha($tipo);
+
+        $secoes = $planilha->secoes()
             ->with('linhas')
             ->get()
             ->map(fn ($secao) => [
@@ -94,7 +99,10 @@ class SupermercadoController extends Controller
                 ])->values(),
             ])->values();
 
-        return response()->json(['secoes' => $secoes]);
+        return response()->json([
+            'planilha' => ['id' => $planilha->id, 'tipo' => $planilha->tipo, 'nome' => $planilha->nome],
+            'secoes' => $secoes,
+        ]);
     }
 
     private function validar(Request $request): array

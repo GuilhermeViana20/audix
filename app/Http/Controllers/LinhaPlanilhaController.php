@@ -55,7 +55,7 @@ class LinhaPlanilhaController extends Controller
         $titulo = $secao->titulo_primeira_coluna;
 
         DB::transaction(function () use ($secao, $modelo, $titulo) {
-            $outras = Secao::where('supermercado_id', $secao->supermercado_id)
+            $outras = Secao::where('planilha_id', $secao->planilha_id)
                 ->where('id', '!=', $secao->id)
                 ->get();
 
@@ -74,6 +74,6 @@ class LinhaPlanilhaController extends Controller
             }
         });
 
-        return response()->json(['ok' => true, 'secoes_atualizadas' => Secao::where('supermercado_id', $secao->supermercado_id)->count() - 1]);
+        return response()->json(['ok' => true, 'secoes_atualizadas' => Secao::where('planilha_id', $secao->planilha_id)->count() - 1]);
     }
 }

@@ -18,7 +18,7 @@ class PdfHigieneController extends Controller
         $ids = collect(explode(',', (string) $request->query('secoes', '')))
             ->map(fn ($id) => (int) $id)->filter()->values();
 
-        $secoes = $supermercado->secoes()->whereIn('id', $ids)->with('linhas')->get();
+        $secoes = $supermercado->planilha('higiene')->secoes()->whereIn('id', $ids)->with('linhas')->get();
 
         $paginas = [];
         foreach ($secoes as $secao) {

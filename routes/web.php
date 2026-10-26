@@ -23,14 +23,13 @@ Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supe
 Route::get('/higiene/{supermercado}/pdf', [PdfHigieneController::class, 'gerar'])->name('higiene.pdf');
 
 Route::prefix('api')->group(function () {
-    // Seções
-    Route::get('supermercados/{supermercado}/secoes', [SecaoController::class, 'index']);
-    Route::post('supermercados/{supermercado}/secoes', [SecaoController::class, 'store']);
+    // Planilhas (por tipo) e suas seções
+    Route::get('supermercados/{supermercado}/planilhas/{tipo}', [SupermercadoController::class, 'planilha']);
+    Route::post('planilhas/{planilha}/secoes', [SecaoController::class, 'store']);
     Route::put('secoes/{secao}', [SecaoController::class, 'update']);
     Route::delete('secoes/{secao}', [SecaoController::class, 'destroy']);
 
-    // Linhas da planilha de higiene
-    Route::get('supermercados/{supermercado}/planilha', [SupermercadoController::class, 'planilha']);
+    // Linhas das seções
 
     Route::get('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'index']);
     Route::put('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'sincronizar']);

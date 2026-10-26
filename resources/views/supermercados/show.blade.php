@@ -6,7 +6,7 @@
     <a href="{{ route('supermercados.index') }}" class="text-azul text-sm">← Voltar</a>
     <h1 class="text-2xl font-bold mt-2 mb-6">{{ $supermercado->nome }}</h1>
 
-    @forelse ($supermercado->secoes as $secao)
+    @forelse ($supermercado->planilhas->flatMap->secoes as $secao)
         <section class="bg-white rounded-2xl shadow-sm p-5 mb-5">
             <div class="flex items-baseline justify-between mb-3">
                 <h2 class="text-lg font-semibold">{{ $secao->nome }}</h2>

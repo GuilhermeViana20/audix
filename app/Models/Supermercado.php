@@ -22,9 +22,20 @@ class Supermercado extends Model
         });
     }
 
-    public function secoes(): HasMany
+    public function planilhas(): HasMany
     {
-        return $this->hasMany(Secao::class, 'supermercado_id')->orderBy('ordem')->orderBy('nome');
+        return $this->hasMany(Planilha::class, 'supermercado_id')->orderBy('tipo');
+    }
+
+    /** Planilha do tipo informado; cria a planilha vazia se ainda não existir. */
+    public function planilha(string $tipo): Planilha
+    {
+        abort_unless(array_key_exists($tipo, Planilha::TIPOS), 404);
+
+        return $this->planilhas()->firstOrCreate(
+            ['tipo' => $tipo],
+            ['nome' => Planilha::TIPOS[$tipo]],
+        );
     }
 
     /** Logo pronta para exibir: link externo é usado como está; arquivo enviado vem do storage. */

@@ -32,9 +32,11 @@ class SupermercadoExemploSeeder extends Seeder
             ['nome' => 'Aconchemax']
         );
 
+        $planilha = $supermercado->planilha('higiene');
+
         foreach (['AÇOUGUE', 'FLV', 'FRENTE DE LOJA', 'FRIOS'] as $i => $nome) {
             $secao = Secao::firstOrCreate(
-                ['supermercado_id' => $supermercado->id, 'nome' => $nome],
+                ['planilha_id' => $planilha->id, 'nome' => $nome],
                 ['ordem' => $i]
             );
 
