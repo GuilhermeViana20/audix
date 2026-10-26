@@ -18,6 +18,10 @@
 
         <nav class="grid gap-1">
             <a href="{{ route('supermercados.index') }}"
+               class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium {{ request()->routeIs('supermercados.*') ? 'bg-azul text-white shadow-lg shadow-azul/30' : 'text-white/80 hover:bg-white/5' }}">
+                <span class="w-4 text-center">🏪</span> Supermercados
+            </a>
+            <a href="{{ route('supermercados.index') }}"
                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium {{ request()->routeIs('supermercados.index') ? 'bg-azul text-white shadow-lg shadow-azul/30' : 'text-white/80 hover:bg-white/5' }}">
                 <span class="w-4 text-center">▦</span> Visão geral
             </a>
