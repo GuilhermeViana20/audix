@@ -467,6 +467,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .topo { margin-bottom: 0; }
 .sheet .topo td { height: 36px; vertical-align: top; padding-top: 4px; font-size: 9px; }
 .sheet .topo .valor { display: block; font-size: 10px; }
+.sheet .topo.local { margin-top: -1px; }
 .sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
 .sheet .grade { margin-top: 8px; }
 .sheet .grade th { font-weight: bold; height: 18px; font-size: 9px; }
