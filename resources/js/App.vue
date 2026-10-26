@@ -17,6 +17,19 @@ const status = ref('Tudo salvo');
 const logoUrl = ref(null);
 const versaoPreview = ref(0);
 
+// Contador de requisições em andamento: enquanto houver alguma, a tela mostra o loading.
+const pendentes = ref(0);
+const pdfCarregando = ref(false);
+const carregandoRede = computed(() => pendentes.value > 0 || pdfCarregando.value);
+async function rede(url, opts = {}) {
+    pendentes.value++;
+    try {
+        return await fetch(url, opts);
+    } finally {
+        pendentes.value--;
+    }
+}
+
 const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
 const urlPreview = computed(() => supermercadoId.value && idsSelecionados.value.length
@@ -33,7 +46,7 @@ function msg(texto) { aviso.value = texto; setTimeout(() => (aviso.value = ''), 
 function atualizarPreview() { versaoPreview.value++; }
 
 async function api(url, opts = {}) {
-    const r = await fetch(url, { headers: JSON_HEADERS, ...opts });
+    const r = await rede(url, { headers: JSON_HEADERS, ...opts });
     const dados = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(dados.message || Object.values(dados.errors || {})[0]?.[0] || 'Erro ao salvar');
     return dados;
@@ -53,7 +66,7 @@ async function recarregarSecoes() {
 }
 
 async function carregarLogo() {
-    const r = await fetch(`/api/supermercados/${supermercadoId.value}/logo`, { headers: { Accept: 'application/json' } });
+    const r = await rede(`/api/supermercados/${supermercadoId.value}/logo`, { headers: { Accept: 'application/json' } });
     logoUrl.value = (await r.json()).logo_url;
 }
 
@@ -192,7 +205,7 @@ async function enviarLogo(evento) {
     const corpo = new FormData();
     corpo.append('logo', arquivo);
     try {
-        const r = await fetch(`/api/supermercados/${supermercadoId.value}/logo`, {
+        const r = await rede(`/api/supermercados/${supermercadoId.value}/logo`, {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': TOKEN, Accept: 'application/json' },
             body: corpo,
@@ -219,6 +232,7 @@ async function voltarLogoPadrao() {
 watch([titulo, () => atual.value?.linhas], agendarSalvamento, { deep: true });
 // Atualiza a pré-visualização quando muda a seleção
 watch(selecionadas, atualizarPreview, { deep: true });
+watch(urlPreview, url => { pdfCarregando.value = !!url; });
 
 onMounted(async () => {
     window.addEventListener('beforeunload', avisarAntesDeSair);
@@ -228,6 +242,14 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 </script>
 
 <template>
+    <!-- Loading enquanto houver requisições em andamento (salvar, carregar, PDF) -->
+    <div v-if="carregandoRede" class="fixed inset-0 z-50 flex items-center justify-center bg-grafite/20 backdrop-blur-[1px]" role="status" aria-live="polite">
+        <div class="flex items-center gap-3 rounded-2xl bg-white px-5 py-3 text-sm font-semibold shadow-lg">
+            <span class="h-4 w-4 animate-spin rounded-full border-2 border-azul border-t-transparent"></span>
+            Carregando…
+        </div>
+    </div>
+
     <div class="flex min-h-screen">
         <div class="flex-1 min-w-0 grid xl:grid-cols-[2fr_3fr] h-screen">
             <!-- Coluna da esquerda: controles (rola sozinha) -->
@@ -334,7 +356,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                     </div>
                 </div>
                 <div class="mt-4 flex-1 overflow-hidden rounded-2xl bg-white shadow-sm">
-                    <iframe v-if="urlPreview" :src="urlPreview" class="h-full w-full" title="Pré-visualização"></iframe>
+                    <iframe v-if="urlPreview" :src="urlPreview" class="h-full w-full" title="Pré-visualização" @load="pdfCarregando = false"></iframe>
                     <p v-else class="p-6 text-grafite/60">Selecione um supermercado e pelo menos uma seção para ver a pré-visualização.</p>
                 </div>
             </aside>
