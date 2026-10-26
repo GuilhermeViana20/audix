@@ -81,6 +81,9 @@ function assinatura(s, tit) {
     return JSON.stringify({ t: tit, l: s.linhas.map(l => [l.tipo, l.texto]) });
 }
 const estaSujo = computed(() => !!atual.value && assinatura(atual.value, titulo.value) !== atual.value._salvo);
+const textoStatus = computed(() => ['Salvando…', 'Erro ao salvar'].includes(status.value)
+    ? status.value
+    : (estaSujo.value ? 'Alterações não salvas' : 'Tudo salvo'));
 
 function msg(texto) { aviso.value = texto; setTimeout(() => (aviso.value = ''), 3500); }
 function atualizarPreview() { versaoPreview.value++; }
@@ -112,8 +115,7 @@ async function carregarLogo() {
 }
 
 async function carregarSupermercado(id) {
-    if (!id) return;
-    await salvarAgora();
+    if (!id || !podeDescartar()) return;
     carregando.value = true;
     try {
         supermercadoId.value = id;
@@ -127,28 +129,39 @@ async function carregarSupermercado(id) {
     finally { carregando.value = false; }
 }
 
+// Pede confirmação se houver alterações não salvas; ao confirmar, descarta-as.
+async function podeDescartar() {
+    if (!estaSujo.value) return true;
+    if (!window.confirm('Há alterações não salvas. Descartar?')) return false;
+    clearTimeout(timer);
+    await recarregarSecoes();
+    return true;
+}
+
 async function fechar() {
-    await salvarAgora();
+    if (!await podeDescartar()) return;
     atual.value = null;
     titulo.value = '';
 }
 
 async function abrir(secao) {
+    if (atual.value?.id !== secao.id && !await podeDescartar()) return;
+    const atualizada = secoes.value.find(s => s.id === secao.id) || secao;
+    atual.value = atualizada;
+    titulo.value = atualizada.titulo_primeira_coluna;
+}
+
+// Salva a seção aberta quando o usuário clica em "Salvar"
+async function salvar() {
+    clearTimeout(timer);
     await salvarAgora();
-    atual.value = secao;
-    titulo.value = secao.titulo_primeira_coluna;
+    if (status.value === 'Tudo salvo') msg('Seção salva');
 }
 
 // ---------- Salvamento automático ----------
 let timer = null;
 let fila = Promise.resolve();
 
-function agendarSalvamento() {
-    if (!atual.value || !estaSujo.value) return;
-    status.value = 'Alterações pendentes';
-    clearTimeout(timer);
-    timer = setTimeout(salvarAgora, 700);
-}
 
 // Enfileira o salvamento para não haver duas gravações ao mesmo tempo.
 function salvarAgora() {
@@ -178,7 +191,7 @@ async function salvarSecao() {
             s.titulo_primeira_coluna = tit;
         }
         s._salvo = assin;
-        status.value = estaSujo.value ? 'Alterações pendentes' : 'Tudo salvo';
+        status.value = estaSujo.value ? 'Alterações não salvas' : 'Tudo salvo';
         atualizarPreview();
     } catch (e) {
         status.value = 'Erro ao salvar';
@@ -194,7 +207,7 @@ function avisarAntesDeSair(evento) {
 // ---------- Ações de edição ----------
 async function copiarParaTodas() {
     if (!atual.value) return;
-    await salvarAgora();
+    if (estaSujo.value) { msg('Clique em Salvar antes de copiar para as outras seções'); return; }
     try {
         await api(`/api/secoes/${atual.value.id}/copiar-para-todas`, { method: 'POST' });
         await recarregarSecoes();
@@ -213,6 +226,7 @@ function adicionarGrupo() { atual.value.linhas.push({ tipo: 'grupo', texto: 'NOV
 function removerLinha(i) { atual.value.linhas.splice(i, 1); }
 
 async function adicionarSecao() {
+    if (!await podeDescartar()) return;
     const nome = novaSecao.value.trim();
     if (!nome) return;
     try {
@@ -225,6 +239,7 @@ async function adicionarSecao() {
 }
 
 async function renomear(secao) {
+    if (!await podeDescartar()) return;
     const nome = window.prompt('Novo nome da seção:', secao.nome);
     if (!nome || nome.trim().toUpperCase() === secao.nome) return;
     try {
@@ -237,6 +252,7 @@ async function renomear(secao) {
 }
 
 async function excluirSecao(secao) {
+    if (!await podeDescartar()) return;
     if (!window.confirm(`Remover a seção ${secao.nome} e suas linhas?`)) return;
     try {
         if (atual.value?.id === secao.id) { clearTimeout(timer); atual.value = null; titulo.value = ''; }
@@ -276,7 +292,6 @@ async function voltarLogoPadrao() {
 }
 
 // Autosave: qualquer mudança nas linhas ou no título das seções agenda a gravação
-watch([titulo, () => atual.value?.linhas], agendarSalvamento, { deep: true });
 // Atualiza a pré-visualização quando muda a seleção
 watch(selecionadas, atualizarPreview, { deep: true });
 
@@ -359,7 +374,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                 <div v-if="atual?.id === s.id" class="border-t border-grafite/10 p-4">
                                     <div class="flex items-center justify-end">
                                         <span class="text-xs font-semibold"
-                                              :class="status === 'Erro ao salvar' ? 'text-red-500' : 'text-grafite/50'">{{ status }}</span>
+                                              :class="status === 'Erro ao salvar' ? 'text-red-500' : (estaSujo ? 'text-amber-600' : 'text-grafite/50')">{{ textoStatus }}</span>
                                     </div>
                                     <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
                                     <input v-model="titulo" class="mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm">
@@ -379,6 +394,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                         <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarLinha">+ Linha</button>
                                         <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarGrupo">+ Faixa</button>
                                         <button class="ml-auto rounded-xl bg-white px-3 py-2 font-medium" @click="copiarParaTodas">Copiar para todas</button>
+                                        <button class="rounded-xl bg-azul px-4 py-2 font-semibold text-white disabled:opacity-40"
+                                                :disabled="!estaSujo || status === 'Salvando…'" @click="salvar">Salvar</button>
                                     </div>
                                 </div>
                             </div>
