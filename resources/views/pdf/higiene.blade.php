@@ -84,7 +84,7 @@
                 <tr>
                     <th style="width:{{ $LARG_NOME }}px;">{{ $secao->titulo_primeira_coluna }}</th>
                     @for ($d = 1; $d <= 31; $d++)
-                        <th style="width:{{ $LARG_DIA }}px;">{{ $d }}</th>
+                        <th style="width:{{ $LARG_DIA - 1 }}px;">{{ $d }}</th>
                     @endfor
                 </tr>
             </thead>
@@ -96,7 +96,7 @@
                         <tr>
                             <td class="nome" style="width:{{ $LARG_NOME }}px;">{{ $linha->texto }}</td>
                             @for ($d = 1; $d <= 31; $d++)
-                                <td style="width:{{ $LARG_DIA }}px;"></td>
+                                <td style="width:{{ $LARG_DIA - 1 }}px;"></td>
                             @endfor
                         </tr>
                     @endif
