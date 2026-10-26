@@ -7,12 +7,12 @@
     body { font-family: Times, serif; font-size: 9px; color: #000; }
     .pagina { page-break-after: always; }
     .pagina:last-child { page-break-after: auto; }
-    table.planilha { border-collapse: collapse; table-layout: auto; }
+    table.planilha { border-collapse: collapse; table-layout: fixed; }
     .planilha td, .planilha th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
     .planilha .sem-borda { border: 0; }
     .planilha .titulo { font-size: 14px; font-weight: bold; line-height: 1.25; }
-    .planilha .topo td { height: 30px; vertical-align: top; padding-top: 3px; font-size: 9px; }
-    .planilha .esq { text-align: left; padding-left: 4px; vertical-align: middle; height: 24px; }
+    .planilha .topo td { height: 36px; vertical-align: top; padding-top: 4px; font-size: 9px; }
+    .planilha .local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; font-size: 9px; }
     .planilha .valor { display: block; font-size: 10px; }
     .planilha thead th { font-weight: bold; height: 18px; font-size: 9px; }
     .planilha tbody td { height: 18px; font-size: 9px; }
@@ -23,43 +23,66 @@
 @php($LARG_NOME = 160)
 @php($LARG_DIA = 28.39)
 @php($LARG_TOTAL = $LARG_NOME + 31 * $LARG_DIA)
+@php($TERCO = round($LARG_TOTAL / 3, 2))
+@php($METADE = round($LARG_TOTAL / 2, 2))
 @foreach ($paginas as $pagina)
     @php($secao = $pagina['secao'])
     <div class="pagina">
-        {{-- Uma única tabela de 32 colunas (nome + 31 dias): cabeçalho, topo e grade ficam sempre alinhados --}}
-        <table class="planilha" style="width:{{ $LARG_TOTAL }}px;">
 
-            {{-- Cabeçalho: logo ACCP | título | logo do supermercado --}}
+        {{-- Cabeçalho: logo ACCP | título | logo do supermercado --}}
+        <table class="planilha" style="width:{{ $LARG_TOTAL }}px; margin-bottom:4px;">
+            <colgroup>
+                <col style="width:200px;">
+                <col style="width:{{ $LARG_TOTAL - 400 }}px;">
+                <col style="width:200px;">
+            </colgroup>
             <tr>
-                <td class="sem-borda" colspan="5" style="text-align:left; height:50px;">
+                <td class="sem-borda" style="text-align:left; height:50px;">
                     @if (file_exists($acoopPath))
                         <img src="{{ $acoopPath }}" style="height:40px;">
                     @endif
                 </td>
-                <td class="sem-borda titulo" colspan="22">PLANILHA DE MONITORAMENTO<br>HIGIENE E LIMPEZA AMBIENTAL</td>
-                <td class="sem-borda" colspan="5" style="text-align:right; height:50px;">
+                <td class="sem-borda titulo">PLANILHA DE MONITORAMENTO<br>HIGIENE E LIMPEZA AMBIENTAL</td>
+                <td class="sem-borda" style="text-align:right; height:50px;">
                     @if ($logoPath)
                         <img src="{{ $logoPath }}" style="height:40px;">
                     @else
-                        <div style="border:1px dashed #777; font-size:7px; color:#555; height:40px; line-height:40px; text-align:center;">LOGO DO SUPERMERCADO</div>
+                        <div style="display:inline-block; width:120px; border:1px dashed #777; font-size:7px; color:#555; height:40px; line-height:40px; text-align:center;">LOGO DO SUPERMERCADO</div>
                     @endif
                 </td>
             </tr>
+        </table>
 
-            {{-- Topo: ENCARREGADO | SETOR | MÊS/ANO --}}
-            <tr class="topo">
-                <td colspan="11"><b>ENCARREGADO:</b></td>
-                <td colspan="11"><b>SETOR:</b><span class="valor">{{ $secao->nome }}</span></td>
-                <td colspan="10"><b>MÊS/ANO:</b></td>
+        {{-- Topo: ENCARREGADO | SETOR | MÊS/ANO (33,3% cada) --}}
+        <table class="planilha topo" style="width:{{ $LARG_TOTAL }}px;">
+            <colgroup>
+                <col style="width:{{ $TERCO }}px;">
+                <col style="width:{{ $TERCO }}px;">
+                <col style="width:{{ $LARG_TOTAL - 2 * $TERCO }}px;">
+            </colgroup>
+            <tr>
+                <td><b>ENCARREGADO:</b></td>
+                <td><b>SETOR:</b><span class="valor">{{ $secao->nome }}</span></td>
+                <td><b>MÊS/ANO:</b></td>
             </tr>
-            {{-- LOCAL | DATA --}}
-            <tr class="topo">
-                <td class="esq" colspan="16"><b>LOCAL:</b></td>
-                <td class="esq" colspan="16"><b>DATA:</b></td>
+        </table>
+
+        {{-- LOCAL | DATA (50% cada), centralizados na vertical --}}
+        <table class="planilha local" style="width:{{ $LARG_TOTAL }}px; margin-top:-1px;">
+            <colgroup>
+                <col style="width:{{ $METADE }}px;">
+                <col style="width:{{ $LARG_TOTAL - $METADE }}px;">
+            </colgroup>
+            <tr>
+                <td><b>LOCAL:</b></td>
+                <td><b>DATA:</b></td>
             </tr>
+        </table>
 
-            <tr><td colspan="32" class="sem-borda" style="height:8px; padding:0;"></td></tr>
+        <div style="height:8px;"></div>
 
+        {{-- Grade: nome + 31 dias --}}
+        <table class="planilha" style="width:{{ $LARG_TOTAL }}px;">
             <thead>
                 <tr>
                     <th style="width:{{ $LARG_NOME }}px;">{{ $secao->titulo_primeira_coluna }}</th>
