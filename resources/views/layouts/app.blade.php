@@ -4,20 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>audix · @yield('titulo')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        azul: '#4063FF',
-                        grafite: '#151922',
-                        offwhite: '#F5F7FA',
-                    },
-                },
-            },
-        };
-    </script>
+    @vite(['resources/css/app.css'])
 </head>
 <body class="bg-offwhite text-grafite min-h-screen">
 <div class="flex min-h-screen">
