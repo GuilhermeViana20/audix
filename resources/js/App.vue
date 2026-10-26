@@ -452,6 +452,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
     font-family: Times, 'Times New Roman', serif;
     font-size: 9px;
     box-sizing: border-box;
+    height: 794px; /* A4 paisagem (210mm) sempre, mesmo com poucas linhas */
+    overflow: hidden;
     padding: 22px 36px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
 }
@@ -481,7 +483,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
     #sheets, #sheets * { visibility: visible; }
     #sheets { position: absolute; left: 0; top: 0; width: 100%; display: block; gap: 0; padding: 0; }
     #sheets-box { overflow: visible !important; height: auto !important; }
-    .sheet { zoom: 1 !important; box-shadow: none; padding: 0; width: 100%; break-after: page; page-break-after: always; }
+    .sheet { zoom: 1 !important; box-shadow: none; padding: 0; width: 100%; height: 194mm; overflow: hidden; break-after: page; page-break-after: always; }
     .sheet:last-child { break-after: auto; page-break-after: auto; }
     .sheet .grade td, .sheet .grade th, .sheet .topo td, .sheet .cab-logos td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .sheet .grade .faixa td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
