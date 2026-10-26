@@ -51,21 +51,33 @@
             </tr>
         </table>
 
-        <table class="grade" style="width:{{ $LARG_TOTAL }}px; border-collapse:collapse; table-layout:auto;">
-            {{-- Topo: ENCARREGADO | SETOR | MÊS/ANO (cada um ~1/3) --}}
+        {{-- Bloco 1: ENCARREGADO | SETOR | MÊS/ANO (cada um ~1/3) --}}
+        <table class="grade" style="width:{{ $LARG_TOTAL }}px; border-collapse:collapse; table-layout:fixed;">
+            <colgroup>
+                <col style="width:{{ round($LARG_TOTAL / 3, 2) }}px;">
+                <col style="width:{{ round($LARG_TOTAL / 3, 2) }}px;">
+                <col style="width:{{ $LARG_TOTAL - 2 * round($LARG_TOTAL / 3, 2) }}px;">
+            </colgroup>
             <tr class="cab">
-                <td style="width:{{ round($LARG_TOTAL / 3, 2) }}px;"><b>ENCARREGADO:</b></td>
-                <td style="width:{{ round($LARG_TOTAL / 3, 2) }}px;"><b>SETOR:</b><span class="valor">{{ $secao->nome }}</span></td>
-                <td style="width:{{ $LARG_TOTAL - 2 * round($LARG_TOTAL / 3, 2) }}px;"><b>MÊS/ANO:</b></td>
+                <td style="width:{{ round($LARG_TOTAL / 3, 2) }}px; height:30px; vertical-align:top; text-align:center;"><b>ENCARREGADO:</b></td>
+                <td style="width:{{ round($LARG_TOTAL / 3, 2) }}px; height:30px; vertical-align:top; text-align:center;"><b>SETOR:</b><br>{{ $secao->nome }}</td>
+                <td style="width:{{ $LARG_TOTAL - 2 * round($LARG_TOTAL / 3, 2) }}px; height:30px; vertical-align:top; text-align:center;"><b>MÊS/ANO:</b></td>
             </tr>
-            {{-- Embaixo: LOCAL | DATA (cada um ~1/2) --}}
-            <tr class="cab">
-                <td class="esq" colspan="1" style="width:{{ round($LARG_TOTAL / 2, 2) }}px;"><b>LOCAL:</b></td>
-                <td class="esq" colspan="2" style="width:{{ $LARG_TOTAL - round($LARG_TOTAL / 2, 2) }}px;"><b>DATA:</b></td>
-            </tr>
-
-            <tr class="espaco"><td colspan="3"></td></tr>
         </table>
+
+        {{-- Bloco 2: LOCAL | DATA --}}
+        <table class="grade" style="width:{{ $LARG_TOTAL }}px; border-collapse:collapse; table-layout:fixed; margin-top:-1px;">
+            <colgroup>
+                <col style="width:{{ round($LARG_TOTAL / 2, 2) }}px;">
+                <col style="width:{{ $LARG_TOTAL - round($LARG_TOTAL / 2, 2) }}px;">
+            </colgroup>
+            <tr class="cab">
+                <td style="width:{{ round($LARG_TOTAL / 2, 2) }}px; height:24px; text-align:left; vertical-align:middle; padding-left:4px;"><b>LOCAL:</b></td>
+                <td style="width:{{ $LARG_TOTAL - round($LARG_TOTAL / 2, 2) }}px; height:24px; text-align:left; vertical-align:middle; padding-left:4px;"><b>DATA:</b></td>
+            </tr>
+        </table>
+
+        <div style="height:8px;"></div>
 
         <table class="grade" style="width:{{ $LARG_TOTAL }}px; border-collapse:collapse; table-layout:auto; margin-top:0;">
             <thead>
@@ -79,7 +91,7 @@
             <tbody>
                 @foreach ($pagina['linhas'] as $linha)
                     @if ($linha->tipo === 'grupo')
-                        <tr class="grupo"><td colspan="32">{{ $linha->texto }}</td></tr>
+                        <tr><td colspan="32" style="background:#d9d9d9; font-weight:bold; height:18px; text-align:center;">{{ $linha->texto }}</td></tr>
                     @else
                         <tr>
                             <td class="nome" style="width:{{ $LARG_NOME }}px;">{{ $linha->texto }}</td>
