@@ -110,23 +110,36 @@ class SupermercadoController extends Controller
         return $request->validate([
             'nome' => ['required', 'string', 'max:120'],
             'nome_social' => ['nullable', 'string', 'max:120'],
-            'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:4096'],
+            'logo_url' => ['nullable', 'url:http,https', 'max:500', 'regex:/\.(png|jpe?g|webp|svg|gif)(\?.*)?$/i'],
         ], [
             'nome.required' => 'Informe o nome fantasia do supermercado.',
+            'logo_url.url' => 'Informe um link válido, começando com http:// ou https://.',
+            'logo_url.regex' => 'Use o link direto da imagem, que termina em .png, .jpg, .webp, .svg ou .gif.',
         ]);
     }
 
-    /** Guarda a imagem enviada no formulário, substituindo a anterior. */
+    /** Guarda o link da logo informado no formulário; apaga o arquivo antigo do storage, se houver. */
     private function guardarLogo(Request $request, Supermercado $supermercado): void
     {
-        if (! $request->hasFile('logo')) {
+        $url = trim((string) $request->input('logo_url', ''));
+        $atual = $supermercado->logo_caminho;
+        $atualEhLink = $atual && Supermercado::ehLinkExterno($atual);
+
+        // Campo vazio: só limpa se a logo atual for um link; arquivos do storage são mantidos.
+        if ($url === '') {
+            if ($atualEhLink) {
+                $supermercado->update(['logo_caminho' => null]);
+            }
+
+            return;
+        }
+
+        if ($url === $atual) {
             return;
         }
 
         $supermercado->apagarLogoDoStorage();
-
-        $caminho = $request->file('logo')->store("logos/{$supermercado->id}", 'public');
-        $supermercado->update(['logo_caminho' => $caminho]);
+        $supermercado->update(['logo_caminho' => $url]);
     }
 
     /** Gera o slug a partir do nome, acrescentando -2, -3… se já existir. */

@@ -4,9 +4,11 @@
 
 @section('conteudo')
     @php($editando = $supermercado->exists)
+    @php($linkAtual = $editando && $supermercado->logo_caminho && \App\Models\Supermercado::ehLinkExterno($supermercado->logo_caminho) ? $supermercado->logo_caminho : '')
+    @php($previewInicial = old('logo_url', $linkAtual ?: ($editando ? $supermercado->logo_url : '')))
     <h1 class="text-2xl font-bold mb-6">{{ $editando ? 'Editar supermercado' : 'Novo supermercado' }}</h1>
 
-    <form method="POST" enctype="multipart/form-data"
+    <form method="POST"
           action="{{ $editando ? route('supermercados.update', $supermercado) : route('supermercados.store') }}"
           class="max-w-xl rounded-2xl bg-white p-6 shadow-sm space-y-5">
         @csrf
@@ -35,23 +37,23 @@
         </div>
 
         <div>
-            <p class="block text-sm font-medium text-grafite/70">Imagem (logo)</p>
-            <div class="mt-2 flex items-center gap-4">
-                <div class="flex h-24 w-40 shrink-0 items-center justify-center rounded-xl bg-offwhite">
-                    @if ($editando && $supermercado->logo_url)
-                        <img src="{{ $supermercado->logo_url }}"
-                             class="max-h-20 max-w-full object-contain" alt="Logo atual">
-                    @else
-                        <span class="text-xs font-bold text-grafite/50 text-center">SEM LOGO</span>
-                    @endif
-                </div>
-                <input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                       class="text-sm">
-            </div>
-            <p class="mt-1 text-xs text-grafite/50">PNG, JPG, WEBP ou SVG, até 4 MB. Deixe em branco para manter a atual.</p>
-            @error('logo')
+            <label for="logo_url" class="block text-sm font-medium text-grafite/70">Imagem (logo) — link</label>
+            <input id="logo_url" name="logo_url" type="url" inputmode="url"
+                   value="{{ old('logo_url', $linkAtual) }}" maxlength="500"
+                   placeholder="https://i.ibb.co/xxxx/logo.png"
+                   class="mt-1 w-full rounded-xl bg-offwhite px-3 py-2 text-sm">
+            <p class="mt-1 text-xs text-grafite/50">Use o link direto da imagem, que termina em .png, .jpg, .webp, .svg ou .gif.</p>
+            @error('logo_url')
                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
             @enderror
+
+            <div class="mt-3 flex h-28 w-full items-center justify-center rounded-xl bg-offwhite p-3">
+                <img id="logo_preview" alt="Pré-visualização da logo"
+                     src="{{ $previewInicial }}"
+                     class="max-h-20 max-w-full object-contain {{ $previewInicial ? '' : 'hidden' }}">
+                <span id="logo_vazio" class="text-xs font-bold text-grafite/50 {{ $previewInicial ? 'hidden' : '' }}">SEM LOGO</span>
+                <span id="logo_erro" class="hidden text-xs font-semibold text-red-500">Não foi possível carregar a imagem deste link</span>
+            </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-2 text-sm">
@@ -59,4 +61,33 @@
             <button class="rounded-xl bg-azul px-4 py-2 font-semibold text-white">{{ $editando ? 'Salvar alterações' : 'Cadastrar' }}</button>
         </div>
     </form>
+
+    <script>
+        (() => {
+            const campo = document.getElementById('logo_url');
+            const img = document.getElementById('logo_preview');
+            const vazio = document.getElementById('logo_vazio');
+            const erro = document.getElementById('logo_erro');
+
+            const mostrar = url => {
+                erro.classList.add('hidden');
+                if (!url) {
+                    img.classList.add('hidden');
+                    vazio.classList.remove('hidden');
+                    return;
+                }
+                vazio.classList.add('hidden');
+                img.classList.remove('hidden');
+                img.src = url;
+            };
+
+            img.addEventListener('error', () => {
+                if (img.getAttribute('src')) {
+                    img.classList.add('hidden');
+                    erro.classList.remove('hidden');
+                }
+            });
+            campo.addEventListener('input', () => mostrar(campo.value.trim()));
+        })();
+    </script>
 @endsection
