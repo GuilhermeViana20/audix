@@ -4,9 +4,12 @@ use App\Http\Controllers\LinhaPlanilhaController;
 use App\Http\Controllers\SecaoController;
 use App\Http\Controllers\SupermercadoController;
 use App\Http\Controllers\PdfHigieneController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RelatorioController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [SupermercadoController::class, 'index'])->name('supermercados.index');
+Route::get('/', [DashboardController::class, 'index'])->name('inicio');
+Route::get('/supermercados', [SupermercadoController::class, 'index'])->name('supermercados.index');
 Route::get('/supermercados/novo', [SupermercadoController::class, 'criar'])->name('supermercados.criar');
 Route::post('/supermercados', [SupermercadoController::class, 'store'])->name('supermercados.store');
 Route::get('/supermercados/{supermercado}/editar', [SupermercadoController::class, 'editar'])->name('supermercados.editar');
@@ -26,6 +29,7 @@ Route::prefix('api')->group(function () {
     // Planilhas (por tipo) e suas seções
     Route::get('supermercados/{supermercado}/planilhas/{tipo}', [SupermercadoController::class, 'planilha']);
     Route::post('planilhas/{planilha}/secoes', [SecaoController::class, 'store']);
+    Route::post('planilhas/{planilha}/relatorios', [RelatorioController::class, 'store']);
     Route::put('secoes/{secao}', [SecaoController::class, 'update']);
     Route::delete('secoes/{secao}', [SecaoController::class, 'destroy']);
 

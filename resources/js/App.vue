@@ -62,7 +62,19 @@ function ajustarZoom() {
     if (!caixa) return;
     zoomPreview.value = Math.max(0.3, Math.min(1, (caixa.clientWidth - 24) / 1040));
 }
-function imprimir() { window.print(); }
+// Registra o relatório (planilha impressa) e abre a impressão do navegador
+async function imprimir() {
+    if (planilha.value && idsSelecionados.value.length) {
+        try {
+            await rede(`/api/planilhas/${planilha.value.id}/relatorios`, {
+                method: 'POST',
+                headers: JSON_HEADERS,
+                body: JSON.stringify({ secoes: idsSelecionados.value }),
+            });
+        } catch (e) { /* o registro não impede a impressão */ }
+    }
+    window.print();
+}
 
 // Assinatura do que é salvo no banco para uma seção (título + linhas).
 function assinatura(s, tit) {
