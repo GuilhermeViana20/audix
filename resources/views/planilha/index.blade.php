@@ -14,7 +14,10 @@
 <body class="bg-offwhite text-grafite">
     <div id="app"></div>
     <script>
-        window.AUDIX = { supermercadoId: {{ $supermercado->id }} };
+        window.AUDIX = {
+            supermercadoId: {{ $supermercado?->id ?? 'null' }},
+            supermercados: @json($supermercados),
+        };
     </script>
 </body>
 </html>
