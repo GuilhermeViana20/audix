@@ -20,8 +20,7 @@ const versaoPreview = ref(0);
 
 // Contador de requisições em andamento: enquanto houver alguma, a tela mostra o loading.
 const pendentes = ref(0);
-const pdfCarregando = ref(false);
-const carregandoRede = computed(() => pendentes.value > 0 || pdfCarregando.value);
+const carregandoRede = computed(() => pendentes.value > 0);
 async function rede(url, opts = {}) {
     pendentes.value++;
     try {
@@ -33,9 +32,37 @@ async function rede(url, opts = {}) {
 
 const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
-const urlPreview = computed(() => supermercadoId.value && idsSelecionados.value.length
-    ? `/higiene/${supermercadoId.value}/pdf?secoes=${idsSelecionados.value.join(',')}&v=${versaoPreview.value}`
-    : null);
+// Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
+const LIMITE_LINHAS_PX = 500; // espaço vertical da folha A4 reservado às linhas (cabeçalho ocupa o resto)
+const ALTURA_LINHA_PX = 18;
+function paginar(linhas) {
+    const paginas = [];
+    let atual = [];
+    let altura = 0;
+    for (const linha of linhas) {
+        if (altura + ALTURA_LINHA_PX > LIMITE_LINHAS_PX && atual.length) {
+            paginas.push(atual);
+            atual = [];
+            altura = 0;
+        }
+        atual.push(linha);
+        altura += ALTURA_LINHA_PX;
+    }
+    paginas.push(atual);
+    return paginas;
+}
+const folhas = computed(() => ordenadas.value
+    .filter(s => selecionadas.value[s.id])
+    .flatMap(s => paginar(s.linhas).map((linhas, i) => ({ secao: s, linhas, parte: i + 1 }))));
+
+// Ajusta o zoom das folhas para caber na coluna de pré-visualização (só na tela)
+const zoomPreview = ref(1);
+function ajustarZoom() {
+    const caixa = document.getElementById('sheets-box');
+    if (!caixa) return;
+    zoomPreview.value = Math.max(0.3, Math.min(1, (caixa.clientWidth - 24) / 1040));
+}
+function imprimir() { window.print(); }
 
 // Assinatura do que é salvo no banco para uma seção (título + linhas).
 function assinatura(s, tit) {
@@ -234,10 +261,11 @@ async function voltarLogoPadrao() {
 watch([titulo, () => atual.value?.linhas], agendarSalvamento, { deep: true });
 // Atualiza a pré-visualização quando muda a seleção
 watch(selecionadas, atualizarPreview, { deep: true });
-watch(urlPreview, url => { pdfCarregando.value = !!url; });
 
 onMounted(async () => {
     window.addEventListener('beforeunload', avisarAntesDeSair);
+    window.addEventListener('resize', ajustarZoom);
+    ajustarZoom();
     if (supermercadoId.value) await carregarSupermercado(supermercadoId.value);
 });
 onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSair));
@@ -346,24 +374,114 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                 <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Escolha um supermercado para carregar a planilha.</p>
             </section>
 
-            <!-- Coluna da direita: pré-visualização do PDF real (rola sozinha) -->
-            <aside class="hidden xl:flex flex-col h-screen overflow-hidden p-5 md:p-8 bg-offwhite border-l border-grafite/5">
+            <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
+            <aside class="no-print hidden xl:flex flex-col h-screen overflow-hidden p-5 md:p-8 bg-offwhite border-l border-grafite/5">
                 <div class="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização do PDF</p>
-                        <p class="text-lg font-bold">Higiene e limpeza ambiental</p>
-                        <p class="text-xs text-grafite/60">{{ idsSelecionados.length }} seção(ões) · A4 paisagem</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
+                        <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
+                        <p class="text-xs text-grafite/60">{{ folhas.length }} página(s) · {{ idsSelecionados.length }} seção(ões) · A4 paisagem</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button class="rounded-xl bg-offwhite px-3 py-2 text-sm font-medium" @click="atualizarPreview">Atualizar</button>
-                        <a v-if="urlPreview" :href="urlPreview" target="_blank" class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white">Abrir PDF</a>
-                    </div>
+                    <button class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+                            :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
                 </div>
-                <div class="mt-4 flex-1 overflow-hidden rounded-2xl bg-white shadow-sm">
-                    <iframe v-if="urlPreview" :src="urlPreview" class="h-full w-full" title="Pré-visualização" @load="pdfCarregando = false"></iframe>
-                    <p v-else class="p-6 text-grafite/60">Selecione um supermercado e pelo menos uma seção para ver a pré-visualização.</p>
+                <div id="sheets-box" class="mt-4 flex-1 overflow-y-auto">
+                    <div v-if="folhas.length" id="sheets" class="flex flex-col items-center gap-6 pb-6">
+                        <div v-for="(f, i) in folhas" :key="i" class="sheet" :style="{ zoom: zoomPreview }">
+                            <table class="cab-logos">
+                                <tr>
+                                    <td class="sem-borda esq"><img src="/images/acoop.png" alt="ACCP" class="logo-acoop"></td>
+                                    <td class="sem-borda titulo">PLANILHA DE MONITORAMENTO<br>{{ planilha?.nome?.toUpperCase() || 'HIGIENE E LIMPEZA AMBIENTAL' }}</td>
+                                    <td class="sem-borda dir">
+                                        <img v-if="logoUrl" :src="logoUrl" alt="Logo" class="logo-mae">
+                                        <div v-else class="logo-box">LOGO DO SUPERMERCADO</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table class="topo">
+                                <tr>
+                                    <td style="width:33.33%"><b>ENCARREGADO:</b></td>
+                                    <td style="width:33.33%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span></td>
+                                    <td style="width:33.34%"><b>MÊS/ANO:</b></td>
+                                </tr>
+                            </table>
+                            <table class="topo local">
+                                <tr>
+                                    <td style="width:50%"><b>LOCAL:</b></td>
+                                    <td style="width:50%"><b>DATA:</b></td>
+                                </tr>
+                            </table>
+
+                            <table class="grade">
+                                <colgroup>
+                                    <col style="width:160px">
+                                    <col v-for="d in 31" :key="d">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>{{ f.secao.titulo_primeira_coluna }}</th>
+                                        <th v-for="d in 31" :key="d">{{ d }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template v-for="(l, j) in f.linhas" :key="j">
+                                        <tr v-if="l.tipo === 'grupo'" class="faixa"><td :colspan="32">{{ l.texto }}</td></tr>
+                                        <tr v-else>
+                                            <td>{{ l.texto }}</td>
+                                            <td v-for="d in 31" :key="d"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Selecione um supermercado e pelo menos uma seção para ver a pré-visualização.</p>
                 </div>
             </aside>
         </div>
     </div>
 </template>
+
+<style>
+/* Folha A4 paisagem em HTML (mesmo layout do PDF). Largura de referência: 1040px. */
+.sheet {
+    width: 1040px;
+    background: #fff;
+    color: #000;
+    font-family: Times, 'Times New Roman', serif;
+    font-size: 9px;
+    padding: 22px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
+}
+.sheet table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.sheet td, .sheet th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
+.sheet .sem-borda, .sheet .sem-borda td { border: 0; }
+.sheet .cab-logos td { height: 50px; }
+.sheet .cab-logos .esq { text-align: left; width: 200px; }
+.sheet .cab-logos .dir { text-align: right; width: 200px; }
+.sheet .titulo { font-size: 14px; font-weight: bold; line-height: 1.25; }
+.sheet .logo-acoop, .sheet .logo-mae { height: 40px; display: inline-block; }
+.sheet .logo-box { display: inline-block; width: 120px; height: 40px; line-height: 40px; border: 1px dashed #777; font-size: 7px; color: #555; text-align: center; }
+.sheet .topo { margin-bottom: 0; }
+.sheet .topo td { height: 36px; vertical-align: top; padding-top: 4px; font-size: 9px; }
+.sheet .topo .valor { display: block; font-size: 10px; }
+.sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
+.sheet .grade { margin-top: 8px; }
+.sheet .grade th { font-weight: bold; height: 18px; font-size: 9px; }
+.sheet .grade td { height: 18px; font-size: 9px; }
+.sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
+
+/* Impressão: só a folha, em A4 paisagem */
+@media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    body * { visibility: hidden; }
+    #sheets, #sheets * { visibility: visible; }
+    #sheets { position: absolute; left: 0; top: 0; width: 100%; display: block; gap: 0; padding: 0; }
+    #sheets-box { overflow: visible !important; height: auto !important; }
+    .sheet { zoom: 1 !important; box-shadow: none; padding: 0; width: 100%; break-after: page; page-break-after: always; }
+    .sheet:last-child { break-after: auto; page-break-after: auto; }
+    .sheet .grade td, .sheet .grade th, .sheet .topo td, .sheet .cab-logos td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet .grade .faixa td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
