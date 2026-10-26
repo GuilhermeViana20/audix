@@ -47,12 +47,14 @@
             </tr>
         </table>
 
-        <table class="grade">
-            {{-- define as larguras de todas as colunas (32 = nome + 31 dias) --}}
-            <tr class="largura">
-                <td style="width:160px;"></td>
-                <td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td><td style="width:28.39px;"></td>
-            </tr>
+        <table class="grade" style="width:1040px;">
+            {{-- larguras das colunas: 1 coluna de nomes (160px) + 31 dias --}}
+            <colgroup>
+                <col style="width:160px;">
+                @for ($d = 1; $d <= 31; $d++)
+                    <col style="width:28.39px;">
+                @endfor
+            </colgroup>
 
             {{-- Topo: 3 blocos (ENCARREGADO, SETOR, MÊS/ANO) --}}
             <tr class="cab">
