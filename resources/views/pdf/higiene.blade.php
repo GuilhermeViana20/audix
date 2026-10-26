@@ -7,14 +7,16 @@
     body { font-family: Times, serif; font-size: 9px; color: #000; }
     .pagina { page-break-after: always; }
     .pagina:last-child { page-break-after: auto; }
-    td, th { border: 1px solid #000; padding: 0 2px; text-align: center; vertical-align: middle; }
+    td, th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
     .sem-borda { border: 0; }
     .titulo { font-size: 14px; font-weight: bold; text-align: center; line-height: 1.25; }
     .logo-acoop { height: 40px; }
     .logo-mae { height: 40px; }
     .logo-box { border: 1px dashed #777; font-size: 7px; color: #555; text-align: center; height: 40px; width: 120px; line-height: 40px; }
     .cab td { height: 30px; vertical-align: top; padding-top: 3px; font-size: 9px; }
+    .cab td.topo { padding-top: 3px; }
     .cab .esq { text-align: left; padding-left: 4px; vertical-align: middle; height: 20px; }
+    .titulo-cab { padding-left: 4px; }
     .cab .valor { display: block; font-size: 10px; margin-top: 2px; }
     .espaco td { border: 0; height: 8px; padding: 0; }
     .grade th { font-weight: bold; height: 18px; font-size: 9px; }
