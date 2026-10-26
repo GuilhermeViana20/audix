@@ -7,6 +7,11 @@ use App\Http\Controllers\PdfHigieneController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SupermercadoController::class, 'index'])->name('supermercados.index');
+Route::get('/supermercados/novo', [SupermercadoController::class, 'criar'])->name('supermercados.criar');
+Route::post('/supermercados', [SupermercadoController::class, 'store'])->name('supermercados.store');
+Route::get('/supermercados/{supermercado}/editar', [SupermercadoController::class, 'editar'])->name('supermercados.editar');
+Route::put('/supermercados/{supermercado}', [SupermercadoController::class, 'update'])->name('supermercados.update');
+Route::delete('/supermercados/{supermercado}', [SupermercadoController::class, 'destroy'])->name('supermercados.destroy');
 Route::get('/supermercados/{supermercado}', [SupermercadoController::class, 'show'])->name('supermercados.show');
 
 Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {

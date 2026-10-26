@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Supermercado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SupermercadoController extends Controller
 {
@@ -20,6 +24,53 @@ class SupermercadoController extends Controller
         $supermercado->load('secoes.linhas');
 
         return view('supermercados.show', compact('supermercado'));
+    }
+
+    public function criar(): View
+    {
+        return view('supermercados.form', ['supermercado' => new Supermercado()]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $dados = $this->validar($request);
+
+        $supermercado = Supermercado::create([
+            'nome' => $dados['nome'],
+            'slug' => $this->slugUnico($dados['nome']),
+        ]);
+
+        return redirect()->route('supermercados.index')->with('ok', "{$supermercado->nome} cadastrado.");
+    }
+
+    public function editar(Supermercado $supermercado): View
+    {
+        return view('supermercados.form', compact('supermercado'));
+    }
+
+    public function update(Request $request, Supermercado $supermercado): RedirectResponse
+    {
+        $dados = $this->validar($request);
+
+        $supermercado->update([
+            'nome' => $dados['nome'],
+            'slug' => $this->slugUnico($dados['nome'], $supermercado->id),
+        ]);
+
+        return redirect()->route('supermercados.index')->with('ok', "{$supermercado->nome} atualizado.");
+    }
+
+    /** Remove o supermercado, junto com suas seções, linhas e logo. */
+    public function destroy(Supermercado $supermercado): RedirectResponse
+    {
+        $nome = $supermercado->nome;
+
+        if ($supermercado->logo_caminho) {
+            Storage::disk('public')->delete($supermercado->logo_caminho);
+        }
+        $supermercado->delete();
+
+        return redirect()->route('supermercados.index')->with('ok', "{$nome} removido.");
     }
 
     /** Seções e linhas do supermercado, em uma só resposta, para montar a planilha. */
@@ -41,5 +92,31 @@ class SupermercadoController extends Controller
             ])->values();
 
         return response()->json(['secoes' => $secoes]);
+    }
+
+    private function validar(Request $request): array
+    {
+        return $request->validate([
+            'nome' => ['required', 'string', 'max:120'],
+        ], [
+            'nome.required' => 'Informe o nome do supermercado.',
+        ]);
+    }
+
+    /** Gera o slug a partir do nome, acrescentando -2, -3… se já existir. */
+    private function slugUnico(string $nome, ?int $ignorarId = null): string
+    {
+        $base = Str::slug($nome) ?: 'supermercado';
+        $slug = $base;
+        $n = 2;
+
+        while (Supermercado::where('slug', $slug)
+            ->when($ignorarId, fn ($q) => $q->where('id', '!=', $ignorarId))
+            ->exists()) {
+            $slug = "{$base}-{$n}";
+            $n++;
+        }
+
+        return $slug;
     }
 }
