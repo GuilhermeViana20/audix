@@ -7,7 +7,7 @@
     body { font-family: Times, serif; font-size: 9px; color: #000; }
     .pagina { page-break-after: always; }
     .pagina:last-child { page-break-after: auto; }
-    table.planilha { border-collapse: collapse; table-layout: fixed; }
+    table.planilha { border-collapse: collapse; table-layout: auto; }
     .planilha td, .planilha th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
     .planilha .sem-borda { border: 0; }
     .planilha .titulo { font-size: 14px; font-weight: bold; line-height: 1.25; }
@@ -28,12 +28,6 @@
     <div class="pagina">
         {{-- Uma única tabela de 32 colunas (nome + 31 dias): cabeçalho, topo e grade ficam sempre alinhados --}}
         <table class="planilha" style="width:{{ $LARG_TOTAL }}px;">
-            <colgroup>
-                <col style="width:{{ $LARG_NOME }}px;">
-                @for ($d = 1; $d <= 31; $d++)
-                    <col style="width:{{ $LARG_DIA }}px;">
-                @endfor
-            </colgroup>
 
             {{-- Cabeçalho: logo ACCP | título | logo do supermercado --}}
             <tr>
@@ -68,9 +62,9 @@
 
             <thead>
                 <tr>
-                    <th>{{ $secao->titulo_primeira_coluna }}</th>
+                    <th style="width:{{ $LARG_NOME }}px;">{{ $secao->titulo_primeira_coluna }}</th>
                     @for ($d = 1; $d <= 31; $d++)
-                        <th>{{ $d }}</th>
+                        <th style="width:{{ $LARG_DIA - 1 }}px;">{{ $d }}</th>
                     @endfor
                 </tr>
             </thead>
@@ -80,9 +74,9 @@
                         <tr class="faixa"><td colspan="32">{{ $linha->texto }}</td></tr>
                     @else
                         <tr>
-                            <td>{{ $linha->texto }}</td>
+                            <td style="width:{{ $LARG_NOME }}px;">{{ $linha->texto }}</td>
                             @for ($d = 1; $d <= 31; $d++)
-                                <td></td>
+                                <td style="width:{{ $LARG_DIA - 1 }}px;"></td>
                             @endfor
                         </tr>
                     @endif
