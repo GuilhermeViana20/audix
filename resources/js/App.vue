@@ -295,16 +295,17 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                         <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b class="text-grafite">{{ planilha.nome }}</b></p>
                     <div class="mt-3 grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
                             <div v-for="s in ordenadas" :key="s.id"
-                                 class="rounded-xl border p-3"
-                                 :class="atual?.id === s.id ? 'border-azul' : 'border-transparent bg-offwhite'">
-                                <label class="flex items-center gap-2 font-medium">
+                                 class="cursor-pointer rounded-xl border p-3 transition hover:border-azul/40"
+                                 :class="atual?.id === s.id ? 'border-azul bg-azul/5' : 'border-transparent bg-offwhite'"
+                                 @click="abrir(s)">
+                                <label class="flex items-center gap-2 font-medium" @click.stop>
                                     <input type="checkbox" v-model="selecionadas[s.id]" class="accent-azul h-4 w-4">
                                     {{ s.nome }}
                                 </label>
                                 <div class="mt-2 flex flex-wrap items-center gap-3 text-sm">
-                                    <button class="text-azul font-semibold" @click="abrir(s)">Linhas</button>
-                                    <button class="text-azul" @click="renomear(s)">Renomear</button>
-                                    <button class="ml-auto text-red-500" @click="excluirSecao(s)">×</button>
+                                    <span class="text-xs text-grafite/50">{{ s.linhas.length }} linhas</span>
+                                    <button class="text-azul" @click.stop="renomear(s)">Renomear</button>
+                                    <button class="ml-auto text-red-500" @click.stop="excluirSecao(s)">×</button>
                                 </div>
                             </div>
                         </div>
