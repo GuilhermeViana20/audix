@@ -63,9 +63,24 @@ function paginar(linhas) {
     paginas.push(atual);
     return paginas;
 }
+// Título no cabeçalho da grade: a faixa em que a folha começa (ou a última faixa anterior);
+// sem nenhuma faixa, o título da primeira coluna da seção
+function tituloDaFolha(secao, inicio) {
+    for (let j = inicio; j >= 0; j--) {
+        if (secao.linhas[j]?.tipo === 'grupo') return secao.linhas[j].texto;
+    }
+    return secao.titulo_primeira_coluna;
+}
 const folhas = computed(() => ordenadas.value
     .filter(s => selecionadas.value[s.id])
-    .flatMap(s => paginar(s.linhas).map((linhas, i) => ({ secao: s, linhas, parte: i + 1 }))));
+    .flatMap(s => {
+        let inicio = 0; // posição, na seção, da primeira linha desta folha
+        return paginar(s.linhas).map((linhas, i) => {
+            const titulo = tituloDaFolha(s, inicio);
+            inicio += linhas.length;
+            return { secao: s, linhas, parte: i + 1, titulo };
+        });
+    }));
 
 // Ajusta o zoom das folhas para caber na coluna de pré-visualização (só na tela)
 const zoomPreview = ref(1);
@@ -705,7 +720,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                 </colgroup>
                                 <thead>
                                     <tr>
-                                        <th class="faixa-cabecalho">{{ f.secao.titulo_primeira_coluna }}</th>
+                                        <th class="faixa-cabecalho">{{ f.titulo }}</th>
                                         <th v-for="d in 31" :key="d" class="faixa-cabecalho">{{ d }}</th>
                                     </tr>
                                 </thead>
