@@ -63,7 +63,7 @@ const zoomPreview = ref(1);
 function ajustarZoom() {
     const caixa = document.getElementById('sheets-box');
     if (!caixa) return;
-    zoomPreview.value = Math.max(0.3, Math.min(1, (caixa.clientWidth - 24) / 1040));
+    zoomPreview.value = Math.max(0.3, Math.min(1, (caixa.clientWidth - 24) / 1123));
 }
 // Registra o relatório (planilha impressa) e abre a impressão do navegador
 async function imprimir() {
@@ -689,7 +689,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                 </tr>
                             </table>
 
-                            <table class="grade">
+                            <div class="grade-caixa"><table class="grade">
                                 <colgroup>
                                     <col style="width:160px">
                                     <col v-for="d in 31" :key="d">
@@ -709,7 +709,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                         </tr>
                                     </template>
                                 </tbody>
-                            </table>
+                            </table></div>
                         </div>
                     </div>
                     <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Selecione um supermercado e pelo menos uma seção para ver a pré-visualização.</p>
@@ -720,9 +720,11 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 </template>
 
 <style>
-/* Folha A4 paisagem em HTML (mesmo layout do PDF). Largura de referência: 1040px. */
+/* Folha A4 paisagem em HTML (mesmo layout do PDF). Largura de referência: 1123px (297mm a 96 dpi). */
 .sheet {
-    width: 1040px;
+    width: 1123px;
+    display: flex;
+    flex-direction: column;
     background: #fff;
     color: #000;
     font-family: Times, 'Times New Roman', serif;
@@ -748,6 +750,9 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .topo.local { margin-top: -1px; }
 .sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
 .sheet .grade { margin-top: 8px; }
+.sheet .grade-caixa { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin-top: 8px; }
+.sheet .grade-caixa .grade { flex: 1 1 auto; margin-top: 0; height: 100%; }
+.sheet .grade-caixa .grade tbody tr { height: auto; }
 .sheet .grade th { font-weight: bold; height: 18px; font-size: 9px; }
 .sheet .grade td { height: 18px; font-size: 9px; }
 .sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
