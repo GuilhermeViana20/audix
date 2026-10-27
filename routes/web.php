@@ -51,6 +51,7 @@ Route::prefix('api')->group(function () {
     Route::get('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'index']);
     Route::put('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'sincronizar']);
     Route::post('secoes/{secao}/copiar-para-todas', [LinhaPlanilhaController::class, 'copiarParaTodas']);
+    Route::post('secoes/{secao}/copiar-para-supermercado', [SecaoController::class, 'copiarParaSupermercado']);
 
     Route::get('supermercados/{supermercado}/logo', [\App\Http\Controllers\LogoController::class, 'atual']);
     Route::post('supermercados/{supermercado}/logo', [\App\Http\Controllers\LogoController::class, 'enviar']);

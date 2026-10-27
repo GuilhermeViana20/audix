@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Planilha;
 use App\Models\Secao;
+use App\Models\Supermercado;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -65,5 +67,41 @@ class SecaoController extends Controller
         }
 
         return $dados;
+    }
+
+    /** Copia a seção inteira (título e linhas) para o mesmo tipo de planilha de outro supermercado. */
+    public function copiarParaSupermercado(Request $request, Secao $secao): JsonResponse
+    {
+        $dados = $request->validate([
+            'supermercado_id' => ['required', 'integer', 'exists:supermercados,id'],
+        ]);
+
+        $destino = Supermercado::findOrFail($dados['supermercado_id']);
+        $planilhaDestino = $destino->planilha($secao->planilha->tipo);
+
+        if (Secao::where('planilha_id', $planilhaDestino->id)->where('nome', $secao->nome)->exists()) {
+            return response()->json([
+                'message' => "{$destino->nome} já tem a seção {$secao->nome}. Renomeie ou remova a seção de lá antes de copiar.",
+            ], 422);
+        }
+
+        DB::transaction(function () use ($secao, $planilhaDestino) {
+            $nova = Secao::create([
+                'planilha_id' => $planilhaDestino->id,
+                'nome' => $secao->nome,
+                'titulo_primeira_coluna' => $secao->titulo_primeira_coluna,
+                'ordem' => (int) Secao::where('planilha_id', $planilhaDestino->id)->max('ordem') + 1,
+            ]);
+
+            foreach ($secao->linhas as $linha) {
+                $nova->linhas()->create([
+                    'ordem' => $linha->ordem,
+                    'tipo' => $linha->tipo,
+                    'texto' => $linha->texto,
+                ]);
+            }
+        });
+
+        return response()->json(['ok' => true, 'supermercado' => $destino->nome]);
     }
 }

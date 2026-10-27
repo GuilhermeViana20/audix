@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { lerPlanilhaPdf } from './importarPdf.js';
 
 const TOKEN = document.querySelector('meta[name="csrf-token"]').content;
@@ -183,6 +183,60 @@ async function salvar() {
     clearTimeout(timer);
     await salvarAgora();
     if (status.value === 'Tudo salvo') msg('Seção salva');
+}
+
+// ---------- Desfazer (Ctrl+Z) na edição da seção ----------
+// Guarda o estado anterior de cada alteração; alterações seguidas em menos de 0,8s contam como uma só.
+const historico = ref([]);
+let ultimaAlteracao = 0;
+let restaurando = false;
+const estadoDaSecao = () => atual.value ? JSON.stringify({
+    id: atual.value.id,
+    t: titulo.value,
+    l: atual.value.linhas.map(l => [l.tipo, l.texto]),
+}) : null;
+watch(estadoDaSecao, (novo, antigo) => {
+    if (restaurando || !novo || !antigo) return;
+    const a = JSON.parse(antigo);
+    const n = JSON.parse(novo);
+    if (a.id !== n.id) return;
+    if (Date.now() - ultimaAlteracao > 800) {
+        historico.value.push(a);
+        if (historico.value.length > 100) historico.value.shift();
+    }
+    ultimaAlteracao = Date.now();
+});
+watch(() => atual.value?.id, () => { historico.value = []; ultimaAlteracao = 0; });
+function desfazer() {
+    const anterior = historico.value.pop();
+    if (!anterior || !atual.value || anterior.id !== atual.value.id) { msg('Nada para desfazer'); return; }
+    restaurando = true;
+    titulo.value = anterior.t;
+    atual.value.linhas = anterior.l.map(([tipo, texto]) => ({ tipo, texto }));
+    nextTick(() => { restaurando = false; });
+}
+function aoTeclar(evento) {
+    if ((evento.ctrlKey || evento.metaKey) && !evento.shiftKey && evento.key.toLowerCase() === 'z' && !rascunho.value && !copiaPendente.value) {
+        evento.preventDefault();
+        desfazer();
+    }
+}
+
+// Copiar a seção inteira (título e linhas) para outro supermercado
+async function copiarSecaoPara(evento) {
+    const destinoId = Number(evento.target.value);
+    evento.target.value = '';
+    const destino = supermercados.value.find(m => m.id === destinoId);
+    if (!destino || !atual.value) return;
+    if (estaSujo.value) { msg('Salve as alterações desta seção antes de copiar'); return; }
+    if (!window.confirm(`Copiar a seção ${atual.value.nome} com todas as linhas para ${destino.nome}?`)) return;
+    try {
+        const r = await api(`/api/secoes/${atual.value.id}/copiar-para-supermercado`, {
+            method: 'POST',
+            body: JSON.stringify({ supermercado_id: destino.id }),
+        });
+        msg(`Seção copiada para ${r.supermercado}`);
+    } catch (e) { msg(e.message); }
 }
 
 // ---------- Salvamento automático ----------
@@ -378,6 +432,9 @@ async function voltarLogoPadrao() {
 // As seções lidas ficam em "rascunho" no popup; só são gravadas ao confirmar.
 const rascunho = ref(null);
 const lendoPdf = ref(false);
+const totalAvisos = computed(() => rascunho.value
+    ? rascunho.value.reduce((n, s) => n + s.linhas.filter(l => l.aviso).length, 0)
+    : 0);
 let contadorChave = 0;
 const novaChave = () => ++contadorChave;
 
@@ -394,7 +451,7 @@ async function escolherPdf(evento) {
             _k: novaChave(),
             nome: s.nome,
             titulo_primeira_coluna: s.titulo_primeira_coluna,
-            linhas: s.linhas.map(l => ({ _k: novaChave(), tipo: l.tipo, texto: l.texto })),
+            linhas: s.linhas.map(l => ({ _k: novaChave(), tipo: l.tipo, texto: l.texto, aviso: l.aviso || null })),
         }));
     } catch (e) {
         msg('Não consegui ler esse PDF');
@@ -461,10 +518,14 @@ watch(selecionadas, atualizarPreview, { deep: true });
 onMounted(async () => {
     window.addEventListener('beforeunload', avisarAntesDeSair);
     window.addEventListener('resize', ajustarZoom);
+    window.addEventListener('keydown', aoTeclar);
     ajustarZoom();
     if (supermercadoId.value) await carregarSupermercado(supermercadoId.value);
 });
-onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSair));
+onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', avisarAntesDeSair);
+    window.removeEventListener('keydown', aoTeclar);
+});
 </script>
 
 <template>
@@ -482,6 +543,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
             <div class="border-b border-grafite/10 p-4 md:p-5">
                 <h2 class="text-lg font-bold">Confirmar importação</h2>
                 <p class="text-xs text-grafite/60">Revise seções, linhas e faixas. Nada é salvo no banco até você clicar em "Confirmar e salvar".</p>
+                <p v-if="totalAvisos" class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{{ totalAvisos }} item(ns) para revisar antes de salvar</p>
             </div>
 
             <div class="flex-1 space-y-5 overflow-y-auto p-4 md:p-5">
@@ -497,7 +559,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 
                     <div class="mt-3 space-y-2">
                         <div v-for="(l, j) in s.linhas" :key="l._k" :data-linha="j" :data-grupo="s._k"
-                             class="flex items-center gap-2 rounded-lg transition"
+                             class="flex flex-wrap items-center gap-2 rounded-lg transition"
                              :class="arrasto && arrasto.grupo === s._k && arrasto.para === j && arrasto.de !== j ? 'ring-2 ring-azul' : ''">
                             <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
                                 <option value="linha">Linha</option>
@@ -512,6 +574,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                   @pointerup="soltarArrasto"
                                   @pointercancel="soltarArrasto">⠿</span>
                             <button class="px-1 text-red-500" @click="s.linhas.splice(j, 1)">×</button>
+                            <p v-if="l.aviso" class="order-last basis-full pl-2 text-xs text-amber-700">⚠ {{ l.aviso }} <button class="font-semibold underline" @click="l.aviso = null">ok</button></p>
                         </div>
                     </div>
 
@@ -657,6 +720,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                         <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarLinha">+ Linha</button>
                                         <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarGrupo">+ Faixa</button>
                                         <button class="ml-auto rounded-xl bg-white px-3 py-2 font-medium" @click="copiarParaTodas">Copiar para todas</button>
+                                        <select class="rounded-xl bg-white px-3 py-2 text-xs text-azul" @change="copiarSecaoPara($event)">
+                                            <option value="">Copiar seção para…</option>
+                                            <option v-for="m in supermercados.filter(x => x.id !== supermercadoId)" :key="m.id" :value="m.id">{{ m.nome }}</option>
+                                        </select>
                                         <button class="rounded-xl bg-azul px-4 py-2 font-semibold text-white disabled:opacity-40"
                                                 :disabled="!estaSujo || status === 'Salvando…'" @click="salvar">Salvar</button>
                                     </div>

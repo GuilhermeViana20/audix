@@ -44,7 +44,9 @@ class SupermercadoController extends Controller
 
     public function editar(Supermercado $supermercado): View
     {
-        return view('supermercados.form', compact('supermercado'));
+        $supermercados = Supermercado::orderBy('nome')->get(['id', 'nome']);
+
+        return view('supermercados.form', compact('supermercado', 'supermercados'));
     }
 
     public function update(Request $request, Supermercado $supermercado): RedirectResponse
