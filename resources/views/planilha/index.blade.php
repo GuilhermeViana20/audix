@@ -17,6 +17,7 @@
             supermercadoId: {{ $supermercado?->id ?? 'null' }},
             supermercados: @json($supermercados),
             embutido: true,
+            nomeArquivo: @json('Planilha de Higiene - ' . ($supermercado?->nome_social ?: $supermercado?->nome)),
         };
     </script>
 </body>

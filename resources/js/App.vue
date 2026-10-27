@@ -103,7 +103,11 @@ async function imprimir() {
             });
         } catch (e) { /* o registro não impede a impressão */ }
     }
+    // O nome sugerido do arquivo, ao salvar como PDF, é o título da página no momento da impressão
+    const tituloAnterior = document.title;
+    if (window.AUDIX.nomeArquivo) document.title = window.AUDIX.nomeArquivo;
     window.print();
+    document.title = tituloAnterior;
 }
 
 // Assinatura do que é salvo no banco para uma seção (título + linhas).
