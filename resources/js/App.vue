@@ -697,7 +697,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                 <thead>
                                     <tr>
                                         <th class="faixa-cabecalho">{{ f.secao.titulo_primeira_coluna }}</th>
-                                        <th v-for="d in 31" :key="d">{{ d }}</th>
+                                        <th v-for="d in 31" :key="d" class="faixa-cabecalho">{{ d }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
