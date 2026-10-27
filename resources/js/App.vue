@@ -329,6 +329,31 @@ function moverItem(lista, i, d) {
     [lista[i], lista[j]] = [lista[j], lista[i]];
 }
 
+// Arrastar linhas no popup (pointer events: funciona com toque e mouse).
+// Enquanto arrasta, a linha de destino fica destacada; ao soltar, a linha é movida.
+const arrasto = ref(null); // { grupo, lista, de, para }
+function iniciarArrasto(evento, grupo, lista, i) {
+    evento.preventDefault();
+    evento.currentTarget.setPointerCapture(evento.pointerId);
+    arrasto.value = { grupo, lista, de: i, para: i };
+}
+function moverArrasto(evento) {
+    if (!arrasto.value) return;
+    const alvo = document.elementFromPoint(evento.clientX, evento.clientY)?.closest('[data-linha]');
+    if (alvo && alvo.dataset.grupo === String(arrasto.value.grupo)) {
+        arrasto.value.para = Number(alvo.dataset.linha);
+    }
+}
+function soltarArrasto() {
+    if (!arrasto.value) return;
+    const { lista, de, para } = arrasto.value;
+    if (de !== para) {
+        const [item] = lista.splice(de, 1);
+        lista.splice(para, 0, item);
+    }
+    arrasto.value = null;
+}
+
 async function confirmarImportacao() {
     const secoesParaGravar = rascunho.value.map(s => ({
         nome: s.nome.trim(),
@@ -391,15 +416,21 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                     <input v-model="s.titulo_primeira_coluna" class="mt-1 w-full rounded-lg bg-offwhite px-3 py-2 text-sm">
 
                     <div class="mt-3 space-y-2">
-                        <div v-for="(l, j) in s.linhas" :key="l._k" class="flex items-center gap-2">
+                        <div v-for="(l, j) in s.linhas" :key="l._k" :data-linha="j" :data-grupo="s._k"
+                             class="flex items-center gap-2 rounded-lg transition"
+                             :class="arrasto && arrasto.grupo === s._k && arrasto.para === j && arrasto.de !== j ? 'ring-2 ring-azul' : ''">
                             <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
                                 <option value="linha">Linha</option>
                                 <option value="grupo">Faixa</option>
                             </select>
                             <input v-model="l.texto" class="min-w-0 flex-1 rounded-lg px-3 py-2 text-sm"
                                    :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
-                            <button class="px-1 text-azul disabled:opacity-30" :disabled="j === 0" @click="moverItem(s.linhas, j, -1)">↑</button>
-                            <button class="px-1 text-azul disabled:opacity-30" :disabled="j === s.linhas.length - 1" @click="moverItem(s.linhas, j, 1)">↓</button>
+                            <span class="touch-none cursor-grab select-none px-1 text-xl leading-none text-grafite/40 active:cursor-grabbing"
+                                  title="Arraste para mover"
+                                  @pointerdown="iniciarArrasto($event, s._k, s.linhas, j)"
+                                  @pointermove="moverArrasto"
+                                  @pointerup="soltarArrasto"
+                                  @pointercancel="soltarArrasto">⠿</span>
                             <button class="px-1 text-red-500" @click="s.linhas.splice(j, 1)">×</button>
                         </div>
                     </div>
