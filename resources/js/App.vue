@@ -36,8 +36,8 @@ async function rede(url, opts = {}) {
 const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
 // Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
-const ALTURA_LINHA_PX = 21; // altura fixa de toda linha/faixa da grade (px)
-const LIMITE_LINHAS_PX = 580; // espaço da folha reservado às linhas: 27 linhas por folha
+const ALTURA_LINHA_PX = 20; // altura fixa de toda linha/faixa da grade (px)
+const LIMITE_LINHAS_PX = 540; // espaço das linhas por folha: 27 linhas de 20px
 const ALTURA_LINHA_EXTRA_PX = 11; // cada linha extra de texto quebrado soma esta altura
 const CARACTERES_POR_LINHA = 30; // aprox. o que cabe na primeira coluna
 const CARACTERES_POR_LINHA_FAIXA = 150; // a faixa ocupa a grade inteira
@@ -734,7 +734,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                     </template>
                                 </tbody>
                             </table></div>
-                            <div class="rodape">ACCP Alimentos &amp; Tecnologia</div>
+                            <div class="rodape">
+                                <p class="rodape-nome">ACCP Alimentos &amp; Tecnologia</p>
+                                <p>Av. Humberto Monte, 2929, sala 501, Torre Sul – Pici – Fortaleza – Ceará · contato@accpconsultoria.com.br</p>
+                            </div>
                         </div>
                     </div>
                     <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Selecione um supermercado e pelo menos uma seção para ver a pré-visualização.</p>
@@ -777,9 +780,11 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
 .sheet .grade { margin-top: 0; }
 .sheet .grade-caixa { margin-top: -1px; }
-.sheet .rodape { margin-top: auto; padding-top: 4px; text-align: center; font-size: 9px; line-height: 12px; }
-.sheet .grade th { font-weight: bold; height: 21px; font-size: 8.5px; line-height: 11px; }
-.sheet .grade td { height: 21px; font-size: 8.5px; line-height: 11px; }
+.sheet .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 8px; line-height: 10px; }
+.sheet .rodape p { margin: 0; }
+.sheet .rodape .rodape-nome { font-size: 9px; font-weight: bold; }
+.sheet .grade th { font-weight: bold; height: 20px; font-size: 8.5px; line-height: 11px; }
+.sheet .grade td { height: 20px; font-size: 8.5px; line-height: 11px; }
 .sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
 .sheet .grade th.faixa-cabecalho { background: #d9d9d9; }
 
