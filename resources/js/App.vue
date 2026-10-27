@@ -77,8 +77,11 @@ const folhas = computed(() => ordenadas.value
         let inicio = 0; // posição, na seção, da primeira linha desta folha
         return paginar(s.linhas).map((linhas, i) => {
             const titulo = tituloDaFolha(s, inicio);
-            inicio += linhas.length;
-            return { secao: s, linhas, parte: i + 1, titulo };
+            const total = linhas.length;
+            // Se a folha começa numa faixa, ela já está no título (ao lado dos números): não repete no corpo
+            const corpo = linhas[0]?.tipo === 'grupo' ? linhas.slice(1) : linhas;
+            inicio += total;
+            return { secao: s, linhas: corpo, parte: i + 1, titulo };
         });
     }));
 
