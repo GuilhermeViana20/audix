@@ -22,13 +22,6 @@ class SupermercadoController extends Controller
         return view('supermercados.index', compact('supermercados'));
     }
 
-    public function show(Supermercado $supermercado): View
-    {
-        $supermercado->load('planilhas.secoes.linhas');
-
-        return view('supermercados.show', compact('supermercado'));
-    }
-
     public function criar(): View
     {
         return view('supermercados.form', ['supermercado' => new Supermercado()]);

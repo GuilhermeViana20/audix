@@ -6,11 +6,12 @@
     @php($editando = $supermercado->exists)
     @php($linkAtual = $editando && $supermercado->logo_caminho && \App\Models\Supermercado::ehLinkExterno($supermercado->logo_caminho) ? $supermercado->logo_caminho : '')
     @php($previewInicial = old('logo_url', $linkAtual ?: ($editando ? $supermercado->logo_url : '')))
+
     <h1 class="text-2xl font-bold mb-6">{{ $editando ? 'Editar supermercado' : 'Novo supermercado' }}</h1>
 
-    <form method="POST"
+    <form method="POST" enctype="multipart/form-data"
           action="{{ $editando ? route('supermercados.update', $supermercado) : route('supermercados.store') }}"
-          class="flex w-full min-h-[calc(100vh-8rem)] flex-col space-y-5 rounded-2xl bg-white p-6 shadow-sm">
+          class="w-full max-w-3xl space-y-5 rounded-2xl bg-white p-6 shadow-sm">
         @csrf
         @if ($editando)
             @method('PUT')
@@ -56,11 +57,24 @@
             </div>
         </div>
 
-        <div class="mt-auto flex items-center justify-end gap-3 pt-2 text-sm">
-            <a href="{{ route('supermercados.index') }}" class="font-medium text-grafite/70">Cancelar</a>
-            <button class="rounded-xl bg-azul px-4 py-2 font-semibold text-white">{{ $editando ? 'Salvar alterações' : 'Cadastrar' }}</button>
+        <div class="flex items-center justify-end gap-3 pt-2 text-sm">
+            <a href="{{ route('supermercados.index') }}" class="font-medium text-grafite/70">Voltar</a>
+            <button class="rounded-xl bg-azul px-4 py-2 font-semibold text-white">{{ $editando ? 'Salvar dados' : 'Cadastrar' }}</button>
         </div>
     </form>
+
+    @if ($editando)
+        <section class="mt-8 w-full">
+            <h2 class="mb-1 text-xl font-bold">Seções e linhas da planilha de higiene</h2>
+            <p class="mb-4 text-sm text-grafite/60">As alterações da planilha são salvas pelo botão "Salvar" de cada seção.</p>
+            {{-- Editor da planilha (Vue), sem o seletor de supermercado nem a pré-visualização --}}
+            <div id="app"></div>
+        </section>
+        @vite(['resources/js/app.js'])
+        <script>
+            window.AUDIX = { supermercadoId: {{ $supermercado->id }}, supermercados: [], embutido: true };
+        </script>
+    @endif
 
     <script>
         (() => {

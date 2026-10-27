@@ -4,6 +4,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 const TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const JSON_HEADERS = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': TOKEN };
 
+const embutido = !!window.AUDIX.embutido; // editor dentro da tela de edição do supermercado
 const supermercados = ref(window.AUDIX.supermercados || []);
 const supermercadoId = ref(window.AUDIX.supermercadoId);
 const carregando = ref(false);
@@ -124,7 +125,7 @@ async function carregarSupermercado(id) {
         selecionadas.value = {};
         await recarregarSecoes();
         await carregarLogo();
-        history.replaceState(null, '', `/higiene/${id}`);
+        if (!embutido) history.replaceState(null, '', `/higiene/${id}`);
     } catch (e) { msg(e.message); }
     finally { carregando.value = false; }
 }
@@ -314,10 +315,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
     </div>
 
     <div class="flex min-h-screen">
-        <div class="flex-1 min-w-0 grid xl:grid-cols-[2fr_3fr] h-screen">
+        <div :class="embutido ? 'flex-1 min-w-0 grid' : 'flex-1 min-w-0 grid xl:grid-cols-[2fr_3fr] h-screen'">
             <!-- Coluna da esquerda: controles (rola sozinha) -->
             <section class="overflow-y-auto p-5 md:p-8 space-y-5">
-                <div class="rounded-2xl bg-white p-4 shadow-sm">
+                <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
                     <select class="mt-2 w-full rounded-xl bg-offwhite px-3 py-2 text-sm font-medium"
                             :value="supermercadoId ?? ''"
@@ -328,7 +329,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                 </div>
 
                 <template v-if="supermercadoId">
-                    <div class="rounded-2xl bg-white p-4 shadow-sm">
+                    <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
                         <p class="text-xs font-semibold uppercase text-grafite/50">Logo do supermercado</p>
                         <div class="mt-3 flex items-center gap-4">
                             <div class="flex h-24 w-40 items-center justify-center rounded-xl bg-offwhite">
@@ -412,7 +413,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
             </section>
 
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
-            <aside class="no-print hidden xl:flex flex-col h-screen overflow-hidden p-5 md:p-8 bg-offwhite border-l border-grafite/5">
+            <aside v-if="!embutido" class="no-print hidden xl:flex flex-col h-screen overflow-hidden p-5 md:p-8 bg-offwhite border-l border-grafite/5">
                 <div class="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>

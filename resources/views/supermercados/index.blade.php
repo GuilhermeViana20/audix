@@ -14,13 +14,17 @@
     @endif
 
     @forelse ($supermercados as $supermercado)
-        <div class="mb-3 flex items-center gap-3 rounded-2xl bg-white p-5 shadow-sm">
-            <a href="{{ route('supermercados.show', $supermercado) }}" class="flex-1 min-w-0">
+        <div class="mb-3 flex cursor-pointer items-center gap-3 rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md"
+             data-editar="{{ route('supermercados.editar', $supermercado) }}"
+             onclick="if (!event.target.closest('a,button,form')) window.location.href = this.dataset.editar">
+            <div class="flex-1 min-w-0">
                 <span class="text-lg font-semibold">{{ $supermercado->nome }}</span>
-                <span class="ml-2 text-sm font-medium text-azul">{{ $supermercado->secoes_count }} seções</span>
-            </a>
+                @if ($supermercado->nome_social)
+                    <span class="block text-sm text-grafite/60">{{ $supermercado->nome_social }}</span>
+                @endif
+                <span class="text-sm font-medium text-azul">{{ $supermercado->secoes_count }} seções</span>
+            </div>
             <a href="{{ route('higiene.index', $supermercado) }}" class="text-sm font-medium text-azul">Planilha</a>
-            <a href="{{ route('supermercados.editar', $supermercado) }}" class="text-sm font-medium text-azul">Editar</a>
             <form method="POST" action="{{ route('supermercados.destroy', $supermercado) }}"
                   onsubmit="return confirm('Remover {{ addslashes($supermercado->nome) }} e todas as suas seções e linhas?')">
                 @csrf

@@ -15,7 +15,6 @@ Route::post('/supermercados', [SupermercadoController::class, 'store'])->name('s
 Route::get('/supermercados/{supermercado}/editar', [SupermercadoController::class, 'editar'])->name('supermercados.editar');
 Route::put('/supermercados/{supermercado}', [SupermercadoController::class, 'update'])->name('supermercados.update');
 Route::delete('/supermercados/{supermercado}', [SupermercadoController::class, 'destroy'])->name('supermercados.destroy');
-Route::get('/supermercados/{supermercado}', [SupermercadoController::class, 'show'])->name('supermercados.show');
 
 Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {
     $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome']);
