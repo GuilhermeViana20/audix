@@ -37,7 +37,7 @@ const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeC
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
 // Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
 const ALTURA_LINHA_PX = 20; // altura fixa de toda linha/faixa da grade (px)
-const LIMITE_LINHAS_PX = 580; // espaço das linhas por folha: 29 linhas de 20px
+const LIMITE_LINHAS_PX = 560; // espaço das linhas por folha: 28 linhas de 20px (deixa lugar para o rodapé de 3 linhas)
 const ALTURA_LINHA_EXTRA_PX = 11; // cada linha extra de texto quebrado soma esta altura
 const CARACTERES_POR_LINHA = 30; // aprox. o que cabe na primeira coluna
 const CARACTERES_POR_LINHA_FAIXA = 150; // a faixa ocupa a grade inteira
@@ -736,7 +736,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                             </table></div>
                             <div class="rodape">
                                 <p class="rodape-nome">ACCP Alimentos &amp; Tecnologia</p>
-                                <p>Av. Humberto Monte, 2929, sala 501, Torre Sul – Pici – Fortaleza – Ceará · contato@accpconsultoria.com.br</p>
+                                <p>Av. Humberto Monte, 2929, Sala 501, Torre Sul – Pici, Fortaleza/CE</p>
+                                <p>contato@accpconsultoria.com.br</p>
                             </div>
                         </div>
                     </div>
