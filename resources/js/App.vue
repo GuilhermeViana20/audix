@@ -38,18 +38,27 @@ const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.
 // Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
 const ALTURA_LINHA_PX = 21; // altura fixa de toda linha/faixa da grade (px)
 const LIMITE_LINHAS_PX = 580; // espaço da folha reservado às linhas: 27 linhas por folha
+const ALTURA_LINHA_EXTRA_PX = 11; // cada linha extra de texto quebrado soma esta altura
+const CARACTERES_POR_LINHA = 30; // aprox. o que cabe na primeira coluna
+const CARACTERES_POR_LINHA_FAIXA = 150; // a faixa ocupa a grade inteira
+// Altura da linha: 21px se couber em uma linha; cada quebra de palavra soma 11px
+function alturaDaLinha(linha) {
+    const cabe = linha.tipo === 'grupo' ? CARACTERES_POR_LINHA_FAIXA : CARACTERES_POR_LINHA;
+    const n = Math.max(1, Math.ceil((linha.texto || '').length / cabe));
+    return ALTURA_LINHA_PX + (n - 1) * ALTURA_LINHA_EXTRA_PX;
+}
 function paginar(linhas) {
     const paginas = [];
     let atual = [];
     let altura = 0;
     for (const linha of linhas) {
-        if (altura + ALTURA_LINHA_PX > LIMITE_LINHAS_PX && atual.length) {
+        if (altura + alturaDaLinha(linha) > LIMITE_LINHAS_PX && atual.length) {
             paginas.push(atual);
             atual = [];
             altura = 0;
         }
         atual.push(linha);
-        altura += ALTURA_LINHA_PX;
+        altura += alturaDaLinha(linha);
     }
     paginas.push(atual);
     return paginas;
@@ -702,8 +711,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                 </thead>
                                 <tbody>
                                     <template v-for="(l, j) in f.linhas" :key="j">
-                                        <tr v-if="l.tipo === 'grupo'" class="faixa" :style="{ height: ALTURA_LINHA_PX + 'px' }"><td :colspan="32">{{ l.texto }}</td></tr>
-                                        <tr v-else :style="{ height: ALTURA_LINHA_PX + 'px' }">
+                                        <tr v-if="l.tipo === 'grupo'" class="faixa" :style="{ height: alturaDaLinha(l) + 'px' }"><td :colspan="32">{{ l.texto }}</td></tr>
+                                        <tr v-else :style="{ height: alturaDaLinha(l) + 'px' }">
                                             <td>{{ l.texto }}</td>
                                             <td v-for="d in 31" :key="d"></td>
                                         </tr>
@@ -752,8 +761,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
 .sheet .grade { margin-top: 0; }
 .sheet .grade-caixa { margin-top: -1px; }
-.sheet .grade th { font-weight: bold; height: 21px; font-size: 8.5px; white-space: nowrap; overflow: hidden; }
-.sheet .grade td { height: 21px; font-size: 8.5px; white-space: nowrap; overflow: hidden; }
+.sheet .grade th { font-weight: bold; height: 21px; font-size: 8.5px; line-height: 11px; }
+.sheet .grade td { height: 21px; font-size: 8.5px; line-height: 11px; }
 .sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
 .sheet .grade th.faixa-cabecalho { background: #d9d9d9; }
 
