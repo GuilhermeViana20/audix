@@ -746,11 +746,12 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .logo-box { display: inline-block; width: 120px; height: 40px; line-height: 40px; border: 1px dashed #777; font-size: 7px; color: #555; text-align: center; }
 .sheet .topo { margin-bottom: 0; }
 .sheet .topo td { height: 36px; vertical-align: top; padding-top: 4px; font-size: 9px; }
+.sheet .topo td { border-bottom: 0; } /* a linha de baixo é a do bloco LOCAL/DATA, evita borda dupla */
 .sheet .topo .valor { display: block; font-size: 10px; }
 .sheet .topo.local { margin-top: -1px; }
 .sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
 .sheet .grade { margin-top: 8px; }
-.sheet .grade-caixa { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin-top: 8px; }
+.sheet .grade-caixa { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin-top: -1px; }
 .sheet .grade-caixa .grade { flex: 1 1 auto; margin-top: 0; height: 100%; }
 .sheet .grade-caixa .grade tbody tr { height: auto; }
 .sheet .grade th { font-weight: bold; height: 18px; font-size: 9px; }
