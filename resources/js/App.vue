@@ -842,7 +842,7 @@ onBeforeUnmount(() => {
 
 /* Impressão: só a folha, em A4 paisagem */
 @media print {
-    @page { size: 297mm 210mm; margin: 8mm; } /* A4 paisagem com dimensões explícitas (evita sair deitada em 90°) */
+    @page { size: A4 landscape; margin: 8mm; }
     body * { visibility: hidden; }
     #sheets, #sheets * { visibility: visible; }
     #sheets { position: absolute; left: 0; top: 0; width: 100%; display: block; gap: 0; padding: 0; }
