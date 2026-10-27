@@ -527,7 +527,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                         <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i" :data-grupo="atual.id"
                                              class="flex items-center gap-2 rounded-lg transition"
                                              :class="arrasto && arrasto.grupo === atual.id && arrasto.para === i && arrasto.de !== i ? 'ring-2 ring-azul' : ''">
-                                            <span class="w-12 text-xs text-grafite/50">{{ l.tipo === 'grupo' ? 'Faixa' : 'Linha' }}</span>
+                                            <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
+                                                <option value="linha">Linha</option>
+                                                <option value="grupo">Faixa</option>
+                                            </select>
                                             <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
                                                    :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
                                             <span class="touch-none cursor-grab select-none px-1 text-xl leading-none text-grafite/40 active:cursor-grabbing"
