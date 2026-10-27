@@ -5,6 +5,7 @@
 
 const TOLERANCIA_Y = 2.5; // itens na mesma altura (pt) pertencem à mesma linha
 const SOMENTE_DIA = /^\d{1,2}$/;
+const TEXTO_LONGO = 28; // caracteres a partir dos quais o texto da primeira coluna pode quebrar
 const RUIDO = /^(PLANILHA DE MONITORAMENTO|HIGIENE E LIMPEZA AMBIENTAL|ENCARREGADO|MÊS\/ANO|LOCAL|DATA)/i;
 
 export function agruparLinhas(itens) {
@@ -48,7 +49,7 @@ export function interpretarPlanilha(paginas) {
                     k++;
                 }
                 colunaDias = null;
-                secao = secoes.find(s => s.nome === nome) || null;
+                        secao = secoes.find(s => s.nome === nome) || null;
                 if (!secao) {
                     secao = { nome, titulo_primeira_coluna: 'ÁREA DE ATENDIMENTO', linhas: [] };
                     secoes.push(secao);
@@ -71,14 +72,32 @@ export function interpretarPlanilha(paginas) {
             const centro = linha.itens.filter(i => i.x >= colunaDias - 1 && !SOMENTE_DIA.test(i.texto));
             const textoPrimeira = texto(primeira);
 
+            let item = null;
             if (textoPrimeira) {
                 if (RUIDO.test(textoPrimeira)) continue;
                 const negrito = primeira.every(i => i.negrito);
-                secao.linhas.push({ tipo: negrito ? 'grupo' : 'linha', texto: textoPrimeira });
+                item = { tipo: negrito ? 'grupo' : 'linha', texto: textoPrimeira };
             } else if (centro.length) {
-                secao.linhas.push({ tipo: 'grupo', texto: texto(centro) });
+                item = { tipo: 'grupo', texto: texto(centro) };
             }
+            if (!item) continue;
+
+            // Texto longo na primeira coluna: pode ter quebrado em duas linhas, vale conferir
+            if (textoPrimeira.length >= TEXTO_LONGO) {
+                item.aviso = 'Texto longo, pode estar quebrado em duas linhas';
+            }
+            secao.linhas.push(item);
         }
+    }
+
+    // Faixa sem nenhuma linha abaixo dela (ou seguida de outra faixa): marca para revisão
+    for (const s of secoes) {
+        s.linhas.forEach((l, i) => {
+            const proxima = s.linhas[i + 1];
+            if (l.tipo === 'grupo' && (!proxima || proxima.tipo === 'grupo')) {
+                l.aviso = l.aviso || 'Faixa sem linhas abaixo';
+            }
+        });
     }
 
     return secoes.filter(s => s.linhas.length);
