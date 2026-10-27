@@ -227,6 +227,10 @@ function moverLinha(i, d) {
 function adicionarLinha() { atual.value.linhas.push({ tipo: 'linha', texto: '' }); }
 function adicionarGrupo() { atual.value.linhas.push({ tipo: 'grupo', texto: 'NOVA FAIXA' }); }
 function removerLinha(i) { atual.value.linhas.splice(i, 1); }
+// Insere uma linha vazia logo acima (d = 0) ou logo abaixo (d = 1) da linha i
+function inserirLinha(i, d) {
+    atual.value.linhas.splice(i + d, 0, { tipo: 'linha', texto: '' });
+}
 
 async function adicionarSecao() {
     if (!await podeDescartar()) return;
@@ -539,6 +543,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                                   @pointermove="moverArrasto"
                                                   @pointerup="soltarArrasto"
                                                   @pointercancel="soltarArrasto">⠿</span>
+                                            <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha acima" @click="inserirLinha(i, 0)">+↑</button>
+                                            <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha abaixo" @click="inserirLinha(i, 1)">+↓</button>
                                             <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
                                         </div>
                                     </div>
