@@ -469,29 +469,23 @@ function moverItem(lista, i, d) {
     [lista[i], lista[j]] = [lista[j], lista[i]];
 }
 
-// Arrastar linhas no popup (pointer events: funciona com toque e mouse).
-// Enquanto arrasta, a linha de destino fica destacada; ao soltar, a linha é movida.
-const arrasto = ref(null); // { grupo, lista, de, para }
-function iniciarArrasto(evento, grupo, lista, i) {
-    evento.preventDefault();
-    evento.currentTarget.setPointerCapture(evento.pointerId);
-    arrasto.value = { grupo, lista, de: i, para: i };
-}
-function moverArrasto(evento) {
-    if (!arrasto.value) return;
-    const alvo = document.elementFromPoint(evento.clientX, evento.clientY)?.closest('[data-linha]');
-    if (alvo && alvo.dataset.grupo === String(arrasto.value.grupo)) {
-        arrasto.value.para = Number(alvo.dataset.linha);
+// Ordena as linhas A–Z dentro de cada bloco; as faixas continuam no lugar e separam os blocos
+function ordenarBlocos(lista) {
+    const resultado = [];
+    let bloco = [];
+    const fecharBloco = () => {
+        bloco.sort((a, b) => a.texto.localeCompare(b.texto, 'pt-BR', { sensitivity: 'base' }));
+        resultado.push(...bloco);
+        bloco = [];
+    };
+    for (const item of lista) {
+        if (item.tipo === 'grupo') { fecharBloco(); resultado.push(item); } else { bloco.push(item); }
     }
+    fecharBloco();
+    return resultado;
 }
-function soltarArrasto() {
-    if (!arrasto.value) return;
-    const { lista, de, para } = arrasto.value;
-    if (de !== para) {
-        const [item] = lista.splice(de, 1);
-        lista.splice(para, 0, item);
-    }
-    arrasto.value = null;
+function ordenarEditor() {
+    if (atual.value) atual.value.linhas = ordenarBlocos(atual.value.linhas);
 }
 
 async function confirmarImportacao() {
@@ -562,26 +556,20 @@ onBeforeUnmount(() => {
 
                     <div class="mt-3 space-y-2">
                         <div v-for="(l, j) in s.linhas" :key="l._k" :data-linha="j" :data-grupo="s._k"
-                             class="flex flex-wrap items-center gap-2 rounded-lg transition"
-                             :class="arrasto && arrasto.grupo === s._k && arrasto.para === j && arrasto.de !== j ? 'ring-2 ring-azul' : ''">
+                             class="flex flex-wrap items-center gap-2 rounded-lg transition">
                             <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
                                 <option value="linha">Linha</option>
                                 <option value="grupo">Faixa</option>
                             </select>
                             <input v-model="l.texto" class="min-w-0 flex-1 rounded-lg px-3 py-2 text-sm"
                                    :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
-                            <span class="touch-none cursor-grab select-none px-1 text-xl leading-none text-grafite/40 active:cursor-grabbing"
-                                  title="Arraste para mover"
-                                  @pointerdown="iniciarArrasto($event, s._k, s.linhas, j)"
-                                  @pointermove="moverArrasto"
-                                  @pointerup="soltarArrasto"
-                                  @pointercancel="soltarArrasto">⠿</span>
                             <button class="px-1 text-red-500" @click="s.linhas.splice(j, 1)">×</button>
                             <p v-if="l.aviso" class="order-last basis-full pl-2 text-xs text-amber-700">⚠ {{ l.aviso }} <button class="font-semibold underline" @click="l.aviso = null">ok</button></p>
                         </div>
                     </div>
 
                     <div class="mt-3 flex gap-2 text-sm">
+                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas = ordenarBlocos(s.linhas)">Ordenar A–Z</button>
                         <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas.push({ _k: novaChave(), tipo: 'linha', texto: '' })">+ Linha</button>
                         <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas.push({ _k: novaChave(), tipo: 'grupo', texto: 'NOVA FAIXA' })">+ Faixa</button>
                     </div>
@@ -698,8 +686,7 @@ onBeforeUnmount(() => {
 
                                     <div class="mt-4 space-y-2">
                                         <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i" :data-grupo="atual.id"
-                                             class="flex flex-wrap items-center gap-2 rounded-lg transition"
-                                             :class="arrasto && arrasto.grupo === atual.id && arrasto.para === i && arrasto.de !== i ? 'ring-2 ring-azul' : ''">
+                                             class="flex flex-wrap items-center gap-2 rounded-lg transition">
                                             <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
                                                 <option value="linha">Linha</option>
                                                 <option value="grupo">Faixa</option>
@@ -707,12 +694,6 @@ onBeforeUnmount(() => {
                                             <button v-if="l.tipo === 'grupo'" class="shrink-0 rounded-lg bg-offwhite px-2 py-2 text-azul" title="Copiar faixa e linhas para outra seção" @click="abrirCopia('faixa', i)"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                                             <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
                                                    :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
-                                            <span class="touch-none cursor-grab select-none px-1 text-xl leading-none text-grafite/40 active:cursor-grabbing"
-                                                  title="Arraste para mover"
-                                                  @pointerdown="iniciarArrasto($event, atual.id, atual.linhas, i)"
-                                                  @pointermove="moverArrasto"
-                                                  @pointerup="soltarArrasto"
-                                                  @pointercancel="soltarArrasto">⠿</span>
                                             <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha acima" @click="inserirLinha(i, 0)">+↑</button>
                                             <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha abaixo" @click="inserirLinha(i, 1)">+↓</button>
                                             <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
@@ -720,6 +701,7 @@ onBeforeUnmount(() => {
                                     </div>
 
                                     <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                                        <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="ordenarEditor">Ordenar A–Z</button>
                                         <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarLinha">+ Linha</button>
                                         <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarGrupo">+ Faixa</button>
                                         <button class="ml-auto rounded-xl bg-white px-3 py-2 font-medium" @click="copiarParaTodas">Copiar para todas</button>
