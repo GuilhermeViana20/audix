@@ -734,6 +734,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                     </template>
                                 </tbody>
                             </table></div>
+                            <div class="rodape">ACCP Alimentos &amp; Tecnologia</div>
                         </div>
                     </div>
                     <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Selecione um supermercado e pelo menos uma seção para ver a pré-visualização.</p>
@@ -776,6 +777,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
 .sheet .grade { margin-top: 0; }
 .sheet .grade-caixa { margin-top: -1px; }
+.sheet .rodape { margin-top: auto; padding-top: 4px; text-align: center; font-size: 9px; line-height: 12px; }
 .sheet .grade th { font-weight: bold; height: 21px; font-size: 8.5px; line-height: 11px; }
 .sheet .grade td { height: 21px; font-size: 8.5px; line-height: 11px; }
 .sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
