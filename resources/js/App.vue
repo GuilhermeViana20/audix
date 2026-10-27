@@ -602,8 +602,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                     </div>
                                     <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
                                     <div class="mt-1 flex items-center gap-2">
-                                        <input v-model="titulo" class="min-w-0 flex-1 rounded-xl bg-white px-3 py-2 text-sm">
                                         <button class="shrink-0 rounded-lg bg-white px-2 py-2 text-azul" title="Copiar título e linhas para outra seção" @click="abrirCopia('titulo')"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                                        <input v-model="titulo" class="min-w-0 flex-1 rounded-xl bg-grafite/10 px-3 py-2 text-sm font-bold uppercase">
                                     </div>
 
                                     <div class="mt-4 space-y-2">
@@ -696,7 +696,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                 </colgroup>
                                 <thead>
                                     <tr>
-                                        <th>{{ f.secao.titulo_primeira_coluna }}</th>
+                                        <th class="faixa-cabecalho">{{ f.secao.titulo_primeira_coluna }}</th>
                                         <th v-for="d in 31" :key="d">{{ d }}</th>
                                     </tr>
                                 </thead>
@@ -751,6 +751,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .grade th { font-weight: bold; height: 18px; font-size: 9px; }
 .sheet .grade td { height: 18px; font-size: 9px; }
 .sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
+.sheet .grade th.faixa-cabecalho { background: #d9d9d9; }
 
 /* Impressão: só a folha, em A4 paisagem */
 @media print {
@@ -763,5 +764,6 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
     .sheet:last-child { break-after: auto; page-break-after: auto; }
     .sheet .grade td, .sheet .grade th, .sheet .topo td, .sheet .cab-logos td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .sheet .grade .faixa td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet .grade th.faixa-cabecalho { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
