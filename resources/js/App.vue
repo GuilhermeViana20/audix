@@ -248,28 +248,40 @@ async function copiarParaSecao(destinoId, copia) {
     } catch (e) { msg(e.message); }
 }
 
-// Faixa da posição i + as linhas abaixo dela (até a próxima faixa)
-async function copiarFaixa(i, evento) {
-    const destinoId = Number(evento.target.value);
-    evento.target.value = '';
+// Monta o bloco a copiar: a faixa (ou o título) e as linhas abaixo dela, até a próxima faixa
+function montarCopia(tipo, i) {
     const linhas = atual.value.linhas;
+    const copiar = l => ({ tipo: l.tipo, texto: l.texto });
+    if (tipo === 'titulo') {
+        let fim = 0;
+        while (fim < linhas.length && linhas[fim].tipo !== 'grupo') fim++;
+        return {
+            resumo: titulo.value.trim(),
+            copia: [{ tipo: 'grupo', texto: titulo.value.trim() }, ...linhas.slice(0, fim).map(copiar)],
+        };
+    }
     let fim = i + 1;
     while (fim < linhas.length && linhas[fim].tipo !== 'grupo') fim++;
-    await copiarParaSecao(destinoId, linhas.slice(i, fim).map(l => ({ tipo: l.tipo, texto: l.texto })));
+    return { resumo: linhas[i].texto, copia: linhas.slice(i, fim).map(copiar) };
 }
 
-// Título da primeira coluna (também é uma faixa) + as linhas antes da primeira faixa
-async function copiarTitulo(evento) {
-    const destinoId = Number(evento.target.value);
-    evento.target.value = '';
-    const linhas = atual.value.linhas;
-    let fim = 0;
-    while (fim < linhas.length && linhas[fim].tipo !== 'grupo') fim++;
-    const copia = [
-        { tipo: 'grupo', texto: titulo.value.trim() },
-        ...linhas.slice(0, fim).map(l => ({ tipo: l.tipo, texto: l.texto })),
-    ];
-    await copiarParaSecao(destinoId, copia);
+// Popup de cópia: o usuário escolhe a seção de destino e confirma
+const copiaPendente = ref(null);
+function abrirCopia(tipo, i) {
+    if (estaSujo.value) { msg('Salve as alterações desta seção antes de copiar'); return; }
+    const { resumo, copia } = montarCopia(tipo, i);
+    copiaPendente.value = {
+        resumo,
+        copia,
+        destinos: ordenadas.value.filter(o => o.id !== atual.value.id),
+        escolhido: null,
+    };
+}
+async function confirmarCopia() {
+    const c = copiaPendente.value;
+    if (!c || !c.escolhido) return;
+    copiaPendente.value = null;
+    await copiarParaSecao(c.escolhido, c.copia);
 }
 
 async function adicionarSecao() {
@@ -496,6 +508,30 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
         </div>
     </div>
 
+    <!-- Popup para copiar faixa (ou título) e linhas para outra seção -->
+    <div v-if="copiaPendente" class="fixed inset-0 z-40 flex items-end justify-center bg-grafite/50 sm:items-center sm:p-4" role="dialog" aria-modal="true">
+        <div class="flex max-h-[85vh] w-full max-w-md flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl">
+            <div class="border-b border-grafite/10 p-4">
+                <h2 class="text-lg font-bold">Copiar para outra seção</h2>
+                <p class="text-sm text-grafite/70">“{{ copiaPendente.resumo }}” com {{ copiaPendente.copia.length - 1 }} linha(s) abaixo. Será adicionada ao fim da seção escolhida.</p>
+            </div>
+            <div class="flex-1 space-y-2 overflow-y-auto p-4">
+                <p v-if="!copiaPendente.destinos.length" class="text-sm text-grafite/60">Não há outras seções para copiar.</p>
+                <label v-for="d in copiaPendente.destinos" :key="d.id"
+                       class="flex cursor-pointer items-center gap-3 rounded-xl bg-offwhite px-4 py-3 text-sm font-medium"
+                       :class="copiaPendente.escolhido === d.id && 'ring-2 ring-azul'">
+                    <input type="radio" name="destino-copia" :value="d.id" v-model="copiaPendente.escolhido" class="accent-azul h-4 w-4">
+                    {{ d.nome }}
+                </label>
+            </div>
+            <div class="flex items-center justify-between gap-3 border-t border-grafite/10 p-4">
+                <button class="text-sm font-medium text-grafite/70" @click="copiaPendente = null">Cancelar</button>
+                <button class="rounded-xl bg-azul px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+                        :disabled="!copiaPendente.escolhido" @click="confirmarCopia">Confirmar cópia</button>
+            </div>
+        </div>
+    </div>
+
     <div class="flex min-h-screen">
         <div :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
@@ -565,11 +601,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                               :class="status === 'Erro ao salvar' ? 'text-red-500' : (estaSujo ? 'text-amber-600' : 'text-grafite/50')">{{ textoStatus }}</span>
                                     </div>
                                     <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
-                                    <input v-model="titulo" class="mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm">
-                                    <select class="mt-2 w-full rounded-xl bg-white px-3 py-2 text-xs text-azul" @change="copiarTitulo($event)">
-                                        <option value="">Copiar título e linhas para…</option>
-                                        <option v-for="outra in ordenadas.filter(o => o.id !== atual.id)" :key="outra.id" :value="outra.id">{{ outra.nome }}</option>
-                                    </select>
+                                    <div class="mt-1 flex items-center gap-2">
+                                        <input v-model="titulo" class="min-w-0 flex-1 rounded-xl bg-white px-3 py-2 text-sm">
+                                        <button class="shrink-0 rounded-lg bg-white px-2 py-2 text-azul" title="Copiar título e linhas para outra seção" @click="abrirCopia('titulo')"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                                    </div>
 
                                     <div class="mt-4 space-y-2">
                                         <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i" :data-grupo="atual.id"
@@ -579,6 +614,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                                 <option value="linha">Linha</option>
                                                 <option value="grupo">Faixa</option>
                                             </select>
+                                            <button v-if="l.tipo === 'grupo'" class="shrink-0 rounded-lg bg-offwhite px-2 py-2 text-azul" title="Copiar faixa e linhas para outra seção" @click="abrirCopia('faixa', i)"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                                             <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
                                                    :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
                                             <span class="touch-none cursor-grab select-none px-1 text-xl leading-none text-grafite/40 active:cursor-grabbing"
@@ -587,10 +623,6 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                                   @pointermove="moverArrasto"
                                                   @pointerup="soltarArrasto"
                                                   @pointercancel="soltarArrasto">⠿</span>
-                                            <select v-if="l.tipo === 'grupo'" class="order-last basis-full mt-1 rounded-lg bg-offwhite px-2 py-2 text-xs text-azul" @change="copiarFaixa(i, $event)">
-                                                <option value="">Copiar itens para…</option>
-                                                <option v-for="outra in ordenadas.filter(o => o.id !== atual.id)" :key="outra.id" :value="outra.id">{{ outra.nome }}</option>
-                                            </select>
                                             <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha acima" @click="inserirLinha(i, 0)">+↑</button>
                                             <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha abaixo" @click="inserirLinha(i, 1)">+↓</button>
                                             <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
