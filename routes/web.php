@@ -41,6 +41,7 @@ Route::prefix('api')->group(function () {
     // Planilhas (por tipo) e suas seções
     Route::get('supermercados/{supermercado}/planilhas/{tipo}', [SupermercadoController::class, 'planilha']);
     Route::post('planilhas/{planilha}/secoes', [SecaoController::class, 'store']);
+    Route::post('planilhas/{planilha}/importacao', [\App\Http\Controllers\ImportacaoPlanilhaController::class, 'store']);
     Route::post('planilhas/{planilha}/relatorios', [RelatorioController::class, 'store']);
     Route::put('secoes/{secao}', [SecaoController::class, 'update']);
     Route::delete('secoes/{secao}', [SecaoController::class, 'destroy']);

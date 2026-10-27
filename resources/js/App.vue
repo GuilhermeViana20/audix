@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { lerPlanilhaPdf } from './importarPdf.js';
 
 const TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const JSON_HEADERS = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': TOKEN };
@@ -293,6 +294,61 @@ async function voltarLogoPadrao() {
     } catch (e) { msg(e.message); }
 }
 
+// ---------- Importação de PDF ----------
+// As seções lidas ficam em "rascunho" no popup; só são gravadas ao confirmar.
+const rascunho = ref(null);
+const lendoPdf = ref(false);
+let contadorChave = 0;
+const novaChave = () => ++contadorChave;
+
+async function escolherPdf(evento) {
+    const arquivo = evento.target.files[0];
+    evento.target.value = '';
+    if (!arquivo) return;
+    if (!await podeDescartar()) return;
+    lendoPdf.value = true;
+    try {
+        const lidas = await lerPlanilhaPdf(arquivo);
+        if (!lidas.length) { msg('Não encontrei seções nesse PDF'); return; }
+        rascunho.value = lidas.map(s => ({
+            _k: novaChave(),
+            nome: s.nome,
+            titulo_primeira_coluna: s.titulo_primeira_coluna,
+            linhas: s.linhas.map(l => ({ _k: novaChave(), tipo: l.tipo, texto: l.texto })),
+        }));
+    } catch (e) {
+        msg('Não consegui ler esse PDF');
+    } finally {
+        lendoPdf.value = false;
+    }
+}
+
+function moverItem(lista, i, d) {
+    const j = i + d;
+    if (j < 0 || j >= lista.length) return;
+    [lista[i], lista[j]] = [lista[j], lista[i]];
+}
+
+async function confirmarImportacao() {
+    const secoesParaGravar = rascunho.value.map(s => ({
+        nome: s.nome.trim(),
+        titulo_primeira_coluna: s.titulo_primeira_coluna,
+        linhas: s.linhas.map(l => ({ tipo: l.tipo, texto: l.texto })),
+    }));
+    if (secoesParaGravar.some(s => !s.nome)) { msg('Todas as seções precisam de nome'); return; }
+    try {
+        await api(`/api/planilhas/${planilha.value.id}/importacao`, {
+            method: 'POST',
+            body: JSON.stringify({ secoes: secoesParaGravar }),
+        });
+        rascunho.value = null;
+        atual.value = null;
+        titulo.value = '';
+        await recarregarSecoes();
+        msg('Planilha importada e salva');
+    } catch (e) { msg(e.message); }
+}
+
 // Autosave: qualquer mudança nas linhas ou no título das seções agenda a gravação
 // Atualiza a pré-visualização quando muda a seleção
 watch(selecionadas, atualizarPreview, { deep: true });
@@ -312,6 +368,56 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
         <div class="flex items-center gap-3 rounded-2xl bg-white px-5 py-3 text-sm font-semibold shadow-lg">
             <span class="h-4 w-4 animate-spin rounded-full border-2 border-azul border-t-transparent"></span>
             Carregando…
+        </div>
+    </div>
+
+    <!-- Popup de conferência da importação: nada é gravado antes de confirmar -->
+    <div v-if="rascunho" class="fixed inset-0 z-40 flex items-end justify-center bg-grafite/50 sm:items-center sm:p-4" role="dialog" aria-modal="true">
+        <div class="flex max-h-[92vh] w-full max-w-3xl flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl">
+            <div class="border-b border-grafite/10 p-4 md:p-5">
+                <h2 class="text-lg font-bold">Confirmar importação</h2>
+                <p class="text-xs text-grafite/60">Revise seções, linhas e faixas. Nada é salvo no banco até você clicar em "Confirmar e salvar".</p>
+            </div>
+
+            <div class="flex-1 space-y-5 overflow-y-auto p-4 md:p-5">
+                <div v-for="(s, i) in rascunho" :key="s._k" class="rounded-xl border border-grafite/10 p-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input v-model="s.nome" placeholder="Nome da seção" class="min-w-0 flex-1 rounded-lg bg-offwhite px-3 py-2 text-sm font-bold uppercase">
+                        <button class="px-1 text-azul disabled:opacity-30" :disabled="i === 0" @click="moverItem(rascunho, i, -1)">↑</button>
+                        <button class="px-1 text-azul disabled:opacity-30" :disabled="i === rascunho.length - 1" @click="moverItem(rascunho, i, 1)">↓</button>
+                        <button class="text-sm text-red-500" @click="rascunho.splice(i, 1)">Remover seção</button>
+                    </div>
+                    <label class="mt-3 block text-xs text-grafite/60">Título da primeira coluna</label>
+                    <input v-model="s.titulo_primeira_coluna" class="mt-1 w-full rounded-lg bg-offwhite px-3 py-2 text-sm">
+
+                    <div class="mt-3 space-y-2">
+                        <div v-for="(l, j) in s.linhas" :key="l._k" class="flex items-center gap-2">
+                            <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
+                                <option value="linha">Linha</option>
+                                <option value="grupo">Faixa</option>
+                            </select>
+                            <input v-model="l.texto" class="min-w-0 flex-1 rounded-lg px-3 py-2 text-sm"
+                                   :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
+                            <button class="px-1 text-azul disabled:opacity-30" :disabled="j === 0" @click="moverItem(s.linhas, j, -1)">↑</button>
+                            <button class="px-1 text-azul disabled:opacity-30" :disabled="j === s.linhas.length - 1" @click="moverItem(s.linhas, j, 1)">↓</button>
+                            <button class="px-1 text-red-500" @click="s.linhas.splice(j, 1)">×</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 flex gap-2 text-sm">
+                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas.push({ _k: novaChave(), tipo: 'linha', texto: '' })">+ Linha</button>
+                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas.push({ _k: novaChave(), tipo: 'grupo', texto: 'NOVA FAIXA' })">+ Faixa</button>
+                    </div>
+                </div>
+
+                <button class="w-full rounded-xl border border-dashed border-azul py-3 text-sm font-semibold text-azul"
+                        @click="rascunho.push({ _k: novaChave(), nome: '', titulo_primeira_coluna: 'ÁREA DE ATENDIMENTO', linhas: [] })">+ Nova seção</button>
+            </div>
+
+            <div class="flex items-center justify-between gap-3 border-t border-grafite/10 p-4 md:p-5">
+                <button class="text-sm font-medium text-grafite/70" @click="rascunho = null">Cancelar</button>
+                <button class="rounded-xl bg-azul px-5 py-2.5 text-sm font-semibold text-white" @click="confirmarImportacao">Confirmar e salvar</button>
+            </div>
         </div>
     </div>
 
@@ -354,6 +460,11 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                         <div class="mt-3 flex gap-2 text-sm">
                             <button class="text-azul font-medium" @click="ordenadas.forEach(s => selecionadas[s.id] = true)">Marcar todas</button>
                             <button class="text-azul font-medium" @click="ordenadas.forEach(s => selecionadas[s.id] = false)">Nenhuma</button>
+                            <label class="ml-auto cursor-pointer rounded-xl bg-azul px-3 py-1.5 font-semibold text-white"
+                                   :class="lendoPdf && 'pointer-events-none opacity-50'">
+                                {{ lendoPdf ? 'Lendo PDF…' : 'Importar PDF' }}
+                                <input type="file" accept="application/pdf" class="hidden" @change="escolherPdf">
+                            </label>
                         </div>
                         <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b class="text-grafite">{{ planilha.nome }}</b></p>
 
