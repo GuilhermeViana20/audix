@@ -618,6 +618,11 @@ onBeforeUnmount(() => {
         <div :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
             <section class="min-w-0 space-y-5">
+                <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
+                <div v-if="window.AUDIX.nomeSupermercado" class="sticky top-4 z-20 rounded-2xl bg-white p-4 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
+                    <p class="text-xl font-bold">{{ window.AUDIX.nomeSupermercado }}</p>
+                </div>
                 <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
                     <select class="mt-2 w-full rounded-xl bg-offwhite px-3 py-2 text-sm font-medium"

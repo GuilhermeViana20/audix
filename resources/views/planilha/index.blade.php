@@ -11,20 +11,13 @@
     <div class="px-4 pt-4 md:px-8">
         <a href="{{ route('planilhas.supermercados', 'higiene') }}" class="text-sm font-medium text-azul">← Trocar supermercado</a>
     </div>
-    @if ($supermercado)
-        <div class="px-4 pt-4 md:px-8">
-            <div class="rounded-2xl bg-white p-4 shadow-sm">
-                <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
-                <p class="text-xl font-bold">{{ $supermercado->nome }}</p>
-            </div>
-        </div>
-    @endif
     <div id="app" class="p-4 md:p-8"></div>
     <script>
         window.AUDIX = {
             supermercadoId: {{ $supermercado?->id ?? 'null' }},
             supermercados: @json($supermercados),
             embutido: true,
+            nomeSupermercado: @json($supermercado?->nome),
             nomeArquivo: @json('Planilha de Higiene - ' . ($supermercado?->nome_social ?: $supermercado?->nome)),
         };
     </script>
