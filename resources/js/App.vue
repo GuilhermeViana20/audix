@@ -6,7 +6,8 @@ const TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const JSON_HEADERS = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': TOKEN };
 
 const embutido = !!window.AUDIX.embutido; // sem seletor de supermercado nem logo (fluxo e edição)
-const semPrevia = !!window.AUDIX.semPrevia; // tela de edição do supermercado: só o editor
+const semPrevia = !!window.AUDIX.semPrevia;
+const nomeSupermercado = window.AUDIX.nomeSupermercado || null; // nome exibido no card fixo da planilha // tela de edição do supermercado: só o editor
 const supermercados = ref(window.AUDIX.supermercados || []);
 const supermercadoId = ref(window.AUDIX.supermercadoId);
 const carregando = ref(false);
@@ -619,9 +620,9 @@ onBeforeUnmount(() => {
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
             <section class="min-w-0 space-y-5">
                 <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
-                <div v-if="window.AUDIX.nomeSupermercado" class="sticky top-4 z-20 rounded-2xl bg-white p-4 shadow-sm">
+                <div v-if="nomeSupermercado" class="sticky top-4 z-20 rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
-                    <p class="text-xl font-bold">{{ window.AUDIX.nomeSupermercado }}</p>
+                    <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
                 </div>
                 <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
