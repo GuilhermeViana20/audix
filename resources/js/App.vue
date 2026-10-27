@@ -36,8 +36,8 @@ async function rede(url, opts = {}) {
 const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
 // Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
-const LIMITE_LINHAS_PX = 500; // espaço vertical da folha A4 reservado às linhas (cabeçalho ocupa o resto)
-const ALTURA_LINHA_PX = 18;
+const ALTURA_LINHA_PX = 21; // altura fixa de toda linha/faixa da grade (px)
+const LIMITE_LINHAS_PX = 580; // espaço da folha reservado às linhas: 27 linhas por folha
 function paginar(linhas) {
     const paginas = [];
     let atual = [];
@@ -702,8 +702,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                 </thead>
                                 <tbody>
                                     <template v-for="(l, j) in f.linhas" :key="j">
-                                        <tr v-if="l.tipo === 'grupo'" class="faixa"><td :colspan="32">{{ l.texto }}</td></tr>
-                                        <tr v-else>
+                                        <tr v-if="l.tipo === 'grupo'" class="faixa" :style="{ height: ALTURA_LINHA_PX + 'px' }"><td :colspan="32">{{ l.texto }}</td></tr>
+                                        <tr v-else :style="{ height: ALTURA_LINHA_PX + 'px' }">
                                             <td>{{ l.texto }}</td>
                                             <td v-for="d in 31" :key="d"></td>
                                         </tr>
@@ -750,12 +750,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 .sheet .topo .valor { display: block; font-size: 10px; }
 .sheet .topo.local { margin-top: -1px; }
 .sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
-.sheet .grade { margin-top: 8px; }
-.sheet .grade-caixa { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin-top: -1px; }
-.sheet .grade-caixa .grade { flex: 1 1 auto; margin-top: 0; height: 100%; }
-.sheet .grade-caixa .grade tbody tr { height: auto; }
-.sheet .grade th { font-weight: bold; height: 18px; font-size: 9px; }
-.sheet .grade td { height: 18px; font-size: 9px; }
+.sheet .grade { margin-top: 0; }
+.sheet .grade-caixa { margin-top: -1px; }
+.sheet .grade th { font-weight: bold; height: 21px; font-size: 8.5px; white-space: nowrap; overflow: hidden; }
+.sheet .grade td { height: 21px; font-size: 8.5px; white-space: nowrap; overflow: hidden; }
 .sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
 .sheet .grade th.faixa-cabecalho { background: #d9d9d9; }
 
