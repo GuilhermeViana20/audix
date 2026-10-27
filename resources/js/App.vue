@@ -232,6 +232,29 @@ function inserirLinha(i, d) {
     atual.value.linhas.splice(i + d, 0, { tipo: 'linha', texto: '' });
 }
 
+// Copia a faixa da posição i e as linhas abaixo dela (até a próxima faixa) para o fim de outra seção
+async function copiarFaixa(i, evento) {
+    const destinoId = Number(evento.target.value);
+    evento.target.value = '';
+    const destino = secoes.value.find(s => s.id === destinoId);
+    if (!destino || !atual.value) return;
+    if (estaSujo.value) { msg('Salve as alterações desta seção antes de copiar'); return; }
+
+    const linhas = atual.value.linhas;
+    let fim = i + 1;
+    while (fim < linhas.length && linhas[fim].tipo !== 'grupo') fim++;
+    const copia = linhas.slice(i, fim).map(l => ({ tipo: l.tipo, texto: l.texto }));
+    const existentes = destino.linhas.map(l => ({ tipo: l.tipo, texto: l.texto }));
+    try {
+        await api(`/api/secoes/${destino.id}/linhas`, {
+            method: 'PUT',
+            body: JSON.stringify({ linhas: [...existentes, ...copia] }),
+        });
+        await recarregarSecoes();
+        msg(`${copia.length} item(ns) copiado(s) para ${destino.nome}`);
+    } catch (e) { msg(e.message); }
+}
+
 async function adicionarSecao() {
     if (!await podeDescartar()) return;
     const nome = novaSecao.value.trim();
@@ -529,7 +552,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
 
                                     <div class="mt-4 space-y-2">
                                         <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i" :data-grupo="atual.id"
-                                             class="flex items-center gap-2 rounded-lg transition"
+                                             class="flex flex-wrap items-center gap-2 rounded-lg transition"
                                              :class="arrasto && arrasto.grupo === atual.id && arrasto.para === i && arrasto.de !== i ? 'ring-2 ring-azul' : ''">
                                             <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
                                                 <option value="linha">Linha</option>
@@ -543,6 +566,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                                   @pointermove="moverArrasto"
                                                   @pointerup="soltarArrasto"
                                                   @pointercancel="soltarArrasto">⠿</span>
+                                            <select v-if="l.tipo === 'grupo'" class="order-last basis-full mt-1 rounded-lg bg-offwhite px-2 py-2 text-xs text-azul" @change="copiarFaixa(i, $event)">
+                                                <option value="">Copiar itens para…</option>
+                                                <option v-for="outra in ordenadas.filter(o => o.id !== atual.id)" :key="outra.id" :value="outra.id">{{ outra.nome }}</option>
+                                            </select>
                                             <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha acima" @click="inserirLinha(i, 0)">+↑</button>
                                             <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha abaixo" @click="inserirLinha(i, 1)">+↓</button>
                                             <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
