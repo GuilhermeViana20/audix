@@ -524,12 +524,18 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                     <input v-model="titulo" class="mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm">
 
                                     <div class="mt-4 space-y-2">
-                                        <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" class="flex items-center gap-2">
+                                        <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i" :data-grupo="atual.id"
+                                             class="flex items-center gap-2 rounded-lg transition"
+                                             :class="arrasto && arrasto.grupo === atual.id && arrasto.para === i && arrasto.de !== i ? 'ring-2 ring-azul' : ''">
                                             <span class="w-12 text-xs text-grafite/50">{{ l.tipo === 'grupo' ? 'Faixa' : 'Linha' }}</span>
                                             <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
                                                    :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
-                                            <button class="px-1 text-azul disabled:opacity-30" :disabled="i === 0" @click="moverLinha(i, -1)">↑</button>
-                                            <button class="px-1 text-azul disabled:opacity-30" :disabled="i === atual.linhas.length - 1" @click="moverLinha(i, 1)">↓</button>
+                                            <span class="touch-none cursor-grab select-none px-1 text-xl leading-none text-grafite/40 active:cursor-grabbing"
+                                                  title="Arraste para mover"
+                                                  @pointerdown="iniciarArrasto($event, atual.id, atual.linhas, i)"
+                                                  @pointermove="moverArrasto"
+                                                  @pointerup="soltarArrasto"
+                                                  @pointercancel="soltarArrasto">⠿</span>
                                             <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
                                         </div>
                                     </div>
