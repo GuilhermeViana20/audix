@@ -232,18 +232,11 @@ function inserirLinha(i, d) {
     atual.value.linhas.splice(i + d, 0, { tipo: 'linha', texto: '' });
 }
 
-// Copia a faixa da posição i e as linhas abaixo dela (até a próxima faixa) para o fim de outra seção
-async function copiarFaixa(i, evento) {
-    const destinoId = Number(evento.target.value);
-    evento.target.value = '';
+// Copia um bloco (faixa + linhas) para o fim de outra seção e grava na hora
+async function copiarParaSecao(destinoId, copia) {
     const destino = secoes.value.find(s => s.id === destinoId);
     if (!destino || !atual.value) return;
     if (estaSujo.value) { msg('Salve as alterações desta seção antes de copiar'); return; }
-
-    const linhas = atual.value.linhas;
-    let fim = i + 1;
-    while (fim < linhas.length && linhas[fim].tipo !== 'grupo') fim++;
-    const copia = linhas.slice(i, fim).map(l => ({ tipo: l.tipo, texto: l.texto }));
     const existentes = destino.linhas.map(l => ({ tipo: l.tipo, texto: l.texto }));
     try {
         await api(`/api/secoes/${destino.id}/linhas`, {
@@ -253,6 +246,30 @@ async function copiarFaixa(i, evento) {
         await recarregarSecoes();
         msg(`${copia.length} item(ns) copiado(s) para ${destino.nome}`);
     } catch (e) { msg(e.message); }
+}
+
+// Faixa da posição i + as linhas abaixo dela (até a próxima faixa)
+async function copiarFaixa(i, evento) {
+    const destinoId = Number(evento.target.value);
+    evento.target.value = '';
+    const linhas = atual.value.linhas;
+    let fim = i + 1;
+    while (fim < linhas.length && linhas[fim].tipo !== 'grupo') fim++;
+    await copiarParaSecao(destinoId, linhas.slice(i, fim).map(l => ({ tipo: l.tipo, texto: l.texto })));
+}
+
+// Título da primeira coluna (também é uma faixa) + as linhas antes da primeira faixa
+async function copiarTitulo(evento) {
+    const destinoId = Number(evento.target.value);
+    evento.target.value = '';
+    const linhas = atual.value.linhas;
+    let fim = 0;
+    while (fim < linhas.length && linhas[fim].tipo !== 'grupo') fim++;
+    const copia = [
+        { tipo: 'grupo', texto: titulo.value.trim() },
+        ...linhas.slice(0, fim).map(l => ({ tipo: l.tipo, texto: l.texto })),
+    ];
+    await copiarParaSecao(destinoId, copia);
 }
 
 async function adicionarSecao() {
@@ -549,6 +566,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                                     </div>
                                     <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
                                     <input v-model="titulo" class="mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm">
+                                    <select class="mt-2 w-full rounded-xl bg-white px-3 py-2 text-xs text-azul" @change="copiarTitulo($event)">
+                                        <option value="">Copiar título e linhas para…</option>
+                                        <option v-for="outra in ordenadas.filter(o => o.id !== atual.id)" :key="outra.id" :value="outra.id">{{ outra.nome }}</option>
+                                    </select>
 
                                     <div class="mt-4 space-y-2">
                                         <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i" :data-grupo="atual.id"
