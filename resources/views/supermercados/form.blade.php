@@ -72,7 +72,7 @@
         </section>
         @vite(['resources/js/app.js'])
         <script>
-            window.AUDIX = { supermercadoId: {{ $supermercado->id }}, supermercados: [], embutido: true };
+            window.AUDIX = { supermercadoId: {{ $supermercado->id }}, supermercados: [], embutido: true, semPrevia: true };
         </script>
     @endif
 

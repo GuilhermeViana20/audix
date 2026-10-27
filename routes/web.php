@@ -4,11 +4,20 @@ use App\Http\Controllers\LinhaPlanilhaController;
 use App\Http\Controllers\SecaoController;
 use App\Http\Controllers\SupermercadoController;
 use App\Http\Controllers\PdfHigieneController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RelatorioController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [DashboardController::class, 'index'])->name('inicio');
+Route::view('/', 'inicio')->name('inicio');
+
+// Escolha do supermercado para o tipo de planilha
+Route::get('/planilhas/{tipo}', function (string $tipo) {
+    abort_unless(array_key_exists($tipo, \App\Models\Planilha::TIPOS), 404);
+
+    $nomeTipo = \App\Models\Planilha::TIPOS[$tipo];
+    $supermercados = \App\Models\Supermercado::orderBy('nome')->get();
+
+    return view('planilhas.supermercados', compact('tipo', 'nomeTipo', 'supermercados'));
+})->name('planilhas.supermercados');
 Route::get('/supermercados', [SupermercadoController::class, 'index'])->name('supermercados.index');
 Route::get('/supermercados/novo', [SupermercadoController::class, 'criar'])->name('supermercados.criar');
 Route::post('/supermercados', [SupermercadoController::class, 'store'])->name('supermercados.store');
@@ -17,6 +26,10 @@ Route::put('/supermercados/{supermercado}', [SupermercadoController::class, 'upd
 Route::delete('/supermercados/{supermercado}', [SupermercadoController::class, 'destroy'])->name('supermercados.destroy');
 
 Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {
+    if (! $supermercado) {
+        return redirect()->route('planilhas.supermercados', 'higiene');
+    }
+
     $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome']);
 
     return view('planilha.index', compact('supermercado', 'supermercados'));

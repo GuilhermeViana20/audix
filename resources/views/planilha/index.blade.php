@@ -8,11 +8,15 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-offwhite text-grafite">
-    <div id="app"></div>
+    <div class="px-4 pt-4 md:px-8">
+        <a href="{{ route('planilhas.supermercados', 'higiene') }}" class="text-sm font-medium text-azul">← Trocar supermercado</a>
+    </div>
+    <div id="app" class="p-4 md:p-8"></div>
     <script>
         window.AUDIX = {
             supermercadoId: {{ $supermercado?->id ?? 'null' }},
             supermercados: @json($supermercados),
+            embutido: true,
         };
     </script>
 </body>

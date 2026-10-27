@@ -4,7 +4,8 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 const TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const JSON_HEADERS = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': TOKEN };
 
-const embutido = !!window.AUDIX.embutido; // editor dentro da tela de edição do supermercado
+const embutido = !!window.AUDIX.embutido; // sem seletor de supermercado nem logo (fluxo e edição)
+const semPrevia = !!window.AUDIX.semPrevia; // tela de edição do supermercado: só o editor
 const supermercados = ref(window.AUDIX.supermercados || []);
 const supermercadoId = ref(window.AUDIX.supermercadoId);
 const carregando = ref(false);
@@ -315,9 +316,9 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
     </div>
 
     <div class="flex min-h-screen">
-        <div :class="embutido ? 'flex-1 min-w-0 grid' : 'flex-1 min-w-0 grid xl:grid-cols-[2fr_3fr] h-screen'">
-            <!-- Coluna da esquerda: controles (rola sozinha) -->
-            <section class="overflow-y-auto p-5 md:p-8 space-y-5">
+        <div :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
+            <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
+            <section class="min-w-0 space-y-5">
                 <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
                     <select class="mt-2 w-full rounded-xl bg-offwhite px-3 py-2 text-sm font-medium"
@@ -413,7 +414,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
             </section>
 
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
-            <aside v-if="!embutido" class="no-print hidden xl:flex flex-col h-screen overflow-hidden p-5 md:p-8 bg-offwhite border-l border-grafite/5">
+            <aside v-if="!semPrevia" class="no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)] xl:overflow-hidden">
                 <div class="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
@@ -423,7 +424,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', avisarAntesDeSa
                     <button class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
                             :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
                 </div>
-                <div id="sheets-box" class="mt-4 flex-1 overflow-y-auto">
+                <div id="sheets-box" class="min-h-0 flex-1 xl:overflow-y-auto">
                     <div v-if="folhas.length" id="sheets" class="flex flex-col items-center gap-6 pb-6">
                         <div v-for="(f, i) in folhas" :key="i" class="sheet" :style="{ zoom: zoomPreview }">
                             <table class="cab-logos">
