@@ -31,8 +31,8 @@
         .folha .legenda-titulo { text-align: center; font-weight: bold; font-size: 9.5px; letter-spacing: .16em; color: #1f3a5f;
                                  padding-bottom: 3px; border-bottom: 2px solid #1f3a5f; margin: 0 auto 8px; width: 60%;
                                  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 8px; }
-        .folha .legenda-card { width: calc((100% - 40px) / 6); display: flex; flex-direction: column; align-items: center;
+        .folha .legenda-cards { display: flex; flex-wrap: nowrap; justify-content: center; gap: 6px; }
+        .folha .legenda-card { width: calc((100% - 60px) / 11); display: flex; flex-direction: column; align-items: center;
                                background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; padding: 0 4px 4px; }
         .folha .legenda-codigo { margin-top: -1px; min-width: 26px; padding: 0 6px; height: 15px; border-radius: 0 0 4px 4px;
                                  background: #1f3a5f; color: #fff; font-weight: bold; font-size: 8px; line-height: 15px; text-align: center;
