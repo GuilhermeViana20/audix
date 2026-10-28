@@ -73,7 +73,7 @@
 <body class="bg-offwhite text-grafite">
     @include('partials.cabecalho')
 
-    <div class="px-4 pt-6 pb-10 md:px-8 xl:grid xl:grid-cols-[3fr_7fr] xl:items-start xl:gap-6">
+    <div class="print:!p-0 px-4 pt-6 pb-10 md:px-8 xl:grid xl:grid-cols-[3fr_7fr] xl:items-start xl:gap-6">
     <div class="nao-imprimir xl:sticky xl:top-28 xl:self-start">
         @include('partials.breadcrumb', ['itens' => [
             ['nome' => 'Início', 'url' => route('inicio')],
@@ -169,7 +169,7 @@
         }
     </script>
 
-    <main id="folhas" class="flex min-w-0 flex-col items-center gap-6 pb-10">
+    <main id="folhas" class="print:!p-0 flex min-w-0 flex-col items-center gap-6 pb-10">
         @forelse ($secoes as $secao)
             <section class="folha">
                 <table class="cab">
