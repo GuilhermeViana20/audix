@@ -8,7 +8,7 @@
     <style>
         /* Folha A4 paisagem (297 x 210 mm a 96 dpi = 1123 x 794 px) */
         .folha { width: 1123px; height: 794px; box-sizing: border-box; padding: 22px 36px; background: #fff; color: #000;
-                 font-family: Times, 'Times New Roman', serif; font-size: 9px; display: flex; flex-direction: column;
+                 font-family: Times, 'Times New Roman', serif; font-size: 10.5px; display: flex; flex-direction: column;
                  overflow: hidden; box-shadow: 0 2px 10px rgba(0, 0, 0, .12); }
         .folha table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .folha td, .folha th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
@@ -16,34 +16,34 @@
         .folha .cab td { height: 50px; }
         .folha .esq { text-align: left; width: 200px; }
         .folha .dir { text-align: right; width: 200px; }
-        .folha .titulo { font-size: 14px; font-weight: bold; line-height: 1.25; }
+        .folha .titulo { font-size: 16px; font-weight: bold; line-height: 1.25; }
         .folha .logo-acoop, .folha .logo-mae { height: 40px; display: inline-block; }
         .folha .logo-box { display: inline-block; width: 120px; height: 40px; line-height: 40px; border: 1px dashed #777; font-size: 7px; color: #555; }
-        .folha .topo td { height: 34px; vertical-align: top; padding-top: 4px; font-size: 9px; }
-        .folha .topo .valor { display: block; font-size: 10px; }
+        .folha .topo td { height: 38px; vertical-align: top; padding-top: 4px; font-size: 10.5px; }
+        .folha .topo .valor { display: block; font-size: 11.5px; }
         .folha .topo.local td { height: 24px; vertical-align: middle; text-align: left; padding-left: 4px; }
         .folha .topo:not(.local) td { border-bottom: 0; }
         .folha .grade-caixa { margin-top: 12px; }
-        .folha .grade th { font-weight: bold; height: 20px; font-size: 8.5px; }
-        .folha .grade td { height: 26px; font-size: 9px; }
+        .folha .grade th { font-weight: bold; height: 22px; font-size: 9.5px; }
+        .folha .grade td { height: 26px; font-size: 10.5px; }
         .folha .grade td:first-child { font-weight: bold; }
         .folha .grade th, .folha .grade td:first-child { background: #d9d9d9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .folha .legenda { margin-top: 14px; table-layout: fixed; }
-        .folha .legenda td { height: 22px; font-size: 8px; }
+        .folha .legenda td { height: 26px; font-size: 9.5px; }
         .folha .legenda .lateral { width: 22px; background: #c00000; color: #fff; font-weight: bold; font-size: 8px;
                                    border-color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda .lateral span { display: block; font-size: 8px; line-height: 9px; letter-spacing: 0; }
-        .folha .legenda .rotulo { width: 80px; background: #ffff00; font-weight: bold; font-size: 8.5px;
+        .folha .legenda .lateral span { display: block; font-size: 9px; line-height: 10px; letter-spacing: 0; }
+        .folha .legenda .rotulo { width: 90px; background: #ffff00; font-weight: bold; font-size: 9.5px;
                                   -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda .codigo { color: #1f3a5f; font-weight: bold; font-size: 9px; }
-        .folha .legenda .nome { font-size: 7.5px; font-weight: bold; }
-        .folha .legenda .imagem { height: 42px; }
+        .folha .legenda .codigo { color: #1f3a5f; font-weight: bold; font-size: 10.5px; }
+        .folha .legenda .nome { font-size: 8.5px; font-weight: bold; }
+        .folha .legenda .imagem { height: 52px; }
         .folha .legenda td { text-align: center; vertical-align: middle; }
-        .folha .legenda .imagem img { display: block; margin: 0 auto; max-height: 36px; max-width: 100%; object-fit: contain; }
-        .folha .obs { margin-top: 22px; font-weight: bold; font-size: 9px; }
-        .folha .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 8px; line-height: 10px; color: #9a9a9a; }
+        .folha .legenda .imagem img { display: block; margin: 0 auto; max-height: 46px; max-width: 100%; object-fit: contain; }
+        .folha .obs { margin-top: 22px; font-weight: bold; font-size: 11px; }
+        .folha .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 9px; line-height: 11px; color: #9a9a9a; }
         .folha .rodape p { margin: 0; }
-        .folha .rodape .nome { font-size: 9px; font-weight: bold; color: #7a7a7a; }
+        .folha .rodape .nome { font-size: 10px; font-weight: bold; color: #7a7a7a; }
 
         /* Tela: folhas menores para caber no celular e no computador */
         @media (max-width: 1200px) { .folha { zoom: .62; margin-bottom: -300px; } }
