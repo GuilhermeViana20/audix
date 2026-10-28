@@ -2,21 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Secao;
 use App\Models\Supermercado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SupermercadoController extends Controller
 {
     public function index(): View
     {
-        $supermercados = Supermercado::with('planilhas')->orderBy('nome')->get();
+        // Uma consulta para todas as contagens de seções (evita uma consulta por supermercado)
+        $contagens = DB::table('secoes')
+            ->join('planilhas', 'planilhas.id', '=', 'secoes.planilha_id')
+            ->select('planilhas.supermercado_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('planilhas.supermercado_id')
+            ->pluck('total', 'supermercado_id');
+
+        $supermercados = Supermercado::orderBy('nome')->get();
         foreach ($supermercados as $supermercado) {
-            $supermercado->secoes_count = Secao::whereIn('planilha_id', $supermercado->planilhas->pluck('id'))->count();
+            $supermercado->secoes_count = (int) ($contagens[$supermercado->id] ?? 0);
         }
 
         return view('supermercados.index', compact('supermercados'));
