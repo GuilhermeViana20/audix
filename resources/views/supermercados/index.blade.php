@@ -46,7 +46,6 @@
                     @if ($supermercado->nome_social)
                         <p class="truncate text-sm text-grafite/60">{{ $supermercado->nome_social }}</p>
                     @endif
-                    <span class="mt-2 inline-flex rounded-full bg-azul/10 px-2.5 py-0.5 text-xs font-semibold text-azul">{{ $supermercado->secoes_count }} seções</span>
                 </div>
 
                 <div class="mt-4 flex items-center justify-between gap-2 border-t border-grafite/10 pt-3">
