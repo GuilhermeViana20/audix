@@ -19,7 +19,7 @@
 <body class="flex min-h-screen flex-col bg-offwhite text-grafite">
 @include('partials.cabecalho')
 
-<main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-10">
+<main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8 md:py-10">
     @yield('breadcrumb')
     @yield('conteudo')
 </main>
