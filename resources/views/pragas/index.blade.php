@@ -29,14 +29,14 @@
         .folha .grade td:first-child { font-weight: bold; }
         .folha .grade th, .folha .grade td:first-child { background: #d9d9d9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .folha .legenda { margin-top: 14px; table-layout: fixed; }
-        .folha .legenda td { height: 26px; font-size: 9.5px; }
+        .folha .legenda td { height: 28px; font-size: 11px; }
         .folha .legenda .lateral { width: 22px; background: #c00000; color: #fff; font-weight: bold; font-size: 8px;
                                    border-color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda .lateral span { display: block; font-size: 9px; line-height: 10px; letter-spacing: 0; }
-        .folha .legenda .rotulo { width: 90px; background: #ffff00; font-weight: bold; font-size: 9.5px;
+        .folha .legenda .lateral span { display: block; font-size: 10px; line-height: 11px; letter-spacing: 0; }
+        .folha .legenda .rotulo { width: 90px; background: #ffff00; font-weight: bold; font-size: 11px;
                                   -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda .codigo { color: #1f3a5f; font-weight: bold; font-size: 10.5px; }
-        .folha .legenda .nome { font-size: 8.5px; font-weight: bold; }
+        .folha .legenda .codigo { color: #1f3a5f; font-weight: bold; font-size: 13px; }
+        .folha .legenda .nome { font-size: 10px; font-weight: bold; }
         .folha .legenda .imagem { height: 52px; }
         .folha .legenda td { text-align: center; vertical-align: middle; }
         .folha .legenda .imagem img { display: block; margin: 0 auto; max-height: 46px; max-width: 100%; object-fit: contain; }
