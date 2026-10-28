@@ -71,18 +71,6 @@
         </div>
     </form>
 
-    @if ($editando)
-        <section class="mt-8 w-full">
-            <h2 class="mb-1 text-xl font-bold">Seções e linhas da planilha de higiene</h2>
-            <p class="mb-4 text-sm text-grafite/60">As alterações da planilha são salvas pelo botão "Salvar" de cada seção.</p>
-            {{-- Editor da planilha (Vue), sem o seletor de supermercado nem a pré-visualização --}}
-            <div id="app"></div>
-        </section>
-        @vite(['resources/js/app.js'])
-        <script>
-            window.AUDIX = { supermercadoId: {{ $supermercado->id }}, supermercados: @json($supermercados ?? []), embutido: true, semPrevia: true };
-        </script>
-    @endif
 
     <script>
         (() => {
