@@ -727,6 +727,7 @@ onBeforeUnmount(() => {
 
                             <div v-if="ehTemperatura" class="temp-topo">
                                 <table class="temp-dados">
+                                    <tr><td class="rot">CLIENTE:</td><td class="campo"></td></tr>
                                     <tr><td class="rot">SETOR:</td><td class="campo">{{ f.secao.nome }}</td></tr>
                                     <tr><td class="rot">RESPONSÁVEL:</td><td class="campo"></td></tr>
                                     <tr><td class="rot">PERÍODO:</td><td class="campo"></td></tr>
