@@ -30,3 +30,14 @@
 .dark .bg-red-50 { background-color: rgb(239 68 68 / .12); }
 .dark .bg-amber-50 { background-color: rgb(245 158 11 / .12); }
 .dark .logo-tema { filter: brightness(0) invert(1); }
+
+/* Cursor de mão em todos os botões e elementos clicáveis */
+button:not(:disabled),
+[role="button"],
+select,
+label[for] {
+    cursor: pointer;
+}
+button:disabled {
+    cursor: not-allowed;
+}

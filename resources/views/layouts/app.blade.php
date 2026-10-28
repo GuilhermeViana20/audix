@@ -44,5 +44,11 @@
         try { localStorage.setItem('audix-tema', escuro ? 'escuro' : 'claro'); } catch (e) {}
     }
 </script>
+    @if (session('ok'))
+        <script>alert(@json(session('ok')));</script>
+    @endif
+    @if ($errors->any())
+        <script>alert(@json($errors->first()));</script>
+    @endif
 </body>
 </html>

@@ -92,9 +92,6 @@
                     @disabled($secoes->isEmpty())>Imprimir / PDF</button>
         </div>
 
-        @if (session('ok'))
-            <p class="mb-4 rounded-xl bg-white px-4 py-2 text-sm shadow-sm ring-1 ring-grafite/5">{{ session('ok') }}</p>
-        @endif
 
         <div class="flex flex-col gap-4">
             {{-- Seções salvas e inclusão de novas --}}
@@ -320,5 +317,11 @@
             atualizar();
         })();
     </script>
+    @if (session('ok'))
+        <script>alert(@json(session('ok')));</script>
+    @endif
+    @if ($errors->any())
+        <script>alert(@json($errors->first()));</script>
+    @endif
 </body>
 </html>

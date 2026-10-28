@@ -20,9 +20,6 @@
            class="rounded-xl bg-azul px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90">+ Novo supermercado</a>
     </div>
 
-    @if (session('ok'))
-        <p class="mb-4 rounded-xl bg-white px-4 py-2 text-sm shadow-sm ring-1 ring-grafite/5">{{ session('ok') }}</p>
-    @endif
 
     @forelse ($supermercados as $supermercado)
         @if ($loop->first)
