@@ -55,7 +55,7 @@
         .folha .rodape .nome { font-size: 10px; font-weight: bold; color: #7a7a7a; }
 
         /* Tela: folhas menores para caber no celular e no computador */
-        @media (max-width: 1200px) { .folha { zoom: .62; margin-bottom: -300px; } }
+        @media (max-width: 1600px) { .folha { zoom: .62; margin-bottom: -300px; } }
         @media (max-width: 760px)  { .folha { zoom: .36; margin-bottom: -500px; } }
 
         @media print {
@@ -73,7 +73,8 @@
 <body class="bg-offwhite text-grafite">
     <div class="nao-imprimir">@include('partials.cabecalho')</div>
 
-    <div class="nao-imprimir px-4 pt-6 pb-10 md:px-8">
+    <div class="px-4 pt-6 pb-10 md:px-8 xl:grid xl:grid-cols-[3fr_7fr] xl:items-start xl:gap-6">
+    <div class="nao-imprimir xl:sticky xl:top-28 xl:self-start">
         @include('partials.breadcrumb', ['itens' => [
             ['nome' => 'Início', 'url' => route('inicio')],
             ['nome' => 'Controle de Pragas', 'url' => route('planilhas.supermercados', 'pragas')],
@@ -95,7 +96,7 @@
             <p class="mb-4 rounded-xl bg-white px-4 py-2 text-sm shadow-sm ring-1 ring-grafite/5">{{ session('ok') }}</p>
         @endif
 
-        <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div class="flex flex-col gap-4">
             {{-- Seções salvas e inclusão de novas --}}
             <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-grafite/5">
                 <div class="flex items-center justify-between">
@@ -168,7 +169,7 @@
         }
     </script>
 
-    <main id="folhas" class="flex flex-col items-center gap-6 px-2 pb-10 md:px-8">
+    <main id="folhas" class="flex min-w-0 flex-col items-center gap-6 pb-10">
         @forelse ($secoes as $secao)
             <section class="folha">
                 <table class="cab">
@@ -272,6 +273,7 @@
             <p class="nao-imprimir rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Adicione pelo menos uma seção para ver as folhas.</p>
         @endforelse
     </main>
+    </div>
     <script>
         (() => {
             const input = document.getElementById('nova-secao');
