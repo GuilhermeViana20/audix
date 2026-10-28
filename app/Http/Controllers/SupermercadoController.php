@@ -69,7 +69,6 @@ class SupermercadoController extends Controller
     {
         $nome = $supermercado->nome;
 
-        $supermercado->apagarLogoDoStorage();
         $supermercado->delete();
 
         return redirect()->route('supermercados.index')->with('ok', "{$nome} removido.");
@@ -114,28 +113,12 @@ class SupermercadoController extends Controller
         ]);
     }
 
-    /** Guarda o link da logo informado no formulário; apaga o arquivo antigo do storage, se houver. */
+    /** Guarda o link da logo informado no formulário (vazio remove a logo). */
     private function guardarLogo(Request $request, Supermercado $supermercado): void
     {
         $url = trim((string) $request->input('logo_url', ''));
-        $atual = $supermercado->logo_caminho;
-        $atualEhLink = $atual && Supermercado::ehLinkExterno($atual);
 
-        // Campo vazio: só limpa se a logo atual for um link; arquivos do storage são mantidos.
-        if ($url === '') {
-            if ($atualEhLink) {
-                $supermercado->update(['logo_caminho' => null]);
-            }
-
-            return;
-        }
-
-        if ($url === $atual) {
-            return;
-        }
-
-        $supermercado->apagarLogoDoStorage();
-        $supermercado->update(['logo_caminho' => $url]);
+        $supermercado->update(['logo_caminho' => $url === '' ? null : $url]);
     }
 
     /** Gera o slug a partir do nome, acrescentando -2, -3… se já existir. */

@@ -4,12 +4,12 @@
 
 @section('conteudo')
     @php($editando = $supermercado->exists)
-    @php($linkAtual = $editando && $supermercado->logo_caminho && \App\Models\Supermercado::ehLinkExterno($supermercado->logo_caminho) ? $supermercado->logo_caminho : '')
+    @php($linkAtual = $editando ? (string) $supermercado->logo_caminho : '')
     @php($previewInicial = old('logo_url', $linkAtual ?: ($editando ? $supermercado->logo_url : '')))
 
     <h1 class="text-2xl font-bold mb-6">{{ $editando ? 'Editar supermercado' : 'Novo supermercado' }}</h1>
 
-    <form method="POST" enctype="multipart/form-data"
+    <form method="POST"
           action="{{ $editando ? route('supermercados.update', $supermercado) : route('supermercados.store') }}"
           class="w-full max-w-3xl space-y-5 rounded-2xl bg-white p-6 shadow-sm">
         @csrf

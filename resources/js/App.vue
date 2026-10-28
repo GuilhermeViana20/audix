@@ -400,35 +400,6 @@ async function excluirSecao(secao) {
     } catch (e) { msg(e.message); }
 }
 
-async function enviarLogo(evento) {
-    const arquivo = evento.target.files[0];
-    if (!arquivo) return;
-    const corpo = new FormData();
-    corpo.append('logo', arquivo);
-    try {
-        const r = await rede(`/api/supermercados/${supermercadoId.value}/logo`, {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': TOKEN, Accept: 'application/json' },
-            body: corpo,
-        });
-        const dados = await r.json();
-        if (!r.ok) throw new Error(dados.message || 'Não foi possível enviar a logo');
-        logoUrl.value = dados.logo_url;
-        msg('Logo atualizada');
-        atualizarPreview();
-    } catch (e) { msg(e.message); }
-    finally { evento.target.value = ''; }
-}
-
-async function voltarLogoPadrao() {
-    try {
-        await api(`/api/supermercados/${supermercadoId.value}/logo`, { method: 'DELETE' });
-        logoUrl.value = null;
-        msg('Logo padrão restaurada');
-        atualizarPreview();
-    } catch (e) { msg(e.message); }
-}
-
 // ---------- Importação de PDF ----------
 // As seções lidas ficam em "rascunho" no popup; só são gravadas ao confirmar.
 const rascunho = ref(null);
@@ -628,23 +599,6 @@ onBeforeUnmount(() => {
                 </div>
 
                 <template v-if="supermercadoId">
-                    <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
-                        <p class="text-xs font-semibold uppercase text-grafite/50">Logo do supermercado</p>
-                        <div class="mt-3 flex items-center gap-4">
-                            <div class="flex h-24 w-40 items-center justify-center rounded-xl bg-offwhite">
-                                <img v-if="logoUrl" :src="logoUrl" class="max-h-20 max-w-full object-contain" alt="Logo">
-                                <span v-else class="text-xs font-bold text-grafite/50 text-center">LOGO DO SUPERMERCADO</span>
-                            </div>
-                            <div class="grid gap-2 text-sm">
-                                <label class="cursor-pointer rounded-xl bg-azul px-4 py-2 text-center font-semibold text-white">
-                                    Trocar logo
-                                    <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" @change="enviarLogo">
-                                </label>
-                                <button class="text-azul font-medium" @click="voltarLogoPadrao">Voltar ao padrão</button>
-                            </div>
-                        </div>
-                    </div>
-
                     <p v-if="aviso" class="rounded-xl bg-white px-4 py-2 text-sm shadow-sm">{{ aviso }}</p>
 
                     <div class="rounded-2xl bg-white p-4 shadow-sm" :class="carregando && 'opacity-60'">

@@ -6,7 +6,6 @@ use App\Models\Supermercado;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 
 class PdfHigieneController extends Controller
 {
@@ -29,15 +28,14 @@ class PdfHigieneController extends Controller
 
         abort_if(empty($paginas), 422, 'Nenhuma seção selecionada.');
 
-        // Logo enviada fica no storage; link externo não é baixado para o PDF (sem caminho local)
-        $logoPath = $supermercado->logo_caminho && ! Supermercado::ehLinkExterno($supermercado->logo_caminho)
-            ? Storage::disk('public')->path($supermercado->logo_caminho)
-            : null;
+        // Logo do supermercado: link da imagem (o DomPDF baixa a imagem ao gerar o PDF)
+        $logoPath = $supermercado->logo_url;
 
         // Logo fixa do sistema (ACCP), no canto esquerdo
         $acoopPath = public_path('images/acoop.png');
 
         return Pdf::loadView('pdf.higiene', compact('paginas', 'supermercado', 'logoPath', 'acoopPath'))
+            ->setOption('isRemoteEnabled', true)
             ->setPaper('a4', 'landscape')
             ->stream('Planilha Limpeza - ' . $supermercado->nome . '.pdf');
     }
