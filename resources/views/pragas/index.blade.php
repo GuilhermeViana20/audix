@@ -30,15 +30,16 @@
         .folha .grade th, .folha .grade td:first-child { background: #d9d9d9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .folha .legenda { margin-top: 14px; table-layout: fixed; }
         .folha .legenda td { height: 22px; font-size: 8px; }
-        .folha .legenda .lateral { width: 22px; background: #c00000; color: #fff; font-weight: bold; font-size: 10px; letter-spacing: .2em;
+        .folha .legenda .lateral { width: 22px; background: #c00000; color: #fff; font-weight: bold; font-size: 8px;
                                    border-color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda .lateral span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); }
+        .folha .legenda .lateral span { display: block; font-size: 8px; line-height: 9px; letter-spacing: 0; }
         .folha .legenda .rotulo { width: 80px; background: #ffff00; font-weight: bold; font-size: 8.5px;
                                   -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .folha .legenda .codigo { color: #1f3a5f; font-weight: bold; font-size: 9px; }
         .folha .legenda .nome { font-size: 7.5px; font-weight: bold; }
         .folha .legenda .imagem { height: 42px; }
-        .folha .legenda .imagem img { max-height: 36px; max-width: 100%; object-fit: contain; }
+        .folha .legenda td { text-align: center; vertical-align: middle; }
+        .folha .legenda .imagem img { display: block; margin: 0 auto; max-height: 36px; max-width: 100%; object-fit: contain; }
         .folha .obs { margin-top: 22px; font-weight: bold; font-size: 9px; }
         .folha .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 8px; line-height: 10px; color: #9a9a9a; }
         .folha .rodape p { margin: 0; }
@@ -178,7 +179,7 @@
                         @endforeach
                     </colgroup>
                     <tr>
-                        <td class="lateral" rowspan="3"><span>LEGENDA</span></td>
+                        <td class="lateral" rowspan="3"><span>L<br>E<br>G<br>E<br>N<br>D<br>A</span></td>
                         <td class="rotulo">CÓDIGO</td>
                         @foreach ($pragas as $praga)
                             <td class="codigo">{{ $praga->codigo }}</td>
