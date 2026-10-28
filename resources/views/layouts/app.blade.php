@@ -14,7 +14,7 @@
             document.documentElement.classList.toggle('dark', tema === 'escuro');
         })();
     </script>
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/carregando.js'])
 </head>
 <body class="flex min-h-screen flex-col bg-offwhite text-grafite">
 @include('partials.cabecalho')

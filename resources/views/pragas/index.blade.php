@@ -13,7 +13,7 @@
         })();
     </script>
     <title>Controle de Pragas - {{ $supermercado->nome_social ?: $supermercado->nome }}</title>
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/carregando.js'])
     <style>
         /* Folha A4 paisagem (297 x 210 mm a 96 dpi = 1123 x 794 px) */
         .folha { width: 1123px; height: 794px; box-sizing: border-box; padding: 22px 36px; background: #fff; color: #000;
