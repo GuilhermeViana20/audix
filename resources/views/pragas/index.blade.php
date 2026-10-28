@@ -108,7 +108,7 @@
                                 <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-offwhite text-xs font-bold text-grafite/60">{{ $loop->iteration }}</span>
                                 <span class="font-semibold">{{ $secao->nome }}</span>
                             </div>
-                            <form method="POST" action="{{ route('pragas.secoes.destroy', $secao) }}"
+                            <form method="POST" action="{{ route('pragas.secoes.destroy', $secao) }}" data-loading-texto="Removendo…"
                                   onsubmit="return confirm('Remover a seção {{ addslashes($secao->nome) }}?')">
                                 @csrf
                                 @method('DELETE')
