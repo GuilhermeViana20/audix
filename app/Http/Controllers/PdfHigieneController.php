@@ -39,7 +39,7 @@ class PdfHigieneController extends Controller
 
         return Pdf::loadView('pdf.higiene', compact('paginas', 'supermercado', 'logoPath', 'acoopPath'))
             ->setPaper('a4', 'landscape')
-            ->stream('Planilha Limpeza - ' . ($supermercado->nome_social ?: $supermercado->nome) . '.pdf');
+            ->stream('Planilha Limpeza - ' . $supermercado->nome . '.pdf');
     }
 
     private function dividirEmFolhas(Collection $linhas): array

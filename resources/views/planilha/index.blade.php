@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Planilha Limpeza - {{ $supermercado?->nome_social ?: $supermercado?->nome }}</title>
+    <title>Planilha Limpeza - {{ $supermercado?->nome }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-offwhite text-grafite">
@@ -18,7 +18,7 @@
             supermercados: @json($supermercados),
             embutido: true,
             nomeSupermercado: @json($supermercado?->nome),
-            nomeArquivo: @json('Planilha Limpeza - ' . ($supermercado?->nome_social ?: $supermercado?->nome)),
+            nomeArquivo: @json('Planilha Limpeza - ' . ($supermercado?->nome)),
         };
     </script>
 </body>
