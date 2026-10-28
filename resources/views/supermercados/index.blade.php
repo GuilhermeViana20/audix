@@ -41,24 +41,8 @@
                     @endif
                 </div>
 
-                <div class="mt-4 min-w-0">
-                    <p class="truncate text-base font-semibold">{{ $supermercado->nome }}</p>
-                    @if ($supermercado->nome_social)
-                        <p class="truncate text-sm text-grafite/60">{{ $supermercado->nome_social }}</p>
-                    @endif
-                </div>
-
-                <div class="mt-4 flex items-center justify-between gap-2 border-t border-grafite/10 pt-3">
-                    <a href="{{ route('higiene.index', $supermercado) }}"
-                       class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-azul transition hover:bg-azul/10">
-                        Planilhas <span aria-hidden="true">→</span>
-                    </a>
-                    <form method="POST" action="{{ route('supermercados.destroy', $supermercado) }}"
-                          onsubmit="return confirm('Remover {{ addslashes($supermercado->nome) }} e todas as suas seções e linhas?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-red-500 transition hover:bg-red-50">Remover</button>
-                    </form>
+                <div class="mt-4 flex flex-1 items-center justify-center text-center">
+                    <p class="text-base font-semibold">{{ $supermercado->nome }}</p>
                 </div>
             </div>
         @if ($loop->last)
