@@ -26,20 +26,19 @@
         @endif
 
         <div class="grid items-start gap-8 lg:grid-cols-2">
-            {{-- Logo à esquerda --}}
-            <div>
-                <p class="mb-1 text-sm font-medium text-grafite/70">Logo</p>
-                <div class="flex h-40 w-full items-center justify-center rounded-xl bg-offwhite p-6">
-                    <img id="logo_preview" alt="Pré-visualização da logo"
-                         src="{{ $previewInicial }}"
-                         class="max-h-20 max-w-full object-contain {{ $previewInicial ? '' : 'hidden' }}">
-                    <span id="logo_vazio" class="text-xs font-bold text-grafite/50 {{ $previewInicial ? 'hidden' : '' }}">SEM LOGO</span>
-                    <span id="logo_erro" class="hidden text-xs font-semibold text-red-500">Não foi possível carregar a imagem deste link</span>
-                </div>
-            </div>
-
-            {{-- Link da logo e nomes à direita --}}
+            {{-- Logo e link à esquerda --}}
             <div class="space-y-5">
+                <div>
+                    <p class="mb-1 text-sm font-medium text-grafite/70">Logo</p>
+                    <div class="flex h-40 w-full items-center justify-center rounded-xl bg-offwhite p-6">
+                        <img id="logo_preview" alt="Pré-visualização da logo"
+                             src="{{ $previewInicial }}"
+                             class="max-h-20 max-w-full object-contain {{ $previewInicial ? '' : 'hidden' }}">
+                        <span id="logo_vazio" class="text-xs font-bold text-grafite/50 {{ $previewInicial ? 'hidden' : '' }}">SEM LOGO</span>
+                        <span id="logo_erro" class="hidden text-xs font-semibold text-red-500">Não foi possível carregar a imagem deste link</span>
+                    </div>
+                </div>
+
                 <div>
                     <label for="logo_url" class="block text-sm font-medium text-grafite/70">Imagem (logo) — link</label>
                     <input id="logo_url" name="logo_url" type="url" inputmode="url"
@@ -51,7 +50,10 @@
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror
                 </div>
+            </div>
 
+            {{-- Nomes à direita --}}
+            <div class="space-y-5">
                 <div>
                     <label for="nome" class="block text-sm font-medium text-grafite/70">Nome Fantasia</label>
                     <input id="nome" name="nome" value="{{ old('nome', $supermercado->nome) }}" maxlength="120" required
