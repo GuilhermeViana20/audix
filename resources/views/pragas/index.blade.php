@@ -27,20 +27,22 @@
         .folha .grade th { font-weight: bold; height: 20px; font-size: 8.5px; }
         .folha .grade td { height: 26px; font-size: 9px; }
         .folha .grade td:first-child { font-weight: bold; }
+        .folha .grade th, .folha .grade td:first-child { background: #d9d9d9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .folha .legenda-bloco { margin-top: 14px; }
         .folha .legenda-titulo { text-align: center; font-weight: bold; font-size: 9.5px; letter-spacing: .16em; color: #1f3a5f;
                                  padding-bottom: 3px; border-bottom: 2px solid #1f3a5f; margin: 0 auto 8px; width: 60%;
                                  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .folha .legenda-cards { display: flex; flex-wrap: nowrap; justify-content: center; gap: 6px; }
-        .folha .legenda-card { width: calc((100% - 60px) / 11); display: flex; flex-direction: column; align-items: center;
-                               background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; padding: 0 4px 4px; }
-        .folha .legenda-codigo { margin-top: -1px; min-width: 26px; padding: 0 6px; height: 15px; border-radius: 0 0 4px 4px;
-                                 background: #1f3a5f; color: #fff; font-weight: bold; font-size: 8px; line-height: 15px; text-align: center;
-                                 border-bottom: 2px solid #b5d334; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .folha .legenda-card { position: relative; width: calc((100% - 60px) / 11); display: flex; flex-direction: column; align-items: center;
+                               background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; padding: 13px 4px 4px; margin-top: 9px; }
+        .folha .legenda-codigo { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); min-width: 26px; height: 18px; padding: 0 8px;
+                                 border-radius: 999px; background: #1f3a5f; color: #fff; font-weight: bold; font-size: 8.5px; line-height: 18px;
+                                 text-align: center; border-bottom: 2px solid #b5d334; white-space: nowrap;
+                                 -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .folha .legenda-nome { font-size: 7px; font-weight: bold; text-transform: uppercase; text-align: center; line-height: 9px; color: #1f3a5f; margin-top: 3px; }
         .folha .legenda-foto { height: 36px; width: 100%; display: flex; align-items: center; justify-content: center; margin: 3px 0 0; }
         .folha .legenda-foto img { max-height: 36px; max-width: 100%; object-fit: contain; }
-        .folha .obs { margin-top: 8px; font-weight: bold; font-size: 9px; }
+        .folha .obs { margin-top: 22px; font-weight: bold; font-size: 9px; }
         .folha .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 8px; line-height: 10px; color: #9a9a9a; }
         .folha .rodape p { margin: 0; }
         .folha .rodape .nome { font-size: 9px; font-weight: bold; color: #7a7a7a; }
@@ -144,7 +146,7 @@
                 <div class="grade-caixa">
                     <table class="grade">
                         <colgroup>
-                            <col style="width:160px">
+                            <col style="width:110px">
                             @for ($d = 1; $d <= 31; $d++)
                                 <col>
                             @endfor
