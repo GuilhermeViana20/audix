@@ -4,6 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="/images/audix-favicon.png">
+    <script>
+        (function () {
+            var tema = null;
+            try { tema = localStorage.getItem('audix-tema'); } catch (e) {}
+            if (!tema) tema = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+            document.documentElement.classList.toggle('dark', tema === 'escuro');
+        })();
+    </script>
     <title>Controle de Pragas - {{ $supermercado->nome_social ?: $supermercado->nome }}</title>
     @vite(['resources/css/app.css'])
     <style>
@@ -63,49 +71,69 @@
     </style>
 </head>
 <body class="bg-offwhite text-grafite">
-    <div class="nao-imprimir mx-auto max-w-5xl space-y-4 p-4 md:p-8">
-        <a href="{{ route('planilhas.supermercados', 'pragas') }}" class="text-sm font-medium text-azul">← Trocar supermercado</a>
+    @include('partials.cabecalho')
 
-        @if (session('ok'))
-            <p class="rounded-xl bg-white px-4 py-2 text-sm shadow-sm">{{ session('ok') }}</p>
-        @endif
+    <div class="nao-imprimir px-4 pt-6 pb-10 md:px-8">
+        @include('partials.breadcrumb', ['itens' => [
+            ['nome' => 'Início', 'url' => route('inicio')],
+            ['nome' => 'Controle de Pragas', 'url' => route('planilhas.supermercados', 'pragas')],
+            ['nome' => $supermercado->nome],
+        ]])
 
-        <div class="rounded-2xl bg-white p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
-            <p class="text-xl font-bold">{{ $supermercado->nome }}</p>
+        <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-azul">Controle de Pragas</p>
+                <h1 class="text-2xl font-bold tracking-tight">{{ $supermercado->nome }}</h1>
+                <p class="mt-1 text-sm text-grafite/60">Cadastre as seções e imprima uma folha por seção.</p>
+            </div>
+            <button onclick="window.print()"
+                    class="rounded-xl bg-azul px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
+                    @disabled($secoes->isEmpty())>Imprimir / PDF</button>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-[1fr_auto]">
-            <div class="rounded-2xl bg-white p-4 shadow-sm">
-                <p class="text-xs font-semibold uppercase text-grafite/50">Seções (uma folha por seção)</p>
+        @if (session('ok'))
+            <p class="mb-4 rounded-xl bg-white px-4 py-2 text-sm shadow-sm ring-1 ring-grafite/5">{{ session('ok') }}</p>
+        @endif
 
-                <div class="mt-3 divide-y divide-grafite/10">
+        <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+            {{-- Seções salvas e inclusão de novas --}}
+            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-grafite/5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-semibold">Seções</h2>
+                    <span class="rounded-full bg-azul/10 px-2.5 py-0.5 text-xs font-semibold text-azul">{{ $secoes->count() }} salvas</span>
+                </div>
+
+                <div class="mt-4 divide-y divide-grafite/10">
                     @forelse ($secoes as $secao)
-                        <div class="flex items-center justify-between gap-3 py-2">
-                            <span class="font-semibold">{{ $secao->nome }}</span>
+                        <div class="flex items-center justify-between gap-3 py-3">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-offwhite text-xs font-bold text-grafite/60">{{ $loop->iteration }}</span>
+                                <span class="font-semibold">{{ $secao->nome }}</span>
+                            </div>
                             <form method="POST" action="{{ route('pragas.secoes.destroy', $secao) }}"
                                   onsubmit="return confirm('Remover a seção {{ addslashes($secao->nome) }}?')">
                                 @csrf
                                 @method('DELETE')
-                                <button class="text-sm font-medium text-red-500">Remover</button>
+                                <button class="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-red-500 transition hover:bg-red-50">Remover</button>
                             </form>
                         </div>
                     @empty
-                        <p class="py-2 text-sm text-grafite/60">Nenhuma seção ainda. Adicione abaixo, por exemplo AÇOUGUE.</p>
+                        <p class="py-4 text-sm text-grafite/60">Nenhuma seção ainda. Adicione abaixo, por exemplo AÇOUGUE.</p>
                     @endforelse
                 </div>
 
-                <form method="POST" action="{{ route('pragas.secoes.store', $supermercado) }}" id="form-secoes" class="mt-4">
+                <form method="POST" action="{{ route('pragas.secoes.store', $supermercado) }}" id="form-secoes" class="mt-6 rounded-xl bg-offwhite p-4">
                     @csrf
-                    <div class="flex gap-2">
-                        <input id="nova-secao" maxlength="120" placeholder="Nova seção (ex.: FLV)"
-                               class="min-w-0 flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
-                        <button type="button" id="adicionar-secao" class="rounded-xl bg-offwhite px-4 text-sm font-semibold text-azul">Adicionar à lista</button>
+                    <label for="nova-secao" class="text-xs font-semibold uppercase tracking-wide text-grafite/50">Nova seção</label>
+                    <div class="mt-2 flex gap-2">
+                        <input id="nova-secao" maxlength="120" placeholder="Ex.: FLV"
+                               class="min-w-0 flex-1 rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-grafite/10 focus:outline-none focus:ring-2 focus:ring-azul">
+                        <button type="button" id="adicionar-secao" class="rounded-xl bg-white px-4 text-sm font-semibold text-azul ring-1 ring-azul/30 transition hover:bg-azul/5">Adicionar</button>
                     </div>
-                    <ul id="lista-novas" class="mt-3 space-y-1 text-sm"></ul>
+                    <ul id="lista-novas" class="mt-3 space-y-2 text-sm"></ul>
                     <div id="campos-novas"></div>
                     <button id="salvar-secoes" type="submit" disabled
-                            class="mt-3 w-full rounded-xl bg-azul px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Salvar seções</button>
+                            class="mt-4 w-full rounded-xl bg-azul px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40">Salvar seções</button>
                 </form>
                 @error('nomes')
                     <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
@@ -115,12 +143,30 @@
                 @enderror
             </div>
 
-            <div class="flex items-start">
-                <button onclick="window.print()" class="w-full rounded-xl bg-azul px-5 py-3 text-sm font-semibold text-white disabled:opacity-40 md:w-auto"
-                        @disabled($secoes->isEmpty())>Imprimir / PDF</button>
-            </div>
+            {{-- Resumo da folha --}}
+            <aside class="flex flex-col gap-4">
+                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-grafite/5">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-grafite/50">Folha</p>
+                    <ul class="mt-4 space-y-3 text-sm">
+                        <li class="flex justify-between"><span class="text-grafite/60">Formato</span><span class="font-semibold">A4 paisagem</span></li>
+                        <li class="flex justify-between"><span class="text-grafite/60">Folhas</span><span class="font-semibold">{{ $secoes->count() }} (uma por seção)</span></li>
+                        <li class="flex justify-between"><span class="text-grafite/60">Pragas na legenda</span><span class="font-semibold">{{ $pragas->count() }}</span></li>
+                        <li class="flex justify-between"><span class="text-grafite/60">Dias do mês</span><span class="font-semibold">1 a 31</span></li>
+                    </ul>
+                </div>
+                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-grafite/5">
+                    <p class="text-sm text-grafite/70">Para gerar o PDF, escolha <b>Paisagem</b> e <b>A4</b> na janela de impressão.</p>
+                </div>
+            </aside>
         </div>
     </div>
+
+    <script>
+        function alternarTema() {
+            var escuro = document.documentElement.classList.toggle('dark');
+            try { localStorage.setItem('audix-tema', escuro ? 'escuro' : 'claro'); } catch (e) {}
+        }
+    </script>
 
     <main id="folhas" class="flex flex-col items-center gap-6 px-2 pb-10 md:px-8">
         @forelse ($secoes as $secao)
