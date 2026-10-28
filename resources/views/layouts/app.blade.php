@@ -12,9 +12,17 @@
         <a href="{{ route('inicio') }}" class="flex items-center">
             <img src="/images/audix-logo.png" alt="audix – Inteligência em cada controle" class="h-10 w-auto md:h-12">
         </a>
-        <nav class="flex items-center gap-4 text-sm font-medium text-grafite/70">
-            <a href="{{ route('inicio') }}" class="transition hover:text-azul">Planilhas</a>
-            <a href="{{ route('supermercados.index') }}" class="transition hover:text-azul">Supermercados</a>
+        <nav class="flex items-center gap-2 text-sm font-medium">
+            @if (request()->routeIs('inicio'))
+                <span aria-current="page" class="rounded-lg bg-azul/10 px-3 py-1.5 font-semibold text-azul">Planilhas</span>
+            @else
+                <a href="{{ route('inicio') }}" class="rounded-lg px-3 py-1.5 text-grafite/70 transition hover:bg-grafite/5 hover:text-azul">Planilhas</a>
+            @endif
+            @if (request()->routeIs('supermercados.*'))
+                <span aria-current="page" class="rounded-lg bg-azul/10 px-3 py-1.5 font-semibold text-azul">Supermercados</span>
+            @else
+                <a href="{{ route('supermercados.index') }}" class="rounded-lg px-3 py-1.5 text-grafite/70 transition hover:bg-grafite/5 hover:text-azul">Supermercados</a>
+            @endif
         </nav>
     </div>
 </header>
