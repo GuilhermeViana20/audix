@@ -138,16 +138,13 @@ function mapearSecoes(lista) {
 async function recarregarSecoes() {
     const dados = await api(`/api/supermercados/${supermercadoId.value}/planilhas/higiene`);
     planilha.value = dados.planilha;
+    logoUrl.value = dados.logo_url;
     secoes.value = mapearSecoes(dados.secoes);
     dados.secoes.forEach(s => { if (selecionadas.value[s.id] === undefined) selecionadas.value[s.id] = true; });
     if (atual.value) atual.value = secoes.value.find(s => s.id === atual.value.id) || null;
     atualizarPreview();
 }
 
-async function carregarLogo() {
-    const r = await rede(`/api/supermercados/${supermercadoId.value}/logo`, { headers: { Accept: 'application/json' } });
-    logoUrl.value = (await r.json()).logo_url;
-}
 
 async function carregarSupermercado(id) {
     if (!id || !podeDescartar()) return;
@@ -158,7 +155,6 @@ async function carregarSupermercado(id) {
         titulo.value = '';
         selecionadas.value = {};
         await recarregarSecoes();
-        await carregarLogo();
         if (!embutido) history.replaceState(null, '', `/higiene/${id}`);
     } catch (e) { msg(e.message); }
     finally { carregando.value = false; }
@@ -270,15 +266,12 @@ async function salvarSecao() {
     try {
         await api(`/api/secoes/${s.id}/linhas`, {
             method: 'PUT',
-            body: JSON.stringify({ linhas: s.linhas.map(l => ({ tipo: l.tipo, texto: l.texto })) }),
+            body: JSON.stringify({
+                linhas: s.linhas.map(l => ({ tipo: l.tipo, texto: l.texto })),
+                titulo_primeira_coluna: tit,
+            }),
         });
-        if (tit !== s.titulo_primeira_coluna) {
-            await api(`/api/secoes/${s.id}`, {
-                method: 'PUT',
-                body: JSON.stringify({ nome: s.nome, titulo_primeira_coluna: tit }),
-            });
-            s.titulo_primeira_coluna = tit;
-        }
+        s.titulo_primeira_coluna = tit;
         s._salvo = assin;
         status.value = estaSujo.value ? 'Alterações não salvas' : 'Tudo salvo';
         atualizarPreview();

@@ -28,9 +28,14 @@ class LinhaPlanilhaController extends Controller
             'linhas' => ['present', 'array', 'max:300'],
             'linhas.*.tipo' => ['required', 'in:linha,grupo'],
             'linhas.*.texto' => ['nullable', 'string', 'max:255'],
+            'titulo_primeira_coluna' => ['nullable', 'string', 'max:120'],
         ]);
 
         DB::transaction(function () use ($secao, $dados) {
+            if (filled($dados['titulo_primeira_coluna'] ?? null)) {
+                $secao->update(['titulo_primeira_coluna' => $dados['titulo_primeira_coluna']]);
+            }
+
             $secao->linhas()->delete();
 
             foreach (array_values($dados['linhas']) as $pos => $linha) {
