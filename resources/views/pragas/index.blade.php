@@ -71,7 +71,7 @@
     </style>
 </head>
 <body class="bg-offwhite text-grafite">
-    <div class="nao-imprimir">@include('partials.cabecalho')</div>
+    @include('partials.cabecalho')
 
     <div class="px-4 pt-6 pb-10 md:px-8 xl:grid xl:grid-cols-[3fr_7fr] xl:items-start xl:gap-6">
     <div class="nao-imprimir xl:sticky xl:top-28 xl:self-start">

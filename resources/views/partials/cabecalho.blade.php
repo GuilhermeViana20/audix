@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-30 border-b border-grafite/10 border-t-4 border-t-azul bg-white/95 shadow-sm backdrop-blur">
+<header class="print:hidden sticky top-0 z-30 border-b border-grafite/10 border-t-4 border-t-azul bg-white/95 shadow-sm backdrop-blur">
     <div class="mx-auto flex w-full {{ $largura ?? 'max-w-none' }} items-center justify-between px-4 py-3 md:px-8">
         <a href="{{ route('inicio') }}" class="flex items-center">
             <img src="/images/audix-logo.png" alt="audix – Inteligência em cada controle" class="logo-tema h-11 w-auto md:h-14">
