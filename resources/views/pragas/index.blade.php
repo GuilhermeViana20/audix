@@ -27,12 +27,16 @@
         .folha .grade th { font-weight: bold; height: 20px; font-size: 8.5px; }
         .folha .grade td { height: 26px; font-size: 9px; }
         .folha .grade td:first-child { font-weight: bold; }
-        .folha .legenda { margin-top: 12px; }
-        .folha .legenda td { height: 20px; font-size: 8px; }
-        .folha .legenda .img-cel { height: 56px; }
-        .folha .legenda img { max-height: 46px; max-width: 90%; object-fit: contain; display: inline-block; }
-        .folha .legenda .rotulo { background: #ffe600; font-weight: bold; text-align: center; }
-        .folha .legenda .rotulo-codigo { font-weight: bold; text-align: center; }
+        .folha .legenda-bloco { margin-top: 12px; border: 1px solid #d0d5dd; border-radius: 6px; overflow: hidden; }
+        .folha .legenda-titulo { background: #151922; color: #fff; font-weight: bold; font-size: 9px; letter-spacing: .12em;
+                                 padding: 4px 10px; text-align: left; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .folha .legenda-cards { display: grid; grid-template-columns: repeat(11, 1fr); gap: 6px; padding: 6px; background: #fff; }
+        .folha .legenda-card { display: flex; flex-direction: column; align-items: center; background: #f5f7fa; border-radius: 6px; padding: 4px 3px 3px; }
+        .folha .legenda-codigo { width: 18px; height: 18px; border-radius: 999px; background: #4063ff; color: #fff; font-weight: bold;
+                                 font-size: 9px; line-height: 18px; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .folha .legenda-foto { height: 44px; width: 100%; display: flex; align-items: center; justify-content: center; margin: 3px 0 2px; }
+        .folha .legenda-foto img { max-height: 44px; max-width: 100%; object-fit: contain; }
+        .folha .legenda-nome { font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; line-height: 9px; }
         .folha .obs { margin-top: 8px; font-weight: bold; font-size: 9px; }
         .folha .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 8px; line-height: 10px; color: #9a9a9a; }
         .folha .rodape p { margin: 0; }
@@ -48,7 +52,7 @@
             .folha { zoom: 1 !important; margin: 0 !important; box-shadow: none; padding: 0; width: 100%; height: 194mm;
                      break-after: page; page-break-after: always; }
             .folha:last-child { break-after: auto; page-break-after: auto; }
-            .folha .grade th, .folha .grade td, .folha .legenda .rotulo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .folha .grade th, .folha .grade td, .folha .legenda-card, .folha .legenda-codigo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -163,30 +167,22 @@
                     </table>
                 </div>
 
-                <table class="legenda">
-                    <tr>
-                        <td class="rotulo-codigo" style="width:160px">CÓDIGO</td>
+                <div class="legenda-bloco">
+                    <div class="legenda-titulo">LEGENDA DAS PRAGAS</div>
+                    <div class="legenda-cards">
                         @foreach ($pragas as $praga)
-                            <td class="rotulo-codigo">{{ $praga->codigo }}</td>
+                            <div class="legenda-card">
+                                <span class="legenda-codigo">{{ $praga->codigo }}</span>
+                                <span class="legenda-foto">
+                                    @if ($praga->imagem_caminho)
+                                        <img src="{{ $praga->imagem_caminho }}" alt="{{ $praga->nome }}">
+                                    @endif
+                                </span>
+                                <span class="legenda-nome">{{ $praga->nome }}</span>
+                            </div>
                         @endforeach
-                    </tr>
-                    <tr>
-                        <td class="rotulo" style="width:160px">PRAGA</td>
-                        @foreach ($pragas as $praga)
-                            <td>{{ $praga->nome }}</td>
-                        @endforeach
-                    </tr>
-                    <tr>
-                        <td class="rotulo" style="width:160px">IMAGEM</td>
-                        @foreach ($pragas as $praga)
-                            <td class="img-cel">
-                                @if ($praga->imagem_caminho)
-                                    <img src="{{ $praga->imagem_caminho }}" alt="{{ $praga->nome }}">
-                                @endif
-                            </td>
-                        @endforeach
-                    </tr>
-                </table>
+                    </div>
+                </div>
 
                 <p class="obs">OBSERVAÇÕES:</p>
 
