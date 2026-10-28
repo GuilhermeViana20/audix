@@ -14,7 +14,7 @@ Route::get('/planilhas/{tipo}', function (string $tipo) {
     abort_unless(array_key_exists($tipo, \App\Models\Planilha::TIPOS), 404);
 
     $nomeTipo = \App\Models\Planilha::TIPOS[$tipo];
-    $supermercados = \App\Models\Supermercado::orderBy('nome')->get();
+    $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome', 'logo_caminho']);
 
     return view('planilhas.supermercados', compact('tipo', 'nomeTipo', 'supermercados'));
 })->name('planilhas.supermercados');

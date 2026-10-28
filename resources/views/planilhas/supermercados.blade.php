@@ -19,7 +19,7 @@
                class="flex flex-col items-center gap-3 rounded-2xl bg-white p-4 text-center shadow-sm transition hover:shadow-md active:scale-[.98]">
                 <div class="flex h-20 w-full items-center justify-center rounded-xl bg-offwhite p-2">
                     @if ($supermercado->logo_url)
-                        <img src="{{ $supermercado->logo_url }}" alt="Logo {{ $supermercado->nome }}" class="max-h-16 max-w-full object-contain">
+                        <img src="{{ $supermercado->logo_url }}" alt="Logo {{ $supermercado->nome }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" class="max-h-16 max-w-full object-contain">
                     @else
                         <span class="text-xs font-bold text-grafite/40">SEM LOGO</span>
                     @endif
