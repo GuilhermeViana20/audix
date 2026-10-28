@@ -727,7 +727,6 @@ onBeforeUnmount(() => {
 
                             <div v-if="ehTemperatura" class="temp-topo">
                                 <table class="temp-dados">
-                                    <tr><td class="rot">CLIENTE:</td><td class="campo">{{ nomeSupermercado || '' }}</td></tr>
                                     <tr><td class="rot">SETOR:</td><td class="campo">{{ f.secao.nome }}</td></tr>
                                     <tr><td class="rot">RESPONSÁVEL:</td><td class="campo"></td></tr>
                                     <tr><td class="rot">PERÍODO:</td><td class="campo"></td></tr>
@@ -844,7 +843,7 @@ onBeforeUnmount(() => {
 }
 .sheet .temp-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 8px; }
 .sheet .temp-dados { border-collapse: collapse; width: 46%; table-layout: fixed; margin-top: 2px; }
-.sheet .temp-dados td { border: 0; height: 22px; padding: 0 0 2px; vertical-align: bottom; font-size: 10px; text-align: left; }
+.sheet .temp-dados td { border: 0; height: 30px; padding: 0 0 2px; vertical-align: bottom; font-size: 10px; text-align: left; }
 .sheet .temp-dados td.rot { width: 96px; font-weight: bold; white-space: nowrap; }
 .sheet .temp-dados td.campo { border-bottom: 1px solid #000; padding-left: 6px; font-weight: bold; }
 .sheet .legenda-temp { width: 46%; border-collapse: collapse; table-layout: fixed; }
