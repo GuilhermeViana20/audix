@@ -71,7 +71,7 @@
     </style>
 </head>
 <body class="bg-offwhite text-grafite">
-    @include('partials.cabecalho')
+    <div class="nao-imprimir">@include('partials.cabecalho')</div>
 
     <div class="nao-imprimir px-4 pt-6 pb-10 md:px-8">
         @include('partials.breadcrumb', ['itens' => [
