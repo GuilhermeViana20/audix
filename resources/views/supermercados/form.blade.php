@@ -19,13 +19,15 @@
 
     <form method="POST"
           action="{{ $editando ? route('supermercados.update', $supermercado) : route('supermercados.store') }}"
-          class="w-full max-w-3xl space-y-5 rounded-2xl bg-white p-6 shadow-sm">
+          class="w-full rounded-2xl bg-white p-6 shadow-sm md:p-8">
         @csrf
         @if ($editando)
             @method('PUT')
         @endif
 
-        <div>
+        <div class="grid gap-8 lg:grid-cols-2">
+            <div class="space-y-5">
+            <div>
             <label for="nome" class="block text-sm font-medium text-grafite/70">Nome Fantasia</label>
             <input id="nome" name="nome" value="{{ old('nome', $supermercado->nome) }}" maxlength="120" required
                    placeholder="Ex.: Aconchemax"
@@ -35,7 +37,7 @@
             @enderror
         </div>
 
-        <div>
+            <div>
             <label for="nome_social" class="block text-sm font-medium text-grafite/70">Nome Social</label>
             <input id="nome_social" name="nome_social" value="{{ old('nome_social', $supermercado->nome_social) }}" maxlength="120"
                    placeholder="Ex.: Aconchegante Comércio de Alimentos Ltda"
@@ -45,7 +47,9 @@
             @enderror
         </div>
 
-        <div>
+            </div>
+            <div class="space-y-3">
+            <div>
             <label for="logo_url" class="block text-sm font-medium text-grafite/70">Imagem (logo) — link</label>
             <input id="logo_url" name="logo_url" type="url" inputmode="url"
                    value="{{ old('logo_url', $linkAtual) }}" maxlength="500"
@@ -56,12 +60,15 @@
                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
             @enderror
 
-            <div class="mt-3 flex h-28 w-full items-center justify-center rounded-xl bg-offwhite p-3">
+            <div class="mt-3 flex h-64 w-full items-center justify-center rounded-xl bg-offwhite p-6 lg:h-80">
                 <img id="logo_preview" alt="Pré-visualização da logo"
                      src="{{ $previewInicial }}"
                      class="max-h-20 max-w-full object-contain {{ $previewInicial ? '' : 'hidden' }}">
                 <span id="logo_vazio" class="text-xs font-bold text-grafite/50 {{ $previewInicial ? 'hidden' : '' }}">SEM LOGO</span>
                 <span id="logo_erro" class="hidden text-xs font-semibold text-red-500">Não foi possível carregar a imagem deste link</span>
+            </div>
+        </div>
+
             </div>
         </div>
 
