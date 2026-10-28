@@ -582,12 +582,14 @@ onBeforeUnmount(() => {
     <div class="flex min-h-screen">
         <div :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
-            <section class="min-w-0 space-y-5">
+            <section class="min-w-0 flex flex-col gap-5 xl:sticky xl:top-28 xl:self-start xl:h-[calc(100vh-8rem)]">
                 <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
-                <div v-if="nomeSupermercado" class="sticky top-28 z-20 rounded-2xl bg-white p-4 shadow-sm">
+                <div v-if="nomeSupermercado" class="shrink-0 rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
                     <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
                 </div>
+                <!-- Conteúdo abaixo do card: rola por dentro e é cortado na borda do card -->
+                <div class="flex min-h-0 flex-1 flex-col gap-5 xl:overflow-y-auto xl:pr-1">
                 <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
                     <select class="mt-2 w-full rounded-xl bg-offwhite px-3 py-2 text-sm font-medium"
@@ -681,6 +683,7 @@ onBeforeUnmount(() => {
                 </template>
 
                 <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Escolha um supermercado para carregar a planilha.</p>
+                </div>
             </section>
 
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
