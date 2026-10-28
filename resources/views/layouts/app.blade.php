@@ -25,16 +25,16 @@
 </main>
 
 <footer class="mt-12 border-t border-grafite/10 bg-white/95">
-    <div class="mx-auto flex w-full flex-col gap-6 px-4 py-8 text-sm md:flex-row md:items-center md:justify-between md:px-8">
-        <div>
-            <img src="/images/audix-logo.png" alt="audix" class="logo-tema h-8 w-auto">
-            <p class="mt-2 text-grafite/60">Inteligência em cada controle.</p>
+    <div class="flex flex-col gap-3 px-4 py-4 text-xs md:flex-row md:items-center md:justify-between md:gap-6 md:px-8">
+        <div class="flex items-center gap-3">
+            <img src="/images/audix-logo.png" alt="audix" class="logo-tema h-6 w-auto">
+            <span class="text-grafite/60">Inteligência em cada controle.</span>
         </div>
-        <div class="text-grafite/60 md:text-right">
-            <p class="font-semibold text-grafite/80">ACCP Alimentos &amp; Tecnologia</p>
-            <p>contato@accpconsultoria.com.br</p>
-            <p class="mt-2 text-xs">© {{ date('Y') }} · Todos os direitos reservados</p>
-        </div>
+        <p class="text-grafite/60">
+            <a href="https://guilherme-devfullstack.com/" target="_blank" rel="noopener" class="font-semibold text-azul hover:underline">Guilherme DevFullStack</a>
+            <span class="mx-1">·</span> © {{ date('Y') }} · Todos os direitos reservados
+        </p>
+        <p class="text-grafite/60">ACCP Alimentos &amp; Tecnologia <span class="mx-1">|</span> contato@accpconsultoria.com.br</p>
     </div>
 </footer>
 
