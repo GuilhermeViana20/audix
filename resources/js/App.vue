@@ -120,7 +120,10 @@ const textoStatus = computed(() => ['Salvando…', 'Erro ao salvar'].includes(st
     ? status.value
     : (estaSujo.value ? 'Alterações não salvas' : 'Tudo salvo'));
 
-function msg(texto) { aviso.value = texto; setTimeout(() => (aviso.value = ''), 3500); }
+function msg(texto) {
+    const erro = /erro|não|Já |Informe|Clique|Adicione|Escolha|Há |Nenhum/i.test(texto);
+    window.toast?.(texto, erro ? 'erro' : 'sucesso');
+}
 function atualizarPreview() { versaoPreview.value++; }
 
 async function api(url, opts = {}) {

@@ -14,7 +14,7 @@
             document.documentElement.classList.toggle('dark', tema === 'escuro');
         })();
     </script>
-    @vite(['resources/css/app.css', 'resources/js/carregando.js'])
+    @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js'])
 </head>
 <body class="flex min-h-screen flex-col bg-offwhite text-grafite">
 @include('partials.cabecalho')
@@ -44,11 +44,17 @@
         try { localStorage.setItem('audix-tema', escuro ? 'escuro' : 'claro'); } catch (e) {}
     }
 </script>
-    @if (session('ok'))
-        <script>alert(@json(session('ok')));</script>
-    @endif
-    @if ($errors->any())
-        <script>alert(@json($errors->first()));</script>
+    @if (session('ok') || $errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                @if (session('ok'))
+                    window.toast(@json(session('ok')), 'sucesso');
+                @endif
+                @if ($errors->any())
+                    window.toast(@json($errors->first()), 'erro');
+                @endif
+            });
+        </script>
     @endif
 </body>
 </html>

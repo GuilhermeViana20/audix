@@ -14,7 +14,7 @@
         })();
     </script>
     <title>Planilha Limpeza - {{ $supermercado?->nome }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/toast.js'])
 </head>
 <body class="bg-offwhite text-grafite">
     @include('partials.cabecalho', ['largura' => 'max-w-none'])
