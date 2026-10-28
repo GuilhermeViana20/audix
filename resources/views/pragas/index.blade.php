@@ -28,20 +28,17 @@
         .folha .grade td { height: 26px; font-size: 9px; }
         .folha .grade td:first-child { font-weight: bold; }
         .folha .grade th, .folha .grade td:first-child { background: #d9d9d9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda-bloco { margin-top: 14px; }
-        .folha .legenda-titulo { text-align: center; font-weight: bold; font-size: 9.5px; letter-spacing: .16em; color: #1f3a5f;
-                                 padding-bottom: 3px; border-bottom: 2px solid #1f3a5f; margin: 0 auto 8px; width: 60%;
-                                 -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda-cards { display: flex; flex-wrap: nowrap; justify-content: center; gap: 6px; }
-        .folha .legenda-card { position: relative; width: calc((100% - 60px) / 11); display: flex; flex-direction: column; align-items: center;
-                               background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; padding: 13px 4px 4px; margin-top: 9px; }
-        .folha .legenda-codigo { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); min-width: 26px; height: 18px; padding: 0 8px;
-                                 border-radius: 999px; background: #1f3a5f; color: #fff; font-weight: bold; font-size: 8.5px; line-height: 18px;
-                                 text-align: center; border-bottom: 2px solid #b5d334; white-space: nowrap;
-                                 -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .folha .legenda-nome { font-size: 7px; font-weight: bold; text-transform: uppercase; text-align: center; line-height: 9px; color: #1f3a5f; margin-top: 3px; }
-        .folha .legenda-foto { height: 36px; width: 100%; display: flex; align-items: center; justify-content: center; margin: 3px 0 0; }
-        .folha .legenda-foto img { max-height: 36px; max-width: 100%; object-fit: contain; }
+        .folha .legenda { margin-top: 14px; table-layout: fixed; }
+        .folha .legenda td { height: 22px; font-size: 8px; }
+        .folha .legenda .lateral { width: 22px; background: #c00000; color: #fff; font-weight: bold; font-size: 10px; letter-spacing: .2em;
+                                   border-color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .folha .legenda .lateral span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); }
+        .folha .legenda .rotulo { width: 80px; background: #ffff00; font-weight: bold; font-size: 8.5px;
+                                  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .folha .legenda .codigo { color: #1f3a5f; font-weight: bold; font-size: 9px; }
+        .folha .legenda .nome { font-size: 7.5px; font-weight: bold; }
+        .folha .legenda .imagem { height: 42px; }
+        .folha .legenda .imagem img { max-height: 36px; max-width: 100%; object-fit: contain; }
         .folha .obs { margin-top: 22px; font-weight: bold; font-size: 9px; }
         .folha .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 8px; line-height: 10px; color: #9a9a9a; }
         .folha .rodape p { margin: 0; }
@@ -57,7 +54,7 @@
             .folha { zoom: 1 !important; margin: 0 !important; box-shadow: none; padding: 0; width: 100%; height: 194mm;
                      break-after: page; page-break-after: always; }
             .folha:last-child { break-after: auto; page-break-after: auto; }
-            .folha .grade th, .folha .grade td, .folha .legenda-card, .folha .legenda-codigo, .folha .legenda-titulo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .folha .grade th, .folha .grade td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -172,22 +169,38 @@
                     </table>
                 </div>
 
-                <div class="legenda-bloco">
-                    <div class="legenda-titulo">LEGENDA DAS PRAGAS</div>
-                    <div class="legenda-cards">
+                <table class="legenda">
+                    <colgroup>
+                        <col style="width:22px">
+                        <col style="width:80px">
                         @foreach ($pragas as $praga)
-                            <div class="legenda-card">
-                                <span class="legenda-codigo">{{ $praga->codigo }}</span>
-                                <span class="legenda-foto">
-                                    @if ($praga->imagem_caminho)
-                                        <img src="{{ $praga->imagem_caminho }}" alt="{{ $praga->nome }}">
-                                    @endif
-                                </span>
-                                <span class="legenda-nome">{{ $praga->nome }}</span>
-                            </div>
+                            <col>
                         @endforeach
-                    </div>
-                </div>
+                    </colgroup>
+                    <tr>
+                        <td class="lateral" rowspan="3"><span>LEGENDA</span></td>
+                        <td class="rotulo">CÓDIGO</td>
+                        @foreach ($pragas as $praga)
+                            <td class="codigo">{{ $praga->codigo }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="rotulo">PRAGA</td>
+                        @foreach ($pragas as $praga)
+                            <td class="nome">{{ $praga->nome }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="rotulo">IMAGEM</td>
+                        @foreach ($pragas as $praga)
+                            <td class="imagem">
+                                @if ($praga->imagem_caminho)
+                                    <img src="{{ $praga->imagem_caminho }}" alt="{{ $praga->nome }}">
+                                @endif
+                            </td>
+                        @endforeach
+                    </tr>
+                </table>
 
                 <p class="obs">OBSERVAÇÕES:</p>
 
