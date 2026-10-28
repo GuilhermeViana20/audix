@@ -37,6 +37,18 @@ Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supe
 
 Route::get('/higiene/{supermercado}/pdf', [PdfHigieneController::class, 'gerar'])->name('higiene.pdf');
 
+// Controle de temperatura: mesmo editor da higiene, com o box de legenda
+Route::get('/temperatura/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {
+    if (! $supermercado) {
+        return redirect()->route('planilhas.supermercados', 'temperatura');
+    }
+
+    $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome']);
+    $tipo = 'temperatura';
+
+    return view('planilha.index', compact('supermercado', 'supermercados', 'tipo'));
+})->name('temperatura.index');
+
 // Controle de pragas (CIP): seções e folhas com a legenda de pragas
 Route::get('/pragas/{supermercado}', [\App\Http\Controllers\PragasController::class, 'index'])->name('pragas.index');
 Route::post('/pragas/{supermercado}/secoes', [\App\Http\Controllers\PragasController::class, 'store'])->name('pragas.secoes.store');

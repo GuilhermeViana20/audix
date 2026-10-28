@@ -5,6 +5,8 @@ import { lerPlanilhaPdf } from './importarPdf.js';
 const TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const JSON_HEADERS = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': TOKEN };
 
+const TIPO = window.AUDIX.tipo || 'higiene'; // tipo da planilha: higiene ou temperatura
+const ehTemperatura = TIPO === 'temperatura';
 const embutido = !!window.AUDIX.embutido; // sem seletor de supermercado nem logo (fluxo e edição)
 const semPrevia = !!window.AUDIX.semPrevia;
 const nomeSupermercado = window.AUDIX.nomeSupermercado || null; // nome exibido no card fixo da planilha // tela de edição do supermercado: só o editor
@@ -38,6 +40,14 @@ const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeC
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
 // Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
 const ALTURA_LINHA_PX = 20; // altura fixa de toda linha/faixa da grade (px)
+const LIMITE_TEMPERATURA_PX = 500; // o box de legenda ocupa espaço no topo: cabem menos linhas
+const LEGENDA_TEMPERATURA = [
+    ['Leite e Derivados', '0° a 10°C'],
+    ['Carnes e Aves', '0° a 7°C'],
+    ['Resfriados', '0° a 10°C'],
+    ['Pescados', '0° a 3°C'],
+    ['Congelados', '-18°C a -23°C ou conforme orientação do fornecedor'],
+];
 const LIMITE_LINHAS_PX = 560; // espaço das linhas por folha: 28 linhas de 20px (deixa lugar para o espaço e o rodapé)
 const ALTURA_LINHA_EXTRA_PX = 11; // cada linha extra de texto quebrado soma esta altura
 const CARACTERES_POR_LINHA = 30; // aprox. o que cabe na primeira coluna
@@ -53,7 +63,7 @@ function paginar(linhas) {
     let atual = [];
     let altura = 0;
     for (const linha of linhas) {
-        if (altura + alturaDaLinha(linha) > LIMITE_LINHAS_PX && atual.length) {
+        if (altura + alturaDaLinha(linha) > (ehTemperatura ? LIMITE_TEMPERATURA_PX : LIMITE_LINHAS_PX) && atual.length) {
             paginas.push(atual);
             atual = [];
             altura = 0;
@@ -139,7 +149,7 @@ function mapearSecoes(lista) {
 
 // Carrega seções + linhas do supermercado de uma vez.
 async function recarregarSecoes() {
-    const dados = await api(`/api/supermercados/${supermercadoId.value}/planilhas/higiene`);
+    const dados = await api(`/api/supermercados/${supermercadoId.value}/planilhas/${TIPO}`);
     planilha.value = dados.planilha;
     logoUrl.value = dados.logo_url;
     secoes.value = mapearSecoes(dados.secoes);
@@ -158,7 +168,7 @@ async function carregarSupermercado(id) {
         titulo.value = '';
         selecionadas.value = {};
         await recarregarSecoes();
-        if (!embutido) history.replaceState(null, '', `/higiene/${id}`);
+        if (!embutido) history.replaceState(null, '', `/${TIPO}/${id}`);
     } catch (e) { msg(e.message); }
     finally { carregando.value = false; }
 }
@@ -706,7 +716,8 @@ onBeforeUnmount(() => {
                             <table class="cab-logos">
                                 <tr>
                                     <td class="sem-borda esq"><img src="/images/acoop.png" alt="ACCP" class="logo-acoop"></td>
-                                    <td class="sem-borda titulo">PLANILHA DE MONITORAMENTO<br>{{ planilha?.nome?.toUpperCase() || 'HIGIENE E LIMPEZA AMBIENTAL' }}</td>
+                                    <td v-if="ehTemperatura" class="sem-borda titulo">CONTROLE DE TEMPERATURA</td>
+                                    <td v-else class="sem-borda titulo">PLANILHA DE MONITORAMENTO<br>{{ planilha?.nome?.toUpperCase() || 'HIGIENE E LIMPEZA AMBIENTAL' }}</td>
                                     <td class="sem-borda dir">
                                         <img v-if="logoUrl" :src="logoUrl" alt="Logo" class="logo-mae">
                                         <div v-else class="logo-box">LOGO DO SUPERMERCADO</div>
@@ -714,14 +725,28 @@ onBeforeUnmount(() => {
                                 </tr>
                             </table>
 
-                            <table class="topo">
+                            <div v-if="ehTemperatura" class="temp-topo">
+                                <div class="temp-dados">
+                                    <p><b>CLIENTE:</b></p>
+                                    <p><b>RESPONSÁVEL:</b></p>
+                                    <p><b>PERÍODO:</b></p>
+                                </div>
+                                <table class="legenda-temp">
+                                    <thead><tr><th>PRODUTOS</th><th>TEMPERATURA</th></tr></thead>
+                                    <tbody>
+                                        <tr v-for="[produto, temperatura] in LEGENDA_TEMPERATURA" :key="produto"><td>{{ produto }}</td><td>{{ temperatura }}</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <table v-if="!ehTemperatura" class="topo">
                                 <tr>
                                     <td style="width:33.33%"><b>ENCARREGADO:</b></td>
                                     <td style="width:33.33%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span></td>
                                     <td style="width:33.34%"><b>MÊS/ANO:</b></td>
                                 </tr>
                             </table>
-                            <table class="topo local">
+                            <table v-if="!ehTemperatura" class="topo local">
                                 <tr>
                                     <td style="width:50%"><b>LOCAL:</b></td>
                                     <td style="width:50%"><b>DATA:</b></td>
@@ -816,4 +841,9 @@ onBeforeUnmount(() => {
     .sheet .grade .faixa td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .sheet .grade th.faixa-cabecalho { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+.sheet .temp-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 8px; }
+.sheet .temp-dados p { margin: 0 0 7px; font-size: 11px; }
+.sheet .legenda-temp { width: 46%; border-collapse: collapse; table-layout: fixed; }
+.sheet .legenda-temp th, .sheet .legenda-temp td { border: 1px solid #000; padding: 2px 5px; height: auto; text-align: left; font-size: 9px; line-height: 11px; }
+.sheet .legenda-temp th { background: #d9d9d9; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 </style>

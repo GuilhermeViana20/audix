@@ -16,6 +16,7 @@ class Planilha extends Model
     public const TIPOS = [
         'higiene' => 'Higiene e limpeza ambiental',
         'pragas' => 'Controle de Pragas',
+        'temperatura' => 'Controle de Temperatura',
     ];
 
     public function supermercado(): BelongsTo

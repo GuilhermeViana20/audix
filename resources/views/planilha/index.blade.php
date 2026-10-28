@@ -1,3 +1,5 @@
+@php($tipo = $tipo ?? 'higiene')
+@php($nomeTipo = $tipo === 'temperatura' ? 'Planilha de Temperatura' : 'Planilha de Higiene')
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -13,7 +15,7 @@
             document.documentElement.classList.toggle('dark', tema === 'escuro');
         })();
     </script>
-    <title>Planilha Limpeza - {{ $supermercado?->nome }}</title>
+    <title>{{ $tipo === 'temperatura' ? 'Planilha Temperatura' : 'Planilha Limpeza' }} - {{ $supermercado?->nome }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/toast.js'])
 </head>
 <body class="bg-offwhite text-grafite">
@@ -21,7 +23,7 @@
     <div class="px-4 pt-6 md:px-8">
         @include('partials.breadcrumb', ['itens' => [
             ['nome' => 'Início', 'url' => route('inicio')],
-            ['nome' => 'Planilha de Higiene', 'url' => route('planilhas.supermercados', 'higiene')],
+            ['nome' => $nomeTipo, 'url' => route('planilhas.supermercados', $tipo)],
             ['nome' => $supermercado?->nome ?? 'Supermercado'],
         ]])
     </div>
@@ -32,7 +34,8 @@
             supermercados: @json($supermercados),
             embutido: true,
             nomeSupermercado: @json($supermercado?->nome),
-            nomeArquivo: @json('Planilha Limpeza - ' . ($supermercado?->nome)),
+            tipo: @json($tipo),
+            nomeArquivo: @json(($tipo === 'temperatura' ? 'Planilha Temperatura - ' : 'Planilha Limpeza - ') . ($supermercado?->nome)),
         };
     </script>
     <script>
