@@ -584,7 +584,7 @@ onBeforeUnmount(() => {
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
             <section class="min-w-0 space-y-5">
                 <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
-                <div v-if="nomeSupermercado" class="sticky top-24 z-20 rounded-2xl bg-white p-4 shadow-sm">
+                <div v-if="nomeSupermercado" class="sticky top-28 z-20 rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
                     <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
                 </div>
@@ -684,7 +684,7 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
-            <aside v-if="!semPrevia" class="no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-24 xl:h-[calc(100vh-7rem)] xl:overflow-hidden">
+            <aside v-if="!semPrevia" class="no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-28 xl:h-[calc(100vh-8rem)] xl:overflow-hidden">
                 <div class="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
