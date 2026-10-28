@@ -37,6 +37,11 @@ Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supe
 
 Route::get('/higiene/{supermercado}/pdf', [PdfHigieneController::class, 'gerar'])->name('higiene.pdf');
 
+// Controle de pragas (CIP): seções e folhas com a legenda de pragas
+Route::get('/pragas/{supermercado}', [\App\Http\Controllers\PragasController::class, 'index'])->name('pragas.index');
+Route::post('/pragas/{supermercado}/secoes', [\App\Http\Controllers\PragasController::class, 'store'])->name('pragas.secoes.store');
+Route::delete('/pragas/secoes/{secao}', [\App\Http\Controllers\PragasController::class, 'destroy'])->name('pragas.secoes.destroy');
+
 Route::prefix('api')->group(function () {
     // Planilhas (por tipo) e suas seções
     Route::get('supermercados/{supermercado}/planilhas/{tipo}', [SupermercadoController::class, 'planilha']);

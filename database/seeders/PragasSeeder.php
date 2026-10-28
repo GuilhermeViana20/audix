@@ -16,7 +16,7 @@ class PragasSeeder extends Seeder
         ];
 
         foreach ($pragas as $codigo => $nome) {
-            Praga::updateOrCreate(['codigo' => $codigo], ['nome' => $nome]);
+            Praga::updateOrCreate(['codigo' => $codigo], ['nome' => $nome, 'imagem_caminho' => "/images/pragas/{$codigo}.png"]);
         }
     }
 }

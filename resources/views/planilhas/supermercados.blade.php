@@ -15,7 +15,7 @@
         @if ($loop->first)
             <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         @endif
-            <a href="{{ route('higiene.index', $supermercado) }}"
+            <a href="{{ route($tipo === 'pragas' ? 'pragas.index' : 'higiene.index', $supermercado) }}"
                class="flex flex-col items-center gap-3 rounded-2xl bg-white p-4 text-center shadow-sm transition hover:shadow-md active:scale-[.98]">
                 <div class="flex h-20 w-full items-center justify-center rounded-xl bg-offwhite p-2">
                     @if ($supermercado->logo_url)

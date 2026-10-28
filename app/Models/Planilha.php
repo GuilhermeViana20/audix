@@ -15,6 +15,7 @@ class Planilha extends Model
     /** Tipos de planilha disponíveis: código => nome exibido. */
     public const TIPOS = [
         'higiene' => 'Higiene e limpeza ambiental',
+        'pragas' => 'Controle de Pragas',
     ];
 
     public function supermercado(): BelongsTo
