@@ -94,13 +94,22 @@
                     @endforelse
                 </div>
 
-                <form method="POST" action="{{ route('pragas.secoes.store', $supermercado) }}" class="mt-4 flex gap-2">
+                <form method="POST" action="{{ route('pragas.secoes.store', $supermercado) }}" id="form-secoes" class="mt-4">
                     @csrf
-                    <input name="nome" value="{{ old('nome') }}" maxlength="120" placeholder="Nova seção (ex.: FLV)"
-                           class="min-w-0 flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
-                    <button class="rounded-xl bg-azul px-4 text-sm font-semibold text-white">Adicionar</button>
+                    <div class="flex gap-2">
+                        <input id="nova-secao" maxlength="120" placeholder="Nova seção (ex.: FLV)"
+                               class="min-w-0 flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
+                        <button type="button" id="adicionar-secao" class="rounded-xl bg-offwhite px-4 text-sm font-semibold text-azul">Adicionar à lista</button>
+                    </div>
+                    <ul id="lista-novas" class="mt-3 space-y-1 text-sm"></ul>
+                    <div id="campos-novas"></div>
+                    <button id="salvar-secoes" type="submit" disabled
+                            class="mt-3 w-full rounded-xl bg-azul px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Salvar seções</button>
                 </form>
-                @error('nome')
+                @error('nomes')
+                    <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+                @error('nomes.*')
                     <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
                 @enderror
             </div>
@@ -216,5 +225,51 @@
             <p class="nao-imprimir rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Adicione pelo menos uma seção para ver as folhas.</p>
         @endforelse
     </main>
+    <script>
+        (() => {
+            const input = document.getElementById('nova-secao');
+            const lista = document.getElementById('lista-novas');
+            const campos = document.getElementById('campos-novas');
+            const salvar = document.getElementById('salvar-secoes');
+            const nomes = [];
+
+            const atualizar = () => { salvar.disabled = nomes.length === 0; };
+
+            const adicionar = () => {
+                const nome = input.value.trim().toLocaleUpperCase('pt-BR');
+                if (!nome || nomes.includes(nome)) { input.value = ''; input.focus(); return; }
+                nomes.push(nome);
+
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between gap-3 rounded-lg bg-offwhite px-3 py-1';
+                li.innerHTML = '<span></span><button type="button" class="text-red-500">Remover</button>';
+                li.querySelector('span').textContent = nome;
+                li.querySelector('button').addEventListener('click', () => {
+                    const i = nomes.indexOf(nome);
+                    nomes.splice(i, 1);
+                    campos.children[i].remove();
+                    li.remove();
+                    atualizar();
+                });
+                lista.appendChild(li);
+
+                const campo = document.createElement('input');
+                campo.type = 'hidden';
+                campo.name = 'nomes[]';
+                campo.value = nome;
+                campos.appendChild(campo);
+
+                input.value = '';
+                input.focus();
+                atualizar();
+            };
+
+            document.getElementById('adicionar-secao').addEventListener('click', adicionar);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); adicionar(); }
+            });
+            atualizar();
+        })();
+    </script>
 </body>
 </html>

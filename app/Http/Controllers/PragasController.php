@@ -8,6 +8,7 @@ use App\Models\Supermercado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PragasController extends Controller
 {
@@ -21,24 +22,42 @@ class PragasController extends Controller
         return view('pragas.index', compact('supermercado', 'secoes', 'pragas'));
     }
 
+    /** Salva de uma vez todas as seções montadas na tela (nomes[]). */
     public function store(Request $request, Supermercado $supermercado): RedirectResponse
     {
-        $dados = $request->validate(['nome' => ['required', 'string', 'max:120']]);
-        $planilha = $supermercado->planilha('pragas');
-        $nome = mb_strtoupper(trim($dados['nome']));
-
-        if (Secao::where('planilha_id', $planilha->id)->where('nome', $nome)->exists()) {
-            return back()->withErrors(['nome' => 'Já existe uma seção com esse nome.'])->withInput();
-        }
-
-        Secao::create([
-            'planilha_id' => $planilha->id,
-            'nome' => $nome,
-            'titulo_primeira_coluna' => 'PRAGAS',
-            'ordem' => (int) Secao::where('planilha_id', $planilha->id)->max('ordem') + 1,
+        $dados = $request->validate([
+            'nomes' => ['required', 'array', 'min:1', 'max:50'],
+            'nomes.*' => ['required', 'string', 'max:120'],
+        ], [
+            'nomes.required' => 'Adicione pelo menos uma seção antes de salvar.',
+            'nomes.min' => 'Adicione pelo menos uma seção antes de salvar.',
         ]);
 
-        return redirect()->route('pragas.index', $supermercado)->with('ok', "Seção {$nome} adicionada.");
+        $planilha = $supermercado->planilha('pragas');
+        $nomes = collect($dados['nomes'])
+            ->map(fn (string $nome) => mb_strtoupper(trim($nome)))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $existentes = Secao::where('planilha_id', $planilha->id)->whereIn('nome', $nomes)->pluck('nome');
+        if ($existentes->isNotEmpty()) {
+            return back()->withErrors(['nomes' => 'Já existe seção com o nome: '.$existentes->implode(', ').'.'])->withInput();
+        }
+
+        DB::transaction(function () use ($planilha, $nomes) {
+            $ordem = (int) Secao::where('planilha_id', $planilha->id)->max('ordem');
+            foreach ($nomes as $nome) {
+                Secao::create([
+                    'planilha_id' => $planilha->id,
+                    'nome' => $nome,
+                    'titulo_primeira_coluna' => 'PRAGAS',
+                    'ordem' => ++$ordem,
+                ]);
+            }
+        });
+
+        return redirect()->route('pragas.index', $supermercado)->with('ok', $nomes->count().' seção(ões) salva(s).');
     }
 
     public function destroy(Secao $secao): RedirectResponse
