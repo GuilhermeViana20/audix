@@ -17,7 +17,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-offwhite text-grafite">
-    @include('partials.cabecalho')
+    @include('partials.cabecalho', ['largura' => 'max-w-none'])
     <div class="px-4 pt-6 md:px-8">
         @include('partials.breadcrumb', ['itens' => [
             ['nome' => 'Início', 'url' => route('inicio')],
