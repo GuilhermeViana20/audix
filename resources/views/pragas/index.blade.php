@@ -52,6 +52,8 @@
         @media print {
             @page { size: A4 landscape; margin: 8mm; }
             .nao-imprimir { display: none !important; }
+            html, body, main { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+            main { gap: 0 !important; display: block !important; }
             .folha { zoom: 1 !important; margin: 0 !important; box-shadow: none; padding: 0; width: 100%; height: 194mm;
                      break-after: page; page-break-after: always; }
             .folha:last-child { break-after: auto; page-break-after: auto; }
