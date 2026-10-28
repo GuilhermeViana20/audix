@@ -26,28 +26,6 @@
         @endif
 
         <div class="grid items-start gap-8 lg:grid-cols-2">
-            <div class="space-y-5">
-            <div>
-            <label for="nome" class="block text-sm font-medium text-grafite/70">Nome Fantasia</label>
-            <input id="nome" name="nome" value="{{ old('nome', $supermercado->nome) }}" maxlength="120" required
-                   placeholder="Ex.: Aconchemax"
-                   class="mt-1 w-full rounded-xl bg-offwhite px-3 py-2 text-sm">
-            @error('nome')
-                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-            @enderror
-        </div>
-
-            <div>
-            <label for="nome_social" class="block text-sm font-medium text-grafite/70">Nome Social</label>
-            <input id="nome_social" name="nome_social" value="{{ old('nome_social', $supermercado->nome_social) }}" maxlength="120"
-                   placeholder="Ex.: Aconchegante Comércio de Alimentos Ltda"
-                   class="mt-1 w-full rounded-xl bg-offwhite px-3 py-2 text-sm">
-            @error('nome_social')
-                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-            @enderror
-        </div>
-
-            </div>
             <div class="space-y-3">
             <div>
             <label for="logo_url" class="block text-sm font-medium text-grafite/70">Imagem (logo) — link</label>
@@ -67,6 +45,28 @@
                 <span id="logo_vazio" class="text-xs font-bold text-grafite/50 {{ $previewInicial ? 'hidden' : '' }}">SEM LOGO</span>
                 <span id="logo_erro" class="hidden text-xs font-semibold text-red-500">Não foi possível carregar a imagem deste link</span>
             </div>
+        </div>
+
+            </div>
+            <div class="space-y-5">
+            <div>
+            <label for="nome" class="block text-sm font-medium text-grafite/70">Nome Fantasia</label>
+            <input id="nome" name="nome" value="{{ old('nome', $supermercado->nome) }}" maxlength="120" required
+                   placeholder="Ex.: Aconchemax"
+                   class="mt-1 w-full rounded-xl bg-offwhite px-3 py-2 text-sm">
+            @error('nome')
+                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+            @enderror
+        </div>
+
+            <div>
+            <label for="nome_social" class="block text-sm font-medium text-grafite/70">Nome Social</label>
+            <input id="nome_social" name="nome_social" value="{{ old('nome_social', $supermercado->nome_social) }}" maxlength="120"
+                   placeholder="Ex.: Aconchegante Comércio de Alimentos Ltda"
+                   class="mt-1 w-full rounded-xl bg-offwhite px-3 py-2 text-sm">
+            @error('nome_social')
+                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+            @enderror
         </div>
 
             </div>
