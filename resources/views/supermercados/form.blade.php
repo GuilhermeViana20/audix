@@ -25,7 +25,7 @@
             @method('PUT')
         @endif
 
-        <div class="grid gap-8 lg:grid-cols-2">
+        <div class="grid items-start gap-8 lg:grid-cols-2">
             <div class="space-y-5">
             <div>
             <label for="nome" class="block text-sm font-medium text-grafite/70">Nome Fantasia</label>
@@ -60,7 +60,7 @@
                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
             @enderror
 
-            <div class="mt-3 flex h-64 w-full items-center justify-center rounded-xl bg-offwhite p-6 lg:h-80">
+            <div class="mt-3 flex h-40 w-full items-center justify-center rounded-xl bg-offwhite p-6 lg:h-48">
                 <img id="logo_preview" alt="Pré-visualização da logo"
                      src="{{ $previewInicial }}"
                      class="max-h-20 max-w-full object-contain {{ $previewInicial ? '' : 'hidden' }}">
