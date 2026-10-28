@@ -2,6 +2,13 @@
 
 @section('titulo', 'Supermercados')
 
+@section('breadcrumb')
+    @include('partials.breadcrumb', ['itens' => [
+        ['nome' => 'Início', 'url' => route('inicio')],
+        ['nome' => 'Supermercados'],
+    ]])
+@endsection
+
 @section('conteudo')
     <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>

@@ -2,6 +2,14 @@
 
 @section('titulo', $supermercado->exists ? 'Editar supermercado' : 'Novo supermercado')
 
+@section('breadcrumb')
+    @include('partials.breadcrumb', ['itens' => [
+        ['nome' => 'Início', 'url' => route('inicio')],
+        ['nome' => 'Supermercados', 'url' => route('supermercados.index')],
+        ['nome' => $supermercado->exists ? $supermercado->nome : 'Novo supermercado'],
+    ]])
+@endsection
+
 @section('conteudo')
     @php($editando = $supermercado->exists)
     @php($linkAtual = $editando ? (string) $supermercado->logo_caminho : '')

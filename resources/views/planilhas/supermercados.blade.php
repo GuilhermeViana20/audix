@@ -2,9 +2,15 @@
 
 @section('titulo', 'Escolha o supermercado')
 
+@section('breadcrumb')
+    @include('partials.breadcrumb', ['itens' => [
+        ['nome' => 'Início', 'url' => route('inicio')],
+        ['nome' => $nomeTipo],
+    ]])
+@endsection
+
 @section('conteudo')
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <a href="{{ route('inicio') }}" class="text-sm font-medium text-azul">← Tipos de planilha</a>
         <a href="{{ route('supermercados.index') }}" class="text-sm font-medium text-grafite/60 transition hover:text-azul">Gerenciar supermercados</a>
     </div>
 
