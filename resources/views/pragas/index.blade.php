@@ -24,7 +24,7 @@
         .folha .topo.local td { height: 24px; vertical-align: middle; text-align: left; padding-left: 4px; }
         .folha .topo:not(.local) td { border-bottom: 0; }
         .folha .grade-caixa { margin-top: 12px; }
-        .folha .grade th { font-weight: bold; height: 22px; font-size: 9.5px; }
+        .folha .grade th { font-weight: bold; height: 24px; font-size: 12px; }
         .folha .grade td { height: 26px; font-size: 10.5px; }
         .folha .grade td:first-child { font-weight: bold; }
         .folha .grade th, .folha .grade td:first-child { background: #d9d9d9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -146,7 +146,7 @@
                 <div class="grade-caixa">
                     <table class="grade">
                         <colgroup>
-                            <col style="width:110px">
+                            <col style="width:90px">
                             @for ($d = 1; $d <= 31; $d++)
                                 <col>
                             @endfor
