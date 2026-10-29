@@ -509,7 +509,9 @@ onBeforeUnmount(() => {
 
 <template>
     <!-- Loading enquanto houver requisições em andamento (salvar, carregar, PDF) -->
-    <div v-if="carregandoRede" class="fixed inset-0 z-50 flex items-center justify-center bg-grafite/20 backdrop-blur-[1px]" role="status" aria-live="polite">
+    <div v-if="carregandoRede"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-grafite/20 backdrop-blur-[1px]" role="status"
+        aria-live="polite">
         <div class="flex items-center gap-3 rounded-2xl bg-white px-5 py-3 text-sm font-semibold shadow-lg">
             <span class="h-4 w-4 animate-spin rounded-full border-2 border-azul border-t-transparent"></span>
             Carregando…
@@ -517,77 +519,98 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Popup de conferência da importação: nada é gravado antes de confirmar -->
-    <div v-if="rascunho" class="fixed inset-0 z-40 flex items-end justify-center bg-grafite/50 sm:items-center sm:p-4" role="dialog" aria-modal="true">
+    <div v-if="rascunho" class="fixed inset-0 z-40 flex items-end justify-center bg-grafite/50 sm:items-center sm:p-4"
+        role="dialog" aria-modal="true">
         <div class="flex max-h-[92vh] w-full max-w-3xl flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl">
             <div class="border-b border-grafite/10 p-4 md:p-5">
                 <h2 class="text-lg font-bold">Confirmar importação</h2>
-                <p class="text-xs text-grafite/60">Revise seções, linhas e faixas. Nada é salvo no banco até você clicar em "Confirmar e salvar".</p>
-                <p v-if="totalAvisos" class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{{ totalAvisos }} item(ns) para revisar antes de salvar</p>
+                <p class="text-xs text-grafite/60">Revise seções, linhas e faixas. Nada é salvo no banco até você clicar
+                    em "Confirmar e salvar".</p>
+                <p v-if="totalAvisos"
+                    class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{{ totalAvisos }}
+                    item(ns) para revisar antes de salvar</p>
             </div>
 
             <div class="flex-1 space-y-5 overflow-y-auto p-4 md:p-5">
                 <div v-for="(s, i) in rascunho" :key="s._k" class="rounded-xl border border-grafite/10 p-3">
                     <div class="flex flex-wrap items-center gap-2">
-                        <input v-model="s.nome" placeholder="Nome da seção" class="min-w-0 flex-1 rounded-lg bg-offwhite px-3 py-2 text-sm font-bold uppercase">
-                        <button class="px-1 text-azul disabled:opacity-30" :disabled="i === 0" @click="moverItem(rascunho, i, -1)">↑</button>
-                        <button class="px-1 text-azul disabled:opacity-30" :disabled="i === rascunho.length - 1" @click="moverItem(rascunho, i, 1)">↓</button>
+                        <input v-model="s.nome" placeholder="Nome da seção"
+                            class="min-w-0 flex-1 rounded-lg bg-offwhite px-3 py-2 text-sm font-bold uppercase">
+                        <button class="px-1 text-azul disabled:opacity-30" :disabled="i === 0"
+                            @click="moverItem(rascunho, i, -1)">↑</button>
+                        <button class="px-1 text-azul disabled:opacity-30" :disabled="i === rascunho.length - 1"
+                            @click="moverItem(rascunho, i, 1)">↓</button>
                         <button class="text-sm text-red-500" @click="rascunho.splice(i, 1)">Remover seção</button>
                     </div>
                     <label class="mt-3 block text-xs text-grafite/60">Título da primeira coluna</label>
-                    <input v-model="s.titulo_primeira_coluna" class="mt-1 w-full rounded-lg bg-offwhite px-3 py-2 text-sm">
+                    <input v-model="s.titulo_primeira_coluna"
+                        class="mt-1 w-full rounded-lg bg-offwhite px-3 py-2 text-sm">
 
                     <div class="mt-3 space-y-2">
                         <div v-for="(l, j) in s.linhas" :key="l._k" :data-linha="j" :data-grupo="s._k"
-                             class="flex flex-wrap items-center gap-2 rounded-lg transition">
+                            class="flex flex-wrap items-center gap-2 rounded-lg transition">
                             <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
                                 <option value="linha">Linha</option>
                                 <option value="grupo">Faixa</option>
                             </select>
                             <input v-model="l.texto" class="min-w-0 flex-1 rounded-lg px-3 py-2 text-sm"
-                                   :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
+                                :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
                             <button class="px-1 text-red-500" @click="s.linhas.splice(j, 1)">×</button>
-                            <p v-if="l.aviso" class="order-last basis-full pl-2 text-xs text-amber-700">⚠ {{ l.aviso }} <button class="font-semibold underline" @click="l.aviso = null">ok</button></p>
+                            <p v-if="l.aviso" class="order-last basis-full pl-2 text-xs text-amber-700">⚠ {{ l.aviso }}
+                                <button class="font-semibold underline" @click="l.aviso = null">ok</button>
+                            </p>
                         </div>
                     </div>
 
                     <div class="mt-3 flex gap-2 text-sm">
-                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas = ordenarBlocos(s.linhas)">Ordenar A–Z</button>
-                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas.push({ _k: novaChave(), tipo: 'linha', texto: '' })">+ Linha</button>
-                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul" @click="s.linhas.push({ _k: novaChave(), tipo: 'grupo', texto: 'NOVA FAIXA' })">+ Faixa</button>
+                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul"
+                            @click="s.linhas = ordenarBlocos(s.linhas)">Ordenar A–Z</button>
+                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul"
+                            @click="s.linhas.push({ _k: novaChave(), tipo: 'linha', texto: '' })">+ Linha</button>
+                        <button class="rounded-lg bg-offwhite px-3 py-2 font-medium text-azul"
+                            @click="s.linhas.push({ _k: novaChave(), tipo: 'grupo', texto: 'NOVA FAIXA' })">+
+                            Faixa</button>
                     </div>
                 </div>
 
                 <button class="w-full rounded-xl border border-dashed border-azul py-3 text-sm font-semibold text-azul"
-                        @click="rascunho.push({ _k: novaChave(), nome: '', titulo_primeira_coluna: 'ÁREA DE ATENDIMENTO', linhas: [] })">+ Nova seção</button>
+                    @click="rascunho.push({ _k: novaChave(), nome: '', titulo_primeira_coluna: 'ÁREA DE ATENDIMENTO', linhas: [] })">+
+                    Nova seção</button>
             </div>
 
             <div class="flex items-center justify-between gap-3 border-t border-grafite/10 p-4 md:p-5">
                 <button class="text-sm font-medium text-grafite/70" @click="rascunho = null">Cancelar</button>
-                <button class="rounded-xl bg-azul px-5 py-2.5 text-sm font-semibold text-white" @click="confirmarImportacao">Confirmar e salvar</button>
+                <button class="rounded-xl bg-azul px-5 py-2.5 text-sm font-semibold text-white"
+                    @click="confirmarImportacao">Confirmar e salvar</button>
             </div>
         </div>
     </div>
 
     <!-- Popup para copiar faixa (ou título) e linhas para outra seção -->
-    <div v-if="copiaPendente" class="fixed inset-0 z-40 flex items-end justify-center bg-grafite/50 sm:items-center sm:p-4" role="dialog" aria-modal="true">
+    <div v-if="copiaPendente"
+        class="fixed inset-0 z-40 flex items-end justify-center bg-grafite/50 sm:items-center sm:p-4" role="dialog"
+        aria-modal="true">
         <div class="flex max-h-[85vh] w-full max-w-md flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl">
             <div class="border-b border-grafite/10 p-4">
                 <h2 class="text-lg font-bold">Copiar para outra seção</h2>
-                <p class="text-sm text-grafite/70">“{{ copiaPendente.resumo }}” com {{ copiaPendente.copia.length - 1 }} linha(s) abaixo. Será adicionada ao fim da seção escolhida.</p>
+                <p class="text-sm text-grafite/70">“{{ copiaPendente.resumo }}” com {{ copiaPendente.copia.length - 1 }}
+                    linha(s) abaixo. Será adicionada ao fim da seção escolhida.</p>
             </div>
             <div class="flex-1 space-y-2 overflow-y-auto p-4">
-                <p v-if="!copiaPendente.destinos.length" class="text-sm text-grafite/60">Não há outras seções para copiar.</p>
+                <p v-if="!copiaPendente.destinos.length" class="text-sm text-grafite/60">Não há outras seções para
+                    copiar.</p>
                 <label v-for="d in copiaPendente.destinos" :key="d.id"
-                       class="flex cursor-pointer items-center gap-3 rounded-xl bg-offwhite px-4 py-3 text-sm font-medium"
-                       :class="copiaPendente.escolhido === d.id && 'ring-2 ring-azul'">
-                    <input type="radio" name="destino-copia" :value="d.id" v-model="copiaPendente.escolhido" class="accent-azul h-4 w-4">
+                    class="flex cursor-pointer items-center gap-3 rounded-xl bg-offwhite px-4 py-3 text-sm font-medium"
+                    :class="copiaPendente.escolhido === d.id && 'ring-2 ring-azul'">
+                    <input type="radio" name="destino-copia" :value="d.id" v-model="copiaPendente.escolhido"
+                        class="accent-azul h-4 w-4">
                     {{ d.nome }}
                 </label>
             </div>
             <div class="flex items-center justify-between gap-3 border-t border-grafite/10 p-4">
                 <button class="text-sm font-medium text-grafite/70" @click="copiaPendente = null">Cancelar</button>
                 <button class="rounded-xl bg-azul px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
-                        :disabled="!copiaPendente.escolhido" @click="confirmarCopia">Confirmar cópia</button>
+                    :disabled="!copiaPendente.escolhido" @click="confirmarCopia">Confirmar cópia</button>
             </div>
         </div>
     </div>
@@ -603,121 +626,164 @@ onBeforeUnmount(() => {
                 </div>
                 <!-- Conteúdo abaixo do card: rola por dentro e é cortado na borda do card -->
                 <div class="flex min-h-0 flex-1 flex-col gap-5 xl:overflow-y-auto xl:pr-1">
-                <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
-                    <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
-                    <select class="mt-2 w-full rounded-xl bg-offwhite px-3 py-2 text-sm font-medium"
-                            :value="supermercadoId ?? ''"
-                            @change="carregarSupermercado(Number($event.target.value))">
-                        <option value="" disabled>Escolha o supermercado</option>
-                        <option v-for="m in supermercados" :key="m.id" :value="m.id">{{ m.nome }}</option>
-                    </select>
-                </div>
+                    <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
+                        <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
+                        <select class="mt-2 w-full rounded-xl bg-offwhite px-3 py-2 text-sm font-medium"
+                            :value="supermercadoId ?? ''" @change="carregarSupermercado(Number($event.target.value))">
+                            <option value="" disabled>Escolha o supermercado</option>
+                            <option v-for="m in supermercados" :key="m.id" :value="m.id">{{ m.nome }}</option>
+                        </select>
+                    </div>
 
-                <template v-if="supermercadoId">
-                    <p v-if="aviso" class="rounded-xl bg-white px-4 py-2 text-sm shadow-sm">{{ aviso }}</p>
+                    <template v-if="supermercadoId">
+                        <p v-if="aviso" class="rounded-xl bg-white px-4 py-2 text-sm shadow-sm">{{ aviso }}</p>
 
-                    <div class="rounded-2xl bg-white p-4 shadow-sm" :class="carregando && 'opacity-60'">
-                        <p class="text-xs font-semibold uppercase text-grafite/50">Seções no arquivo</p>
-                        <div class="mt-3 flex gap-2 text-sm">
-                            <button class="text-azul font-medium" @click="ordenadas.forEach(s => selecionadas[s.id] = true)">Marcar todas</button>
-                            <button class="text-azul font-medium" @click="ordenadas.forEach(s => selecionadas[s.id] = false)">Nenhuma</button>
-                            <label class="ml-auto cursor-pointer rounded-xl bg-azul px-3 py-1.5 font-semibold text-white"
-                                   :class="lendoPdf && 'pointer-events-none opacity-50'">
-                                {{ lendoPdf ? 'Lendo PDF…' : 'Importar PDF' }}
-                                <input type="file" accept="application/pdf" class="hidden" @change="escolherPdf">
-                            </label>
-                        </div>
-                        <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b class="text-grafite">{{ planilha.nome }}</b></p>
+                        <div class="rounded-2xl bg-white p-4 shadow-sm" :class="carregando && 'opacity-60'">
+                            <p class="text-xs font-semibold uppercase text-grafite/50">Seções no arquivo</p>
+                            <div class="mt-3 flex gap-2 text-sm">
+                                <button class="text-azul font-medium"
+                                    @click="ordenadas.forEach(s => selecionadas[s.id] = true)">Marcar todas</button>
+                                <button class="text-azul font-medium"
+                                    @click="ordenadas.forEach(s => selecionadas[s.id] = false)">Nenhuma</button>
+                                <label
+                                    class="ml-auto cursor-pointer rounded-xl bg-azul px-3 py-1.5 font-semibold text-white"
+                                    :class="lendoPdf && 'pointer-events-none opacity-50'">
+                                    {{ lendoPdf ? 'Lendo PDF…' : 'Importar PDF' }}
+                                    <input type="file" accept="application/pdf" class="hidden" @change="escolherPdf">
+                                </label>
+                            </div>
+                            <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b
+                                    class="text-grafite">{{ planilha.nome }}</b></p>
 
-                        <div class="mt-3 space-y-2">
-                            <div v-for="s in ordenadas" :key="s.id"
-                                 class="rounded-xl border transition"
-                                 :class="atual?.id === s.id ? 'border-azul bg-azul/5' : 'border-transparent bg-offwhite'">
-                                <div class="flex cursor-pointer flex-wrap items-center gap-3 p-3"
-                                     @click="atual?.id === s.id ? fechar() : abrir(s)">
-                                    <label class="flex items-center gap-2 font-medium" @click.stop>
-                                        <input type="checkbox" v-model="selecionadas[s.id]" class="accent-azul h-4 w-4">
-                                        {{ s.nome }}
-                                    </label>
-                                    <span class="text-xs text-grafite/50">{{ s.linhas.length }} linhas</span>
-                                    <span class="ml-auto text-xs font-semibold text-azul">{{ atual?.id === s.id ? 'Fechar ▲' : 'Editar ▼' }}</span>
-                                    <button class="text-sm text-azul" @click.stop="renomear(s)">Renomear</button>
-                                    <button class="text-red-500" @click.stop="excluirSecao(s)">×</button>
-                                </div>
-
-                                <div v-if="atual?.id === s.id" class="border-t border-grafite/10 p-4">
-                                    <div class="flex items-center justify-end">
-                                        <span class="text-xs font-semibold"
-                                              :class="status === 'Erro ao salvar' ? 'text-red-500' : (estaSujo ? 'text-amber-600' : 'text-grafite/50')">{{ textoStatus }}</span>
-                                    </div>
-                                    <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
-                                    <div class="mt-1 flex items-center gap-2">
-                                        <button class="shrink-0 rounded-lg bg-white px-2 py-2 text-azul" title="Copiar título e linhas para outra seção" @click="abrirCopia('titulo')"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
-                                        <input v-model="titulo" class="min-w-0 flex-1 rounded-xl bg-grafite/10 px-3 py-2 text-sm font-bold uppercase">
+                            <div class="mt-3 space-y-2">
+                                <div v-for="s in ordenadas" :key="s.id" class="rounded-xl border transition"
+                                    :class="atual?.id === s.id ? 'border-azul bg-azul/5' : 'border-transparent bg-offwhite'">
+                                    <div class="flex cursor-pointer flex-wrap items-center gap-3 p-3"
+                                        @click="atual?.id === s.id ? fechar() : abrir(s)">
+                                        <label class="flex items-center gap-2 font-medium" @click.stop>
+                                            <input type="checkbox" v-model="selecionadas[s.id]"
+                                                class="accent-azul h-4 w-4">
+                                            {{ s.nome }}
+                                        </label>
+                                        <span class="text-xs text-grafite/50">{{ s.linhas.length }} linhas</span>
+                                        <span class="ml-auto text-xs font-semibold text-azul">{{ atual?.id === s.id ?
+                                            'Fechar ▲' : 'Editar ▼' }}</span>
+                                        <button class="text-sm text-azul" @click.stop="renomear(s)">Renomear</button>
+                                        <button class="text-red-500" @click.stop="excluirSecao(s)">×</button>
                                     </div>
 
-                                    <div class="mt-4 space-y-2">
-                                        <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i" :data-grupo="atual.id"
-                                             class="flex flex-wrap items-center gap-2 rounded-lg transition">
-                                            <select v-model="l.tipo" class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
-                                                <option value="linha">Linha</option>
-                                                <option value="grupo">Faixa</option>
-                                            </select>
-                                            <button v-if="l.tipo === 'grupo'" class="shrink-0 rounded-lg bg-offwhite px-2 py-2 text-azul" title="Copiar faixa e linhas para outra seção" @click="abrirCopia('faixa', i)"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
-                                            <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
-                                                   :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
-                                            <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha acima" @click="inserirLinha(i, 0)">+↑</button>
-                                            <button class="px-1 text-xs font-semibold text-azul" title="Inserir linha abaixo" @click="inserirLinha(i, 1)">+↓</button>
-                                            <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
+                                    <div v-if="atual?.id === s.id" class="border-t border-grafite/10 p-4">
+                                        <div class="flex items-center justify-end">
+                                            <span class="text-xs font-semibold"
+                                                :class="status === 'Erro ao salvar' ? 'text-red-500' : (estaSujo ? 'text-amber-600' : 'text-grafite/50')">{{
+                                                    textoStatus }}</span>
                                         </div>
-                                    </div>
+                                        <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
+                                        <div class="mt-1 flex items-center gap-2">
+                                            <button class="shrink-0 rounded-lg bg-white px-2 py-2 text-azul"
+                                                title="Copiar título e linhas para outra seção"
+                                                @click="abrirCopia('titulo')"><svg viewBox="0 0 24 24" class="h-4 w-4"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    aria-hidden="true">
+                                                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                                </svg></button>
+                                            <input v-model="titulo"
+                                                class="min-w-0 flex-1 rounded-xl bg-grafite/10 px-3 py-2 text-sm font-bold uppercase">
+                                        </div>
 
-                                    <div class="mt-4 flex flex-wrap gap-2 text-sm">
-                                        <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="ordenarEditor">Ordenar A–Z</button>
-                                        <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarLinha">+ Linha</button>
-                                        <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul" @click="adicionarGrupo">+ Faixa</button>
-                                        <button class="ml-auto rounded-xl bg-white px-3 py-2 font-medium" @click="copiarParaTodas">Copiar para todas</button>
-                                        <select class="rounded-xl bg-white px-3 py-2 text-xs text-azul" @change="copiarSecaoPara($event)">
-                                            <option value="">Copiar seção para…</option>
-                                            <option v-for="m in supermercados.filter(x => x.id !== supermercadoId)" :key="m.id" :value="m.id">{{ m.nome }}</option>
-                                        </select>
-                                        <button class="rounded-xl bg-azul px-4 py-2 font-semibold text-white disabled:opacity-40"
-                                                :disabled="!estaSujo || status === 'Salvando…'" @click="salvar">Salvar</button>
+                                        <div class="mt-4 space-y-2">
+                                            <div v-for="(l, i) in atual.linhas" :key="l.id ?? i" :data-linha="i"
+                                                :data-grupo="atual.id"
+                                                class="flex flex-wrap items-center gap-2 rounded-lg transition">
+                                                <select v-model="l.tipo"
+                                                    class="w-20 shrink-0 rounded-lg bg-offwhite px-2 py-2 text-xs">
+                                                    <option value="linha">Linha</option>
+                                                    <option value="grupo">Faixa</option>
+                                                </select>
+                                                <button v-if="l.tipo === 'grupo'"
+                                                    class="shrink-0 rounded-lg bg-offwhite px-2 py-2 text-azul"
+                                                    title="Copiar faixa e linhas para outra seção"
+                                                    @click="abrirCopia('faixa', i)"><svg viewBox="0 0 24 24"
+                                                        class="h-4 w-4" fill="none" stroke="currentColor"
+                                                        stroke-width="2" aria-hidden="true">
+                                                        <rect x="9" y="9" width="13" height="13" rx="2" />
+                                                        <path
+                                                            d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                                    </svg></button>
+                                                <input v-model="l.texto" class="flex-1 rounded-xl px-3 py-2 text-sm"
+                                                    :class="l.tipo === 'grupo' ? 'bg-grafite/10 font-bold uppercase' : 'bg-white'">
+                                                <button class="px-1 text-xs font-semibold text-azul"
+                                                    title="Inserir linha acima" @click="inserirLinha(i, 0)">+↑</button>
+                                                <button class="px-1 text-xs font-semibold text-azul"
+                                                    title="Inserir linha abaixo" @click="inserirLinha(i, 1)">+↓</button>
+                                                <button class="px-1 text-red-500" @click="removerLinha(i)">×</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                                            <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul"
+                                                @click="ordenarEditor">Ordenar A–Z</button>
+                                            <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul"
+                                                @click="adicionarLinha">+ Linha</button>
+                                            <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul"
+                                                @click="adicionarGrupo">+ Faixa</button>
+                                            <button class="ml-auto rounded-xl bg-white px-3 py-2 font-medium"
+                                                @click="copiarParaTodas">Copiar para todas</button>
+                                            <select class="rounded-xl bg-white px-3 py-2 text-xs text-azul"
+                                                @change="copiarSecaoPara($event)">
+                                                <option value="">Copiar seção para…</option>
+                                                <option v-for="m in supermercados.filter(x => x.id !== supermercadoId)"
+                                                    :key="m.id" :value="m.id">{{ m.nome }}</option>
+                                            </select>
+                                            <button
+                                                class="rounded-xl bg-azul px-4 py-2 font-semibold text-white disabled:opacity-40"
+                                                :disabled="!estaSujo || status === 'Salvando…'"
+                                                @click="salvar">Salvar</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <form class="mt-3 flex gap-2" @submit.prevent="adicionarSecao">
+                                <input v-model="novaSecao" placeholder="Nova seção (ex.: PADARIA)"
+                                    class="flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
+                                <button
+                                    class="rounded-xl bg-azul px-4 text-sm font-semibold text-white">Adicionar</button>
+                            </form>
                         </div>
+                    </template>
 
-                        <form class="mt-3 flex gap-2" @submit.prevent="adicionarSecao">
-                            <input v-model="novaSecao" placeholder="Nova seção (ex.: PADARIA)" class="flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
-                            <button class="rounded-xl bg-azul px-4 text-sm font-semibold text-white">Adicionar</button>
-                        </form>
-                    </div>
-                </template>
-
-                <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Escolha um supermercado para carregar a planilha.</p>
+                    <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Escolha um supermercado para
+                        carregar a planilha.
+                    </p>
                 </div>
             </section>
 
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
-            <aside v-if="!semPrevia" class="no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-28 xl:h-[calc(100vh-8rem)] xl:overflow-hidden">
+            <aside v-if="!semPrevia"
+                class="no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-28 xl:h-[calc(100vh-8rem)] xl:overflow-hidden">
                 <div class="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
                         <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
-                        <p class="text-xs text-grafite/60">{{ folhas.length }} página(s) · {{ idsSelecionados.length }} seção(ões) · A4 paisagem</p>
+                        <p class="text-xs text-grafite/60">{{ folhas.length }} página(s) · {{ idsSelecionados.length }}
+                            seção(ões) ·
+                            A4 paisagem</p>
                     </div>
                     <button class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
-                            :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
+                        :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
                 </div>
                 <div id="sheets-box" class="min-h-0 flex-1 xl:overflow-y-auto">
                     <div v-if="folhas.length" id="sheets" class="flex flex-col items-center gap-6 pb-6">
                         <div v-for="(f, i) in folhas" :key="i" class="sheet" :style="{ zoom: zoomPreview }">
                             <table class="cab-logos">
                                 <tr>
-                                    <td class="sem-borda esq"><img src="/images/acoop.png" alt="ACCP" class="logo-acoop"></td>
+                                    <td class="sem-borda esq"><img src="/images/acoop.png" alt="ACCP"
+                                            class="logo-acoop"></td>
                                     <td v-if="ehTemperatura" class="sem-borda titulo">CONTROLE DE TEMPERATURA</td>
-                                    <td v-else class="sem-borda titulo">PLANILHA DE MONITORAMENTO<br>{{ planilha?.nome?.toUpperCase() || 'HIGIENE E LIMPEZA AMBIENTAL' }}</td>
+                                    <td v-else class="sem-borda titulo">PLANILHA DE MONITORAMENTO<br>{{
+                                        planilha?.nome?.toUpperCase() || 'HIGIENE E LIMPEZA AMBIENTAL' }}</td>
                                     <td class="sem-borda dir">
                                         <img v-if="logoUrl" :src="logoUrl" alt="Logo" class="logo-mae">
                                         <div v-else class="logo-box">LOGO DO SUPERMERCADO</div>
@@ -728,18 +794,30 @@ onBeforeUnmount(() => {
                             <div v-if="ehTemperatura" class="temp-topo">
                                 <table class="temp-dados">
                                     <tr>
-                                        <td class="rot">CLIENTE:</td><td class="campo"></td>
-                                        <td class="rot">SETOR:</td><td class="campo">{{ f.secao.nome }}</td>
+                                        <td class="rot">CLIENTE:</td>
+                                        <td class="campo"></td>
+                                        <td class="rot">SETOR:</td>
+                                        <td class="campo">{{ f.secao.nome }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="rot">RESPONSÁVEL:</td><td class="campo"></td>
-                                        <td class="rot">PERÍODO:</td><td class="campo"></td>
+                                        <td class="rot">RESPONSÁVEL:</td>
+                                        <td class="campo"></td>
+                                        <td class="rot">PERÍODO:</td>
+                                        <td class="campo"></td>
                                     </tr>
                                 </table>
                                 <table class="legenda-temp">
-                                    <thead><tr><th>PRODUTOS</th><th>TEMPERATURA</th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th>PRODUTOS</th>
+                                            <th>TEMPERATURA</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
-                                        <tr v-for="[produto, temperatura] in LEGENDA_TEMPERATURA" :key="produto"><td>{{ produto }}</td><td>{{ temperatura }}</td></tr>
+                                        <tr v-for="[produto, temperatura] in LEGENDA_TEMPERATURA" :key="produto">
+                                            <td>{{ produto }}</td>
+                                            <td>{{ temperatura }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -747,7 +825,8 @@ onBeforeUnmount(() => {
                             <table v-if="!ehTemperatura" class="topo">
                                 <tr>
                                     <td style="width:33.33%"><b>ENCARREGADO:</b></td>
-                                    <td style="width:33.33%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span></td>
+                                    <td style="width:33.33%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span>
+                                    </td>
                                     <td style="width:33.34%"><b>MÊS/ANO:</b></td>
                                 </tr>
                             </table>
@@ -758,34 +837,42 @@ onBeforeUnmount(() => {
                                 </tr>
                             </table>
 
-                            <div class="grade-caixa"><table class="grade">
-                                <colgroup>
-                                    <col style="width:160px">
-                                    <col v-for="d in 31" :key="d">
-                                </colgroup>
-                                <thead>
-                                    <tr>
-                                        <th class="faixa-cabecalho">{{ f.titulo }}</th>
-                                        <th v-for="d in 31" :key="d" class="faixa-cabecalho">{{ d }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template v-for="(l, j) in f.linhas" :key="j">
-                                        <tr v-if="l.tipo === 'grupo'" class="faixa" :style="{ height: alturaDaLinha(l) + 'px' }"><td :colspan="32">{{ l.texto }}</td></tr>
-                                        <tr v-else :style="{ height: alturaDaLinha(l) + 'px' }">
-                                            <td>{{ l.texto }}</td>
-                                            <td v-for="d in 31" :key="d"></td>
+                            <div class="grade-caixa">
+                                <table class="grade">
+                                    <colgroup>
+                                        <col style="width:160px">
+                                        <col v-for="d in 31" :key="d">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th class="faixa-cabecalho">{{ f.titulo }}</th>
+                                            <th v-for="d in 31" :key="d" class="faixa-cabecalho">{{ d }}</th>
                                         </tr>
-                                    </template>
-                                </tbody>
-                            </table></div>
+                                    </thead>
+                                    <tbody>
+                                        <template v-for="(l, j) in f.linhas" :key="j">
+                                            <tr v-if="l.tipo === 'grupo'" class="faixa"
+                                                :style="{ height: alturaDaLinha(l) + 'px' }">
+                                                <td :colspan="32">{{ l.texto }}</td>
+                                            </tr>
+                                            <tr v-else :style="{ height: alturaDaLinha(l) + 'px' }">
+                                                <td>{{ l.texto }}</td>
+                                                <td v-for="d in 31" :key="d"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                             <div class="rodape">
-                                <p class="rodape-nome">ACCP Alimentos &amp; Tecnologia | contato@accpconsultoria.com.br</p>
+                                <p class="rodape-nome">ACCP Alimentos &amp; Tecnologia | contato@accpconsultoria.com.br
+                                </p>
                                 <p>Av. Humberto Monte, 2929, Sala 501, Torre Sul – Pici, Fortaleza/CE</p>
                             </div>
                         </div>
                     </div>
-                    <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Selecione um supermercado e pelo menos uma seção para ver a pré-visualização.</p>
+                    <p v-else class="rounded-2xl bg-white p-6 text-grafite/60 shadow-sm">Selecione um supermercado e
+                        pelo menos uma
+                        seção para ver a pré-visualização.</p>
                 </div>
             </aside>
         </div>
@@ -803,55 +890,300 @@ onBeforeUnmount(() => {
     font-family: Times, 'Times New Roman', serif;
     font-size: 9px;
     box-sizing: border-box;
-    height: 794px; /* A4 paisagem (210mm) sempre, mesmo com poucas linhas */
+    height: 794px;
+    /* A4 paisagem (210mm) sempre, mesmo com poucas linhas */
     overflow: hidden;
     padding: 22px 36px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
 }
-.sheet table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.sheet td, .sheet th { border: 1px solid #000; padding: 0; text-align: center; vertical-align: middle; }
-.sheet .sem-borda, .sheet .sem-borda td { border: 0; }
-.sheet .cab-logos td { height: 50px; }
-.sheet .cab-logos .esq { text-align: left; width: 200px; }
-.sheet .cab-logos .dir { text-align: right; width: 200px; }
-.sheet .titulo { font-size: 14px; font-weight: bold; line-height: 1.25; }
-.sheet .logo-acoop, .sheet .logo-mae { height: 40px; display: inline-block; }
-.sheet .logo-box { display: inline-block; width: 120px; height: 40px; line-height: 40px; border: 1px dashed #777; font-size: 7px; color: #555; text-align: center; }
-.sheet .topo { margin-bottom: 0; }
-.sheet .topo td { height: 36px; vertical-align: top; padding-top: 4px; font-size: 9px; }
-.sheet .topo:not(.local) td { border-bottom: 0; } /* a linha de baixo é a do bloco LOCAL/DATA, evita borda dupla */
-.sheet .topo .valor { display: block; font-size: 10px; }
-.sheet .topo.local { margin-top: -1px; }
-.sheet .topo.local td { height: 26px; vertical-align: middle; text-align: left; padding-left: 4px; }
-.sheet .grade { margin-top: 0; }
-.sheet .grade-caixa { margin-top: 12px; } /* espaço entre o bloco LOCAL/DATA e a grade */
-.sheet .rodape { margin-top: auto; padding-top: 3px; text-align: center; font-size: 8px; line-height: 10px; color: #9a9a9a; }
-.sheet .rodape p { margin: 0; }
-.sheet .rodape .rodape-nome { font-size: 9px; font-weight: bold; color: #7a7a7a; }
-.sheet .grade th { font-weight: bold; height: 20px; font-size: 8.5px; line-height: 11px; }
-.sheet .grade td { height: 20px; font-size: 8.5px; line-height: 11px; }
-.sheet .grade .faixa td { background: #d9d9d9; font-weight: bold; }
-.sheet .grade th.faixa-cabecalho { background: #d9d9d9; }
+
+.sheet table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.sheet td,
+.sheet th {
+    border: 1px solid #000;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.sheet .sem-borda,
+.sheet .sem-borda td {
+    border: 0;
+}
+
+.sheet .cab-logos td {
+    height: 50px;
+}
+
+.sheet .cab-logos .esq {
+    text-align: left;
+    width: 200px;
+}
+
+.sheet .cab-logos .dir {
+    text-align: right;
+    width: 200px;
+}
+
+.sheet .titulo {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.25;
+}
+
+.sheet .logo-acoop,
+.sheet .logo-mae {
+    height: 40px;
+    display: inline-block;
+}
+
+.sheet .logo-box {
+    display: inline-block;
+    width: 120px;
+    height: 40px;
+    line-height: 40px;
+    border: 1px dashed #777;
+    font-size: 7px;
+    color: #555;
+    text-align: center;
+}
+
+.sheet .topo {
+    margin-bottom: 0;
+}
+
+.sheet .topo td {
+    height: 36px;
+    vertical-align: top;
+    padding-top: 4px;
+    font-size: 9px;
+}
+
+.sheet .topo:not(.local) td {
+    border-bottom: 0;
+}
+
+/* a linha de baixo é a do bloco LOCAL/DATA, evita borda dupla */
+.sheet .topo .valor {
+    display: block;
+    font-size: 10px;
+}
+
+.sheet .topo.local {
+    margin-top: -1px;
+}
+
+.sheet .topo.local td {
+    height: 26px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 4px;
+}
+
+.sheet .grade {
+    margin-top: 0;
+}
+
+.sheet .grade-caixa {
+    margin-top: 12px;
+}
+
+/* espaço entre o bloco LOCAL/DATA e a grade */
+.sheet .rodape {
+    margin-top: auto;
+    padding-top: 3px;
+    text-align: center;
+    font-size: 8px;
+    line-height: 10px;
+    color: #9a9a9a;
+}
+
+.sheet .rodape p {
+    margin: 0;
+}
+
+.sheet .rodape .rodape-nome {
+    font-size: 9px;
+    font-weight: bold;
+    color: #7a7a7a;
+}
+
+.sheet .grade th {
+    font-weight: bold;
+    height: 20px;
+    font-size: 8.5px;
+    line-height: 11px;
+}
+
+.sheet .grade td {
+    height: 20px;
+    font-size: 8.5px;
+    line-height: 11px;
+}
+
+.sheet .grade .faixa td {
+    background: #d9d9d9;
+    font-weight: bold;
+}
+
+.sheet .grade th.faixa-cabecalho {
+    background: #d9d9d9;
+}
 
 /* Impressão: só a folha, em A4 paisagem */
 @media print {
-    @page { size: A4 landscape; margin: 8mm; }
-    body * { visibility: hidden; }
-    #sheets, #sheets * { visibility: visible; }
-    #sheets { position: absolute; left: 0; top: 0; width: 100%; display: block; gap: 0; padding: 0; }
-    #sheets-box { overflow: visible !important; height: auto !important; }
-    .sheet { zoom: 1 !important; box-shadow: none; padding: 0; width: 100%; height: 194mm; overflow: hidden; break-after: page; page-break-after: always; }
-    .sheet:last-child { break-after: auto; page-break-after: auto; }
-    .sheet .grade td, .sheet .grade th, .sheet .topo td, .sheet .cab-logos td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .sheet .grade .faixa td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .sheet .grade th.faixa-cabecalho { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page {
+        size: A4 landscape;
+        margin: 8mm;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    #sheets,
+    #sheets * {
+        visibility: visible;
+    }
+
+    #sheets {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        display: block;
+        gap: 0;
+        padding: 0;
+    }
+
+    #sheets-box {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .sheet {
+        zoom: 1 !important;
+        box-shadow: none;
+        padding: 0;
+        width: 100%;
+        height: 194mm;
+        overflow: hidden;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .sheet:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .sheet .grade td,
+    .sheet .grade th,
+    .sheet .topo td,
+    .sheet .cab-logos td {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .sheet .grade .faixa td {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .sheet .grade th.faixa-cabecalho {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }
-.sheet .temp-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 10px; }
-.sheet .temp-dados { border-collapse: collapse; width: 62%; table-layout: fixed; margin-top: 0; }
-.sheet .temp-dados td { border: 1px solid #000; height: 22px; padding: 0 6px; vertical-align: middle; font-size: 10px; text-align: left; }
-.sheet .temp-dados td.rot { width: 96px; font-weight: bold; white-space: nowrap; background: #d9d9d9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.sheet .temp-dados td.campo { font-weight: bold; }
-.sheet .legenda-temp { width: 34%; border-collapse: collapse; table-layout: fixed; }
-.sheet .legenda-temp th, .sheet .legenda-temp td { border: 1px solid #000; padding: 0 5px; height: 15px; text-align: left; font-size: 9px; line-height: 11px; }
-.sheet .legenda-temp th { background: #d9d9d9; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+.sheet .temp-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.sheet .temp-dados {
+    border-collapse: collapse;
+    width: 62%;
+    table-layout: fixed;
+    margin-top: 0;
+}
+
+.sheet .temp-dados td {
+    border: 1px solid #000;
+    height: 22px;
+    padding: 0 6px;
+    vertical-align: middle;
+    font-size: 10px;
+    text-align: left;
+}
+
+.sheet .temp-dados td.rot {
+    width: 96px;
+    font-weight: bold;
+    white-space: nowrap;
+    background: #d9d9d9;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.sheet .temp-dados td.campo {
+    font-weight: bold;
+}
+
+.sheet .legenda-temp {
+    width: 34%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.sheet .legenda-temp th,
+.sheet .legenda-temp td {
+    border: 1px solid #000;
+    padding: 0 5px;
+    height: 15px;
+    text-align: left;
+    font-size: 9px;
+    line-height: 11px;
+}
+
+.sheet .legenda-temp th {
+    background: #d9d9d9;
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Iguala a altura dos dados e da legenda de temperatura */
+.sheet .temp-topo {
+    display: grid;
+    grid-template-columns: minmax(0, 62fr) minmax(0, 34fr);
+    align-items: stretch;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.sheet .temp-topo>.temp-dados,
+.sheet .temp-topo>.legenda-temp {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+.sheet .temp-dados tr {
+    height: 50%;
+}
+
+.sheet .temp-dados td {
+    height: auto;
+    padding: 6px;
+    vertical-align: middle;
+}
 </style>
