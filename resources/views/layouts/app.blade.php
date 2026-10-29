@@ -16,7 +16,7 @@
         })();
     </script>
     <script>document.documentElement.classList.add('js');</script>
-    @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js', 'resources/js/animacoes.js'])
+    @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js'])
 </head>
 <body class="audix-shell flex min-h-screen flex-col bg-offwhite text-grafite">
 @include('partials.cabecalho')

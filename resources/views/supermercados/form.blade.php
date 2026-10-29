@@ -17,7 +17,7 @@
 
     <h1 class="text-2xl font-bold mb-6">{{ $editando ? 'Editar supermercado' : 'Novo supermercado' }}</h1>
 
-    <form method="POST" data-reveal
+    <form method="POST"
           action="{{ $editando ? route('supermercados.update', $supermercado) : route('supermercados.store') }}"
           class="w-full rounded-2xl bg-white p-6 shadow-sm md:p-8">
         @csrf
