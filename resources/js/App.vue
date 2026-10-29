@@ -641,7 +641,7 @@ onBeforeUnmount(() => {
             <section class="planilha-controles min-w-0 flex min-h-0 flex-col gap-5 xl:h-full">
                 <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
                 <Teleport to="#topo-supermercado" :disabled="!embutido">
-                    <div v-if="nomeSupermercado" class="shrink-0 rounded-2xl border border-grafite/10 bg-white p-4">
+                    <div v-if="nomeSupermercado" class="shrink-0 rounded-2xl border border-grafite/10 bg-white px-5 py-3">
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
                         <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
                     </div>
@@ -791,7 +791,7 @@ onBeforeUnmount(() => {
             <aside v-if="!semPrevia"
                 class="planilha-previa no-print flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:overflow-hidden">
                 <Teleport to="#topo-previa" :disabled="!embutido">
-                <div class="flex items-center justify-between rounded-2xl border border-grafite/10 bg-white px-5 py-4">
+                <div class="flex items-center justify-between rounded-2xl border border-grafite/10 bg-white px-5 py-3">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
                         <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
