@@ -786,12 +786,8 @@ onBeforeUnmount(() => {
             <aside v-if="!semPrevia"
                 class="planilha-previa no-print flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:overflow-hidden">
                 <Teleport to="#topo-previa" :disabled="!embutido">
-                <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-                    <div class="text-right">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
-                        <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
-                        
-                    </div>
+                <div class="flex flex-wrap items-center justify-end gap-3">
+                    <p class="text-sm font-bold">{{ planilha?.nome || 'Planilha' }}</p>
                     <button class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
                         :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
                 </div>
