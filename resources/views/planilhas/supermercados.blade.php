@@ -222,16 +222,11 @@
             background: var(--sm-panel);
             color: var(--sm-text);
             text-decoration: none;
-            transition:
-                transform .2s,
-                border-color .2s,
-                box-shadow .2s;
+            transition: border-color .15s;
         }
 
         .sm-cartao:hover {
-            transform: translateY(-4px);
             border-color: var(--sm-blue);
-            box-shadow: 0 16px 36px #1519220d;
         }
 
         .sm-cartao:focus-visible,
@@ -354,7 +349,7 @@
         }
 
         .sm-cartao:hover .sm-cartao-acao svg {
-            transform: translateX(3px);
+            transform: none;
         }
 
         .sm-vazio {

@@ -712,11 +712,7 @@ button:disabled {
 }
 .audix-control-card,
 .sm-cartao {
-    transition: translate .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s ease, border-color .35s ease;
-}
-.audix-control-card:hover,
-.sm-cartao:hover {
-    translate: 0 -4px;
+    transition: border-color .15s;
 }
 button,
 .audix-primary {
