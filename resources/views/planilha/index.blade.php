@@ -22,9 +22,9 @@
     <!-- Topo fixo: menu, navegação e títulos num fundo branco único; o restante rola à parte -->
     <div class="planilha-topo shrink-0 border-b border-grafite/10 bg-white">
         @include('partials.cabecalho', ['largura' => 'max-w-none'])
-        <div class="planilha-breadcrumb flex flex-wrap items-center justify-between gap-3 px-4 pt-3 pb-3 md:px-8">
+        <div class="planilha-breadcrumb flex flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-8">
             <div class="flex min-w-0 items-center gap-3">
-            @include('partials.breadcrumb', ['itens' => [
+            @include('partials.breadcrumb', ['variante' => 'destaque', 'itens' => [
                 ['nome' => 'Início', 'url' => route('inicio')],
                 ['nome' => $nomeTipo, 'url' => route('planilhas.supermercados', $tipo)],
                 ['nome' => $supermercado?->nome ?? 'Supermercado'],

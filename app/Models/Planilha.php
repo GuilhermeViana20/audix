@@ -14,9 +14,9 @@ class Planilha extends Model
 
     /** Tipos de planilha disponíveis: código => nome exibido. */
     public const TIPOS = [
-        'higiene' => 'Higiene e limpeza ambiental',
+        'higiene' => 'Planilha de Monitoramento - Higiene e Limpeza Ambiental',
         'pragas' => 'Controle de Pragas',
-        'temperatura' => 'Controle de Temperatura',
+        'temperatura' => 'Planilha de Monitoramento - Controle de Temperatura',
     ];
 
     public function supermercado(): BelongsTo

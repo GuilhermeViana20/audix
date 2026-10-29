@@ -1,14 +1,15 @@
-<nav aria-label="Você está em" class="mb-6 text-sm">
-    <ol class="flex flex-wrap items-center gap-1.5 text-grafite/60">
+@php($destaque = ($variante ?? '') === 'destaque')
+<nav aria-label="Você está em" class="{{ $destaque ? 'inline-flex max-w-full items-center rounded-2xl bg-azul px-5 py-2.5 text-sm text-white shadow-lg shadow-azul/30' : 'mb-6 text-sm' }}">
+    <ol class="flex min-w-0 flex-wrap items-center gap-1.5 {{ $destaque ? 'text-white/70' : 'text-grafite/60' }}">
         @foreach ($itens as $item)
             <li class="flex items-center gap-1.5">
                 @unless ($loop->first)
-                    <span aria-hidden="true" class="text-grafite/30">/</span>
+                    <span aria-hidden="true" class="{{ $destaque ? 'text-white/40' : 'text-grafite/30' }}">/</span>
                 @endunless
                 @if (! empty($item['url']))
-                    <a href="{{ $item['url'] }}" class="font-medium text-azul transition hover:underline">{{ $item['nome'] }}</a>
+                    <a href="{{ $item['url'] }}" class="{{ $destaque ? 'font-medium text-white/90 transition hover:text-white' : 'font-medium text-azul transition hover:underline' }}">{{ $item['nome'] }}</a>
                 @else
-                    <span aria-current="page" class="font-semibold text-grafite">{{ $item['nome'] }}</span>
+                    <span aria-current="page" class="{{ $destaque ? 'font-semibold text-white' : 'font-semibold text-grafite' }}">{{ $item['nome'] }}</span>
                 @endif
             </li>
         @endforeach
