@@ -643,3 +643,43 @@ button:disabled {
         padding-left: 0 !important;
     }
 }
+/* Animação da logo no hero da tela principal */
+.audix-hero-logo-wrap {
+    position: relative;
+    overflow: hidden;
+    width: min(100%, 380px);
+    animation: audix-logo-flutuar 6s ease-in-out 1.4s infinite;
+}
+.audix-hero-logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    animation: audix-logo-entrar 1.2s cubic-bezier(.2, .8, .2, 1) both;
+}
+.audix-hero-logo-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .35) 50%, transparent 65%);
+    transform: translateX(-120%);
+    animation: audix-logo-brilho 3.6s ease-in-out 1.6s infinite;
+    pointer-events: none;
+}
+@keyframes audix-logo-entrar {
+    0% { opacity: 0; transform: translateY(22px) scale(.94); filter: blur(10px); }
+    60% { opacity: 1; filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes audix-logo-flutuar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+@keyframes audix-logo-brilho {
+    0% { transform: translateX(-120%); }
+    45%, 100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .audix-hero-logo-wrap,
+    .audix-hero-logo,
+    .audix-hero-logo-wrap::after { animation: none; }
+}
