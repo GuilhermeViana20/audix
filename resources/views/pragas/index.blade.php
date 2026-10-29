@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="/images/audix-favicon.png">
     <script>
         (function () {
@@ -54,10 +55,6 @@
         .folha .rodape p { margin: 0; }
         .folha .rodape .nome { font-size: 10px; font-weight: bold; color: #7a7a7a; }
 
-        /* Tela: folhas menores para caber no celular e no computador */
-        @media (max-width: 1600px) { .folha { zoom: .62; margin-bottom: -300px; } }
-        @media (max-width: 760px)  { .folha { zoom: .36; margin-bottom: -500px; } }
-
         @media print {
             @page { size: A4 landscape; margin: 8mm; }
             .nao-imprimir { display: none !important; }
@@ -68,13 +65,317 @@
             .folha:last-child { break-after: auto; page-break-after: auto; }
             .folha .grade th, .folha .grade td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
+
+        @media screen {
+    .cip-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        gap: 24px;
+        width: 100%;
+        padding: 24px 32px 40px;
+    }
+
+    .cip-painel {
+        min-width: 0;
+    }
+
+    .cip-previa {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .cip-previa .folha {
+        flex-shrink: 0;
+        margin: 0;
+        zoom: var(--cip-zoom, 1);
+    }
+
+    .cip-secoes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .cip-secao {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: 16px;
+        border: 1px solid #e4e9f2;
+        border-radius: 14px;
+        background: #f9faff;
+        transition: border-color .2s, background .2s;
+    }
+
+    .cip-secao:hover {
+        border-color: #a9b8ff;
+        background: #f0f4ff;
+    }
+
+    .cip-secao-topo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .cip-secao-numero {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: #4063ff12;
+        color: #3152dc;
+        font-size: 11px;
+        font-weight: 750;
+    }
+
+    .cip-secao-tipo {
+        color: #697386;
+        font-size: 9px;
+        font-weight: 650;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .cip-secao h3 {
+        margin: 15px 0 18px;
+        color: #151922;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .cip-secao-rodape {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid #e4e9f2;
+    }
+
+    .cip-secao-rodape > span {
+        color: #697386;
+        font-size: 10px;
+    }
+
+    .cip-remover {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        color: #b42336;
+        cursor: pointer;
+    }
+
+    .cip-remover:hover {
+        background: #ffe4e8;
+    }
+
+    .cip-remover:focus-visible {
+        outline: 3px solid #4063ff;
+        outline-offset: 3px;
+    }
+
+    .cip-secoes-vazio {
+        grid-column: 1 / -1;
+        padding: 20px;
+        border: 1px dashed #b9c3d5;
+        border-radius: 12px;
+        color: #697386;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .dark .cip-secao {
+        background: #111827;
+        border-color: #2c3548;
+    }
+
+    .dark .cip-secao:hover {
+        background: #19233a;
+        border-color: #647ed8;
+    }
+
+    .dark .cip-secao h3 {
+        color: #edf1fa;
+    }
+
+    .dark .cip-secao-numero {
+        background: #4063ff25;
+        color: #a5b5ff;
+    }
+
+    .dark .cip-secao-tipo,
+    .dark .cip-secao-rodape > span,
+    .dark .cip-secoes-vazio {
+        color: #a5afc2;
+    }
+
+    .dark .cip-secao-rodape {
+        border-color: #2c3548;
+    }
+
+    .dark .cip-remover {
+        color: #fda4af;
+    }
+
+    .dark .cip-remover:hover {
+        background: #f43f5e20;
+    }
+
+    @media (min-width: 1280px) {
+        .cip-layout {
+            grid-template-columns:
+                clamp(340px, 28vw, 480px)
+                minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 767px) {
+        .cip-layout {
+            padding: 20px 16px 32px;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .cip-secoes {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cip-secao {
+            transition: none;
+        }
+    }
+}
+
+/* Desktop: cada coluna possui sua própria rolagem */
+@media screen and (min-width: 1280px) {
+    body.audix-shell {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .audix-topbar {
+        flex-shrink: 0;
+    }
+
+    .cip-layout {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        padding: 24px 32px;
+        align-items: stretch;
+    }
+
+    .cip-painel,
+    .cip-previa {
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior-y: contain;
+        scrollbar-gutter: stable;
+        scrollbar-width: thin;
+        scrollbar-color: #a5b5d4 transparent;
+    }
+
+    .cip-painel {
+        position: static;
+        padding-right: 12px;
+        padding-bottom: 24px;
+    }
+
+    .cip-previa {
+        padding-right: 12px;
+        padding-bottom: 24px;
+    }
+
+    .cip-painel::-webkit-scrollbar,
+    .cip-previa::-webkit-scrollbar {
+        width: 7px;
+    }
+
+    .cip-painel::-webkit-scrollbar-thumb,
+    .cip-previa::-webkit-scrollbar-thumb {
+        background: #a5b5d4;
+        border-radius: 20px;
+    }
+
+    .dark .cip-painel,
+    .dark .cip-previa {
+        scrollbar-color: #465572 transparent;
+    }
+
+    .dark .cip-painel::-webkit-scrollbar-thumb,
+    .dark .cip-previa::-webkit-scrollbar-thumb {
+        background: #465572;
+    }
+}
+
+@media print {
+    body.audix-shell,
+    .cip-layout,
+    .cip-previa {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .cip-layout,
+    .cip-previa {
+        display: block !important;
+        padding: 0 !important;
+        scrollbar-gutter: auto;
+    }
+}
+
+@media screen {
+    .cip-previa { justify-self: stretch; }
+    .cip-edicao { margin: 0 0 16px; }
+    .cip-edicao summary { color:#3152dc; cursor:pointer; font-size:12px; font-weight:600; padding:6px 0; }
+    .cip-renomear-form { margin-top:10px; }
+    .cip-renomear-form label { display:block; font-size:11px; margin-bottom:6px; }
+    .cip-renomear-form input { width:100%; min-width:0; padding:10px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:#151922; font-size:13px; }
+    .cip-edicao-status { font-size:12px; line-height:1.5; margin:8px 0; color:#b42336; overflow-wrap:anywhere; }
+    .cip-edicao-acoes { display:flex; flex-wrap:wrap; gap:8px; }
+    .cip-edicao-acoes button { border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px; font-size:11px; cursor:pointer; }
+    .cip-edicao-acoes button[type=submit] { background:#4063ff; color:#fff; border-color:#4063ff; }
+    .cip-edicao-acoes button:disabled { opacity:.5; cursor:wait; }
+    .cip-edicao :focus-visible { outline:2px solid #4063ff; outline-offset:3px; }
+    .dark .cip-edicao summary { color:#a5b5ff; }
+    .dark .cip-renomear-form input { background:#111827; color:#edf1fa; border-color:#46516a; }
+    .dark .cip-edicao-status { color:#fda4af; }
+}
     </style>
 </head>
-<body class="bg-offwhite text-grafite">
+
+<body class="audix-shell bg-offwhite text-grafite">
     @include('partials.cabecalho')
 
-    <div class="print:!p-0 px-4 pt-6 pb-10 md:px-8 xl:grid xl:grid-cols-[3fr_7fr] xl:items-start xl:gap-6">
-    <div class="nao-imprimir xl:sticky xl:top-28 xl:self-start">
+    <div class="cip-layout">
+    <div class="cip-painel nao-imprimir">
         @include('partials.breadcrumb', ['itens' => [
             ['nome' => 'Início', 'url' => route('inicio')],
             ['nome' => 'Controle de Pragas', 'url' => route('planilhas.supermercados', 'pragas')],
@@ -101,22 +402,73 @@
                     <span class="rounded-full bg-azul/10 px-2.5 py-0.5 text-xs font-semibold text-azul">{{ $secoes->count() }} salvas</span>
                 </div>
 
-                <div class="mt-4 divide-y divide-grafite/10">
+                <div class="cip-secoes">
                     @forelse ($secoes as $secao)
-                        <div class="flex items-center justify-between gap-3 py-3">
-                            <div class="flex items-center gap-3">
-                                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-offwhite text-xs font-bold text-grafite/60">{{ $loop->iteration }}</span>
-                                <span class="font-semibold">{{ $secao->nome }}</span>
+                        <article class="cip-secao" data-secao-id="{{ $secao->id }}">
+                            <div class="cip-secao-topo">
+                                <span class="cip-secao-numero">
+                                    {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                </span>
+
+                                <span class="cip-secao-tipo">Seção</span>
                             </div>
-                            <form method="POST" action="{{ route('pragas.secoes.destroy', $secao) }}" data-loading-texto="Removendo…"
-                                  onsubmit="return confirm('Remover a seção {{ addslashes($secao->nome) }}?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-red-500 transition hover:bg-red-50">Remover</button>
-                            </form>
-                        </div>
+
+                            <h3 data-nome-secao>{{ $secao->nome }}</h3>
+                            <details class="cip-edicao">
+                                <summary>Renomear seção</summary>
+                                <form class="cip-renomear-form" action="{{ url('/api/secoes/'.$secao->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <label for="nome-secao-{{ $secao->id }}">Nome da seção</label>
+                                    <input id="nome-secao-{{ $secao->id }}" name="nome" value="{{ $secao->nome }}" required maxlength="120" autocomplete="off">
+                                    <p class="cip-edicao-status" role="status" aria-live="polite"></p>
+                                    <div class="cip-edicao-acoes">
+                                        <button type="button" data-cancelar>Cancelar</button>
+                                        <button type="submit">Salvar</button>
+                                    </div>
+                                </form>
+                            </details>
+
+                            <div class="cip-secao-rodape">
+                                <span>1 folha de controle</span>
+
+                                <form
+                                    method="POST"
+                                    action="{{ route('pragas.secoes.destroy', $secao) }}"
+                                    data-loading-texto="Removendo…"
+                                    onsubmit="return confirm('Deseja remover esta seção?')"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        type="submit"
+                                        class="cip-remover"
+                                        aria-label="Remover seção {{ $secao->nome }}"
+                                        title="Remover seção"
+                                    >
+                                        <svg
+                                            width="17"
+                                            height="17"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.7"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M3 6h18M9 6V4h6v2"/>
+                                            <path d="m5 6 1 14h12l1-14M10 10v6m4-6v6"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </article>
                     @empty
-                        <p class="py-4 text-sm text-grafite/60">Nenhuma seção ainda. Adicione abaixo, por exemplo AÇOUGUE.</p>
+                        <p class="cip-secoes-vazio">
+                            Nenhuma seção cadastrada. Adicione a primeira abaixo.
+                        </p>
                     @endforelse
                 </div>
 
@@ -166,9 +518,9 @@
         }
     </script>
 
-    <main id="folhas" class="print:!p-0 flex min-w-0 flex-col items-center gap-6 pb-10">
+    <main id="folhas" class="cip-previa">
         @forelse ($secoes as $secao)
-            <section class="folha">
+            <section class="folha" data-folha-secao="{{ $secao->id }}">
                 <table class="cab">
                     <tr>
                         <td class="sem-borda esq"><img src="/images/acoop.png" alt="ACCP" class="logo-acoop"></td>
@@ -186,7 +538,7 @@
                 <table class="topo">
                     <tr>
                         <td style="width:40%"><b>EMPRESA RESPONSÁVEL:</b></td>
-                        <td style="width:30%"><b>SEÇÃO:</b><span class="valor">{{ $secao->nome }}</span></td>
+                        <td style="width:30%"><b>SEÇÃO:</b><span class="valor" data-nome-folha>{{ $secao->nome }}</span></td>
                         <td style="width:30%"><b>ENCARREGADO:</b></td>
                     </tr>
                 </table>
@@ -329,5 +681,110 @@
             });
         </script>
     @endif
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const previa = document.getElementById('folhas');
+
+        if (!previa) return;
+
+        let larguraAnterior = 0;
+
+        const ajustarPrevia = () => {
+            if (window.matchMedia('print').matches) return;
+
+            const largura = previa.clientWidth;
+
+            if (!largura || largura === larguraAnterior) return;
+
+            larguraAnterior = largura;
+
+            // A folha original mede 1123px de largura.
+            previa.style.setProperty('--cip-zoom', largura / 1123);
+        };
+
+        const observer = new ResizeObserver(ajustarPrevia);
+        observer.observe(previa);
+
+        window.addEventListener('afterprint', () => {
+            larguraAnterior = 0;
+            ajustarPrevia();
+        });
+
+        ajustarPrevia();
+    });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.cip-renomear-form').forEach(form => {
+        const card = form.closest('[data-secao-id]');
+        const details = form.closest('details');
+        const input = form.elements.nome;
+        const status = form.querySelector('.cip-edicao-status');
+        const save = form.querySelector('[type="submit"]');
+        const cancel = form.querySelector('[data-cancelar]');
+        let original = input.value;
+        let busy = false;
+        cancel.addEventListener('click', () => {
+            if (busy) return;
+            input.value = original;
+            status.textContent = '';
+            details.open = false;
+            details.querySelector('summary').focus();
+        });
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+            if (busy) return;
+            const nome = input.value.trim().toLocaleUpperCase('pt-BR');
+            if (!nome) { status.textContent = 'Informe o nome da seção.'; input.focus(); return; }
+            busy = true;
+            save.disabled = cancel.disabled = true;
+            input.readOnly = true;
+            save.textContent = 'Salvando…';
+            status.textContent = '';
+            try {
+                const response = await fetch(form.action, {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ nome }),
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 419) {
+                        throw new Error('Sua sessão expirou. Recarregue a página e entre novamente.');
+                    }
+                    throw new Error(data.errors?.nome?.[0] || data.message || 'Não foi possível salvar. Tente novamente.');
+                }
+                if (typeof data.nome !== 'string') throw new Error('Resposta inesperada. Recarregue para conferir o nome salvo.');
+                original = data.nome;
+                input.value = original;
+                card.querySelector('[data-nome-secao]').textContent = original;
+                card.querySelector('.cip-remover').setAttribute('aria-label', 'Remover seção ' + original);
+                document.querySelectorAll('[data-folha-secao]').forEach(folha => {
+                    if (folha.dataset.folhaSecao === card.dataset.secaoId) {
+                        folha.querySelector('[data-nome-folha]').textContent = original;
+                    }
+                });
+                details.open = false;
+                details.querySelector('summary').focus();
+                window.toast?.('Seção renomeada.', 'sucesso');
+            } catch (error) {
+                status.textContent = error.message;
+            } finally {
+                busy = false;
+                save.disabled = cancel.disabled = false;
+                input.readOnly = false;
+                save.textContent = 'Salvar';
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>

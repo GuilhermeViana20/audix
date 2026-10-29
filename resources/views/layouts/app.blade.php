@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="/images/audix-favicon.png">
     <title>audix · @yield('titulo')</title>
     <script>
@@ -16,15 +17,15 @@
     </script>
     @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js'])
 </head>
-<body class="flex min-h-screen flex-col bg-offwhite text-grafite">
+<body class="audix-shell flex min-h-screen flex-col bg-offwhite text-grafite">
 @include('partials.cabecalho')
 
-<main class="mx-auto w-full flex-1 px-4 py-6 md:px-8 md:py-10">
+<main class="audix-main mx-auto w-full flex-1 px-4 py-6 md:px-8 md:py-10">
     @yield('breadcrumb')
     @yield('conteudo')
 </main>
 
-<footer class="mt-12 border-t border-grafite/10 bg-white/95">
+<footer class="audix-footer mt-12 border-t border-grafite/10 bg-white/95">
     <div class="flex flex-col gap-3 px-4 py-4 text-xs md:flex-row md:items-center md:justify-between md:gap-6 md:px-8">
         <div class="flex items-center gap-3">
             <img src="/images/audix-logo.png" alt="audix" class="logo-tema h-6 w-auto">

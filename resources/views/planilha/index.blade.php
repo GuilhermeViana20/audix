@@ -18,9 +18,9 @@
     <title>{{ $tipo === 'temperatura' ? 'Planilha Temperatura' : 'Planilha Limpeza' }} - {{ $supermercado?->nome }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/toast.js'])
 </head>
-<body class="bg-offwhite text-grafite">
+<body class="audix-shell {{ $tipo === 'temperatura' ? 'tela-temperatura' : '' }} bg-offwhite text-grafite">
     @include('partials.cabecalho', ['largura' => 'max-w-none'])
-    <div class="px-4 pt-6 md:px-8">
+    <div class="planilha-breadcrumb px-4 pt-6 md:px-8">
         @include('partials.breadcrumb', ['itens' => [
             ['nome' => 'Início', 'url' => route('inicio')],
             ['nome' => $nomeTipo, 'url' => route('planilhas.supermercados', $tipo)],

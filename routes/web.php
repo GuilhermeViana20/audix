@@ -7,67 +7,71 @@ use App\Http\Controllers\PdfHigieneController;
 use App\Http\Controllers\RelatorioController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'inicio')->name('inicio');
+require __DIR__.'/auth.php';
 
-// Escolha do supermercado para o tipo de planilha
-Route::get('/planilhas/{tipo}', function (string $tipo) {
-    abort_unless(array_key_exists($tipo, \App\Models\Planilha::TIPOS), 404);
+Route::middleware('auth')->group(function () {
+    Route::view('/', 'inicio')->name('inicio');
 
-    $nomeTipo = \App\Models\Planilha::TIPOS[$tipo];
-    $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome', 'logo_caminho']);
+    // Escolha do supermercado para o tipo de planilha
+    Route::get('/planilhas/{tipo}', function (string $tipo) {
+        abort_unless(array_key_exists($tipo, \App\Models\Planilha::TIPOS), 404);
 
-    return view('planilhas.supermercados', compact('tipo', 'nomeTipo', 'supermercados'));
-})->name('planilhas.supermercados');
-Route::get('/supermercados', [SupermercadoController::class, 'index'])->name('supermercados.index');
-Route::get('/supermercados/novo', [SupermercadoController::class, 'criar'])->name('supermercados.criar');
-Route::post('/supermercados', [SupermercadoController::class, 'store'])->name('supermercados.store');
-Route::get('/supermercados/{supermercado}/editar', [SupermercadoController::class, 'editar'])->name('supermercados.editar');
-Route::put('/supermercados/{supermercado}', [SupermercadoController::class, 'update'])->name('supermercados.update');
-Route::delete('/supermercados/{supermercado}', [SupermercadoController::class, 'destroy'])->name('supermercados.destroy');
+        $nomeTipo = \App\Models\Planilha::TIPOS[$tipo];
+        $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome', 'logo_caminho']);
 
-Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {
-    if (! $supermercado) {
-        return redirect()->route('planilhas.supermercados', 'higiene');
-    }
+        return view('planilhas.supermercados', compact('tipo', 'nomeTipo', 'supermercados'));
+    })->name('planilhas.supermercados');
+    Route::get('/supermercados', [SupermercadoController::class, 'index'])->name('supermercados.index');
+    Route::get('/supermercados/novo', [SupermercadoController::class, 'criar'])->name('supermercados.criar');
+    Route::post('/supermercados', [SupermercadoController::class, 'store'])->name('supermercados.store');
+    Route::get('/supermercados/{supermercado}/editar', [SupermercadoController::class, 'editar'])->name('supermercados.editar');
+    Route::put('/supermercados/{supermercado}', [SupermercadoController::class, 'update'])->name('supermercados.update');
+    Route::delete('/supermercados/{supermercado}', [SupermercadoController::class, 'destroy'])->name('supermercados.destroy');
 
-    $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome']);
+    Route::get('/higiene/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {
+        if (! $supermercado) {
+            return redirect()->route('planilhas.supermercados', 'higiene');
+        }
 
-    return view('planilha.index', compact('supermercado', 'supermercados'));
-})->name('higiene.index');
+        $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome']);
 
-Route::get('/higiene/{supermercado}/pdf', [PdfHigieneController::class, 'gerar'])->name('higiene.pdf');
+        return view('planilha.index', compact('supermercado', 'supermercados'));
+    })->name('higiene.index');
 
-// Controle de temperatura: mesmo editor da higiene, com o box de legenda
-Route::get('/temperatura/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {
-    if (! $supermercado) {
-        return redirect()->route('planilhas.supermercados', 'temperatura');
-    }
+    Route::get('/higiene/{supermercado}/pdf', [PdfHigieneController::class, 'gerar'])->name('higiene.pdf');
 
-    $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome']);
-    $tipo = 'temperatura';
+    // Controle de temperatura: mesmo editor da higiene, com o box de legenda
+    Route::get('/temperatura/{supermercado?}', function (?\App\Models\Supermercado $supermercado = null) {
+        if (! $supermercado) {
+            return redirect()->route('planilhas.supermercados', 'temperatura');
+        }
 
-    return view('planilha.index', compact('supermercado', 'supermercados', 'tipo'));
-})->name('temperatura.index');
+        $supermercados = \App\Models\Supermercado::orderBy('nome')->get(['id', 'nome']);
+        $tipo = 'temperatura';
 
-// Controle de pragas (CIP): seções e folhas com a legenda de pragas
-Route::get('/pragas/{supermercado}', [\App\Http\Controllers\PragasController::class, 'index'])->name('pragas.index');
-Route::post('/pragas/{supermercado}/secoes', [\App\Http\Controllers\PragasController::class, 'store'])->name('pragas.secoes.store');
-Route::delete('/pragas/secoes/{secao}', [\App\Http\Controllers\PragasController::class, 'destroy'])->name('pragas.secoes.destroy');
+        return view('planilha.index', compact('supermercado', 'supermercados', 'tipo'));
+    })->name('temperatura.index');
 
-Route::prefix('api')->group(function () {
-    // Planilhas (por tipo) e suas seções
-    Route::get('supermercados/{supermercado}/planilhas/{tipo}', [SupermercadoController::class, 'planilha']);
-    Route::post('planilhas/{planilha}/secoes', [SecaoController::class, 'store']);
-    Route::post('planilhas/{planilha}/importacao', [\App\Http\Controllers\ImportacaoPlanilhaController::class, 'store']);
-    Route::post('planilhas/{planilha}/relatorios', [RelatorioController::class, 'store']);
-    Route::put('secoes/{secao}', [SecaoController::class, 'update']);
-    Route::delete('secoes/{secao}', [SecaoController::class, 'destroy']);
+    // Controle de pragas (CIP): seções e folhas com a legenda de pragas
+    Route::get('/pragas/{supermercado}', [\App\Http\Controllers\PragasController::class, 'index'])->name('pragas.index');
+    Route::post('/pragas/{supermercado}/secoes', [\App\Http\Controllers\PragasController::class, 'store'])->name('pragas.secoes.store');
+    Route::delete('/pragas/secoes/{secao}', [\App\Http\Controllers\PragasController::class, 'destroy'])->name('pragas.secoes.destroy');
 
-    // Linhas das seções
+    Route::prefix('api')->group(function () {
+        // Planilhas (por tipo) e suas seções
+        Route::get('supermercados/{supermercado}/planilhas/{tipo}', [SupermercadoController::class, 'planilha']);
+        Route::post('planilhas/{planilha}/secoes', [SecaoController::class, 'store']);
+        Route::post('planilhas/{planilha}/importacao', [\App\Http\Controllers\ImportacaoPlanilhaController::class, 'store']);
+        Route::post('planilhas/{planilha}/relatorios', [RelatorioController::class, 'store']);
+        Route::put('secoes/{secao}', [SecaoController::class, 'update']);
+        Route::delete('secoes/{secao}', [SecaoController::class, 'destroy']);
 
-    Route::get('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'index']);
-    Route::put('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'sincronizar']);
-    Route::post('secoes/{secao}/copiar-para-todas', [LinhaPlanilhaController::class, 'copiarParaTodas']);
-    Route::post('secoes/{secao}/copiar-para-supermercado', [SecaoController::class, 'copiarParaSupermercado']);
+        // Linhas das seções
 
+        Route::get('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'index']);
+        Route::put('secoes/{secao}/linhas', [LinhaPlanilhaController::class, 'sincronizar']);
+        Route::post('secoes/{secao}/copiar-para-todas', [LinhaPlanilhaController::class, 'copiarParaTodas']);
+        Route::post('secoes/{secao}/copiar-para-supermercado', [SecaoController::class, 'copiarParaSupermercado']);
+
+    });
 });

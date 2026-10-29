@@ -98,10 +98,18 @@ const folhas = computed(() => ordenadas.value
 
 // Ajusta o zoom das folhas para caber na coluna de pré-visualização (só na tela)
 const zoomPreview = ref(1);
+let observadorPreview = null;
 function ajustarZoom() {
     const caixa = document.getElementById('sheets-box');
     if (!caixa) return;
-    zoomPreview.value = Math.max(0.3, Math.min(1, (caixa.clientWidth - 24) / 1123));
+    if (ehTemperatura) {
+        if (window.matchMedia('print').matches) return;
+        const estilo = getComputedStyle(caixa);
+        const largura = caixa.clientWidth - (parseFloat(estilo.paddingLeft) || 0) - (parseFloat(estilo.paddingRight) || 0);
+        if (largura > 0) zoomPreview.value = largura / 1123;
+    } else {
+        zoomPreview.value = Math.max(0.3, Math.min(1, (caixa.clientWidth - 24) / 1123));
+    }
 }
 // Registra o relatório (planilha impressa) e abre a impressão do navegador
 async function imprimir() {
@@ -498,10 +506,22 @@ onMounted(async () => {
     window.addEventListener('beforeunload', avisarAntesDeSair);
     window.addEventListener('resize', ajustarZoom);
     window.addEventListener('keydown', aoTeclar);
+    await nextTick();
+    if (ehTemperatura) {
+        const caixa = document.getElementById('sheets-box');
+        if (caixa) {
+            observadorPreview = new ResizeObserver(ajustarZoom);
+            observadorPreview.observe(caixa);
+        }
+        window.addEventListener('afterprint', ajustarZoom);
+    }
     ajustarZoom();
     if (supermercadoId.value) await carregarSupermercado(supermercadoId.value);
 });
 onBeforeUnmount(() => {
+    observadorPreview?.disconnect();
+    window.removeEventListener('resize', ajustarZoom);
+    window.removeEventListener('afterprint', ajustarZoom);
     window.removeEventListener('beforeunload', avisarAntesDeSair);
     window.removeEventListener('keydown', aoTeclar);
 });
@@ -615,17 +635,17 @@ onBeforeUnmount(() => {
         </div>
     </div>
 
-    <div class="flex min-h-screen">
-        <div :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
+    <div class="planilha-workspace flex min-h-screen">
+        <div class="planilha-colunas" :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
-            <section class="min-w-0 flex flex-col gap-5 xl:sticky xl:top-28 xl:self-start xl:h-[calc(100vh-8rem)]">
+            <section class="planilha-controles min-w-0 flex flex-col gap-5 xl:sticky xl:top-28 xl:self-start xl:h-[calc(100vh-8rem)]">
                 <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
                 <div v-if="nomeSupermercado" class="shrink-0 rounded-2xl bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
                     <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
                 </div>
                 <!-- Conteúdo abaixo do card: rola por dentro e é cortado na borda do card -->
-                <div class="flex min-h-0 flex-1 flex-col gap-5 xl:overflow-y-auto xl:pr-1">
+                <div class="planilha-controles-conteudo flex min-h-0 flex-1 flex-col gap-5 xl:overflow-y-auto xl:pr-1">
                     <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
                         <p class="text-xs font-semibold uppercase text-grafite/50">Supermercado</p>
                         <select class="mt-2 w-full rounded-xl bg-offwhite px-3 py-2 text-sm font-medium"
@@ -762,7 +782,7 @@ onBeforeUnmount(() => {
 
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
             <aside v-if="!semPrevia"
-                class="no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-28 xl:h-[calc(100vh-8rem)] xl:overflow-hidden">
+                class="planilha-previa no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-28 xl:h-[calc(100vh-8rem)] xl:overflow-hidden">
                 <div class="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
@@ -1186,4 +1206,94 @@ onBeforeUnmount(() => {
     padding: 6px;
     vertical-align: middle;
 }
+
+/* Temperatura: controles e folhas com rolagens independentes. */
+@media screen and (min-width: 1280px) {
+    body.tela-temperatura {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    .tela-temperatura .audix-topbar,
+    .tela-temperatura .planilha-breadcrumb { flex-shrink: 0; }
+    .tela-temperatura #app {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 24px;
+    }
+    .tela-temperatura .planilha-workspace {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+    .tela-temperatura .planilha-colunas {
+        min-height: 0;
+        height: 100%;
+        align-items: stretch;
+    }
+    .tela-temperatura .planilha-controles,
+    .tela-temperatura .planilha-previa {
+        position: static;
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+        align-self: stretch;
+    }
+    .tela-temperatura .planilha-controles {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 12px;
+        padding-bottom: 20px;
+    }
+    .tela-temperatura .planilha-controles-conteudo {
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow: visible;
+        padding-right: 0;
+    }
+    .tela-temperatura .planilha-previa { overflow: hidden; }
+    .tela-temperatura .planilha-previa > :first-child { flex-shrink: 0; }
+    .tela-temperatura #sheets-box {
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 12px;
+    }
+    .tela-temperatura .planilha-controles,
+    .tela-temperatura #sheets-box {
+        overscroll-behavior-y: contain;
+        scrollbar-gutter: stable;
+        scrollbar-width: thin;
+        scrollbar-color: #a5b5d4 transparent;
+    }
+    .dark .tela-temperatura .planilha-controles,
+    .dark .tela-temperatura #sheets-box { scrollbar-color: #465572 transparent; }
+}
+@media print {
+    body.tela-temperatura,
+    .tela-temperatura #app,
+    .tela-temperatura .planilha-workspace,
+    .tela-temperatura .planilha-colunas,
+    .tela-temperatura .planilha-previa,
+    .tela-temperatura #sheets-box {
+        display: block !important;
+        position: static !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        scrollbar-gutter: auto;
+    }
+    .tela-temperatura .planilha-controles,
+    .tela-temperatura .planilha-breadcrumb,
+    .tela-temperatura .planilha-previa > :first-child { display: none !important; }
+}
+
 </style>

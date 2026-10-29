@@ -24,12 +24,30 @@
     --color-grafite: #e7eaf2;
     --color-offwhite: #0b0e15;
 }
-.dark .bg-white { background-color: #161b27; }
-.dark .bg-white\/95 { background-color: rgb(22 27 39 / .95); }
-.dark .bg-white\/60 { background-color: rgb(22 27 39 / .6); }
-.dark .bg-red-50 { background-color: rgb(239 68 68 / .12); }
-.dark .bg-amber-50 { background-color: rgb(245 158 11 / .12); }
-.dark .logo-tema { filter: brightness(0) invert(1); }
+
+.dark .bg-white {
+    background-color: #161b27;
+}
+
+.dark .bg-white\/95 {
+    background-color: rgb(22 27 39 / .95);
+}
+
+.dark .bg-white\/60 {
+    background-color: rgb(22 27 39 / .6);
+}
+
+.dark .bg-red-50 {
+    background-color: rgb(239 68 68 / .12);
+}
+
+.dark .bg-amber-50 {
+    background-color: rgb(245 158 11 / .12);
+}
+
+.dark .logo-tema {
+    filter: brightness(0) invert(1);
+}
 
 /* Cursor de mão em todos os botões e elementos clicáveis */
 button:not(:disabled),
@@ -38,6 +56,590 @@ select,
 label[for] {
     cursor: pointer;
 }
+
 button:disabled {
     cursor: not-allowed;
+}
+
+/* Interface Audix. As regras de tela não alteram as folhas impressas. */
+.audix-sidebar,
+.audix-topbar {
+    display: none;
+}
+
+@media screen {
+    :root {
+        --audix-panel: #fff;
+        --audix-line: #e5e9f1;
+        --audix-muted: #697386;
+    }
+
+    .dark {
+        --audix-panel: #181e2b;
+        --audix-line: #2b3445;
+        --audix-muted: #a4aec0;
+    }
+
+    .audix-shell {
+        padding-left: 248px;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    }
+
+    .audix-sidebar {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 248px;
+        padding: 36px 20px 24px;
+        z-index: 40;
+        background: #151922;
+        color: #fff;
+    }
+
+    .audix-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 20px;
+        margin: 0 8px 44px;
+        background: #fff;
+        border-radius: 14px;
+    }
+
+    .audix-sidebar .audix-brand {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 8px 0;
+    }
+
+    .audix-sidebar .audix-brand img {
+        width: 170px;
+        height: auto;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    .audix-nav-label {
+        font-size: 10px;
+        letter-spacing: .17em;
+        color: #a3acbf;
+        padding: 0 14px;
+        margin-bottom: 18px;
+        font-weight: 600;
+    }
+
+    .audix-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .audix-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        border-radius: 10px;
+        color: #b8c0d1;
+        font-size: 13px;
+        font-weight: 500;
+        transition: background .18s, color .18s;
+    }
+
+    .audix-nav-link svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+
+    .audix-nav-link:hover {
+        background: #252c3c;
+        color: white;
+    }
+
+    .audix-nav-link.is-active {
+        background: #4063ff;
+        color: white;
+        box-shadow: 0 7px 20px #0002;
+    }
+
+    .audix-sidebar-bottom {
+        margin-top: auto;
+        padding: 24px 14px 0;
+        border-top: 1px solid #ffffff16;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .audix-sidebar-bottom p {
+        font-size: 11px;
+        line-height: 1.6;
+        color: #a3acbf;
+    }
+
+    .audix-small-mark {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -3px;
+    }
+
+    .audix-small-mark span {
+        color: #6a86ff;
+    }
+
+    .audix-topbar {
+        display: flex;
+        min-height: 84px;
+        padding: 18px 32px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        background: var(--audix-panel);
+        border-bottom: 1px solid var(--audix-line);
+    }
+
+    .audix-topbar-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        color: var(--audix-muted);
+    }
+
+    .audix-topbar p {
+        font-size: 13px;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    .audix-theme {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--audix-line);
+        border-radius: 12px;
+        background: var(--color-offwhite);
+    }
+
+    .audix-main {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .audix-footer {
+        margin-top: 32px;
+    }
+
+    .audix-footer>div {
+        flex-wrap: wrap;
+    }
+
+    .audix-hero {
+        display: flex;
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px;
+        background: #151922;
+        color: white;
+        min-height: 290px;
+        padding: 40px;
+        gap: 20px;
+    }
+
+    .audix-hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 620px;
+    }
+
+    .audix-eyebrow {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        color: #4063ff;
+    }
+
+    .audix-hero .audix-eyebrow {
+        color: #a9baff;
+    }
+
+    .audix-hero h1 {
+        font-size: clamp(26px, 2.5vw, 40px);
+        line-height: 1.17;
+        letter-spacing: -.045em;
+        font-weight: 700;
+        margin: 16px 0;
+    }
+
+    .audix-hero h1 span {
+        color: #b9c7ff;
+    }
+
+    .audix-hero p {
+        color: #b9c1d2;
+        font-size: 14px;
+        line-height: 1.7;
+        max-width: 480px;
+    }
+
+    .audix-primary {
+        display: inline-flex;
+        gap: 24px;
+        align-items: center;
+        background: #4063ff;
+        border-radius: 10px;
+        color: #fff;
+        padding: 12px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 24px;
+    }
+
+    .audix-primary:hover {
+        background: #3152e8;
+    }
+
+    .audix-hero-art {
+        flex: 1;
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background: radial-gradient(ellipse, #4063ff25, transparent 70%);
+    }
+
+    .audix-hero-art>span {
+        font-size: 220px;
+        line-height: .9;
+        font-weight: 800;
+        color: #4063ff;
+        transform: rotate(-7deg);
+    }
+
+    .audix-hero-art small {
+        color: #8a98b6;
+        font-size: 8px;
+        letter-spacing: .18em;
+        margin-top: 24px;
+    }
+
+    .audix-section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 16px;
+        margin: 32px 0 18px;
+    }
+
+    .audix-section-heading h2,
+    .audix-guide h2 {
+        font-size: 23px;
+        letter-spacing: -.035em;
+        font-weight: 700;
+        margin-top: 6px;
+    }
+
+    .audix-section-heading>p {
+        font-size: 12px;
+        color: var(--audix-muted);
+    }
+
+    .audix-control-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .audix-control-card {
+        display: flex;
+        flex-direction: column;
+        padding: 26px;
+        border: 1px solid var(--audix-line);
+        border-radius: 18px;
+        background: var(--audix-panel);
+        transition: transform .2s, border-color .2s, box-shadow .2s;
+    }
+
+    .audix-control-card:hover {
+        transform: translateY(-4px);
+        border-color: #4063ff;
+        box-shadow: 0 12px 30px #1519220a;
+    }
+
+    .audix-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 26px;
+    }
+
+    .audix-card-icon {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #4063ff10;
+        color: #4063ff;
+    }
+
+    .dark .audix-card-icon {
+        color: #94a8ff;
+        background: #4063ff20;
+    }
+
+    .audix-card-icon svg {
+        width: 27px;
+        height: 27px;
+    }
+
+    .audix-card-number {
+        font-size: 12px;
+        color: var(--audix-muted);
+    }
+
+    .audix-card-category {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--audix-muted);
+    }
+
+    .audix-control-card h3 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -.03em;
+        margin: 8px 0;
+    }
+
+    .audix-control-card>p {
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--audix-muted);
+        margin-bottom: 25px;
+    }
+
+    .audix-card-action {
+        margin-top: auto;
+        border-top: 1px solid var(--audix-line);
+        padding-top: 18px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4063ff;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .dark .audix-card-action,
+    .dark .audix-eyebrow {
+        color: #9cafff;
+    }
+
+    .audix-guide {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-top: 24px;
+        padding: 26px;
+        border: 1px solid var(--audix-line);
+        border-radius: 18px;
+    }
+
+    .audix-guide h2 {
+        font-size: 18px;
+    }
+
+    .audix-guide ol {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+
+    .audix-guide li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 11px;
+        color: var(--audix-muted);
+    }
+
+    .audix-guide b {
+        color: #4063ff;
+        font-size: 12px;
+    }
+
+    .audix-shell input:not([type=checkbox]):not([type=radio]):not([type=file]),
+    .audix-shell select,
+    .audix-shell textarea {
+        border: 1px solid var(--audix-line);
+    }
+
+    .audix-shell :is(a, button, input, select, textarea):focus-visible {
+        outline: 3px solid #7390ff;
+        outline-offset: 3px;
+    }
+
+    .audix-shell button {
+        transition: filter .18s;
+    }
+
+    .audix-shell button:hover:not(:disabled) {
+        filter: brightness(.96);
+    }
+
+    @media(min-width:1024px) and (max-width:1399px) {
+        .audix-shell {
+            padding-left: 212px;
+        }
+
+        .audix-sidebar {
+            width: 212px;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .audix-hero-art {
+            display: none;
+        }
+
+        .audix-control-card {
+            padding: 22px;
+        }
+
+        .audix-guide {
+            align-items: start;
+            flex-direction: column;
+        }
+    }
+
+    @media(max-width:1023px) {
+        .audix-shell {
+            padding-left: 0;
+        }
+
+        .audix-sidebar {
+            position: static;
+            width: 100%;
+            padding: 16px 20px;
+            gap: 14px;
+        }
+
+        .audix-brand {
+            align-self: start;
+            width: 125px;
+            margin: 0;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .audix-brand img {
+            height: 32px;
+            width: 100%;
+        }
+
+        .audix-nav-label,
+        .audix-sidebar-bottom {
+            display: none;
+        }
+
+        .audix-nav {
+            flex-direction: row;
+            overflow-x: auto;
+            padding-bottom: 3px;
+        }
+
+        .audix-nav-link {
+            white-space: nowrap;
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+
+        .audix-nav-link svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .audix-topbar {
+            padding: 14px 24px;
+            min-height: 70px;
+        }
+
+        .audix-hero {
+            padding: 30px;
+        }
+
+        .audix-hero-art {
+            display: none;
+        }
+
+        .audix-guide {
+            flex-direction: column;
+            align-items: start;
+        }
+    }
+
+    @media(max-width:640px) {
+        .audix-control-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .audix-hero {
+            padding: 26px;
+            border-radius: 18px;
+        }
+
+        .audix-section-heading {
+            align-items: start;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .audix-topbar {
+            padding: 12px 16px;
+        }
+
+        .audix-topbar p {
+            font-size: 12px;
+        }
+
+        .audix-guide ol {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .audix-card-top {
+            margin-bottom: 18px;
+        }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+        .audix-shell *,
+        .audix-shell *::before,
+        .audix-shell *::after {
+            transition: none !important;
+            animation: none !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@media print {
+
+    .audix-sidebar,
+    .audix-topbar,
+    .audix-footer {
+        display: none !important;
+    }
+
+    .audix-shell {
+        padding-left: 0 !important;
+    }
 }

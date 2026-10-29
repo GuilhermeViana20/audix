@@ -1,42 +1,25 @@
 @extends('layouts.app')
-
-@section('titulo', 'Planilhas')
-
+@section('titulo', 'Visão geral')
 @section('conteudo')
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold tracking-tight">Qual planilha você quer preencher?</h1>
-        <p class="mt-1 text-sm text-grafite/60">Escolha o tipo de controle para continuar.</p>
+<div class="audix-dashboard">
+    <section class="audix-hero">
+        <div class="audix-hero-content"><span class="audix-eyebrow">MAIS CLAREZA. MAIS CONTROLE.</span>
+            <h1>Qualidade em cada detalhe.<br><span>Controle em um só lugar.</span></h1>
+            <p>Organize as rotinas dos supermercados e prepare suas planilhas de monitoramento com praticidade.</p>
+            <a href="{{ route('supermercados.index') }}" class="audix-primary">Gerenciar supermercados <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="audix-hero-art" aria-hidden="true"><span>×</span><small>INTELIGÊNCIA EM CADA CONTROLE</small></div>
+    </section>
+    <div class="audix-section-heading"><div><span class="audix-eyebrow">ROTINA ORGANIZADA</span><h2>Seus controles</h2></div><p>Escolha uma planilha para começar</p></div>
+    <div class="audix-control-grid">
+        @foreach ([['temperatura', '01', 'Temperatura', 'Acompanhe as temperaturas dos setores e equipamentos.', 'Monitoramento térmico'], ['higiene', '02', 'Higiene e limpeza', 'Padronize a limpeza dos ambientes e as rotinas de higienização.', 'Higiene ambiental'], ['pragas', '03', 'Controle de pragas', 'Organize as inspeções e o controle integrado de pragas.', 'Controle integrado']] as [$codigo, $numero, $nome, $descricao, $categoria])
+            <a class="audix-control-card" href="{{ route('planilhas.supermercados', $codigo) }}">
+                <div class="audix-card-top"><span class="audix-card-icon">@include('partials.icone', ['icone' => $codigo])</span><span class="audix-card-number">{{ $numero }}</span></div>
+                <span class="audix-card-category">{{ $categoria }}</span><h3>{{ $nome }}</h3><p>{{ $descricao }}</p>
+                <div class="audix-card-action">Abrir controle <span aria-hidden="true">→</span></div>
+            </a>
+        @endforeach
     </div>
-
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <a href="{{ route('planilhas.supermercados', 'pragas') }}"
-           class="group flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-grafite/5 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[.99]">
-            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-azul/10 text-2xl">🐜</span>
-            <div>
-                <p class="text-lg font-semibold">Controle de Pragas</p>
-                <p class="mt-1 text-sm text-grafite/60">CIP – controle integrado de pragas</p>
-            </div>
-            <span class="mt-auto text-sm font-semibold text-azul transition group-hover:translate-x-1">Abrir →</span>
-        </a>
-
-        <a href="{{ route('planilhas.supermercados', 'higiene') }}"
-           class="group flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-grafite/5 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[.99]">
-            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-azul/10 text-2xl">💧</span>
-            <div>
-                <p class="text-lg font-semibold">Planilha de Higiene</p>
-                <p class="mt-1 text-sm text-grafite/60">Higiene e limpeza ambiental</p>
-            </div>
-            <span class="mt-auto text-sm font-semibold text-azul transition group-hover:translate-x-1">Abrir →</span>
-        </a>
-
-        <a href="{{ route('planilhas.supermercados', 'temperatura') }}"
-           class="group flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-grafite/5 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[.99]">
-            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-azul/10 text-2xl">🌡</span>
-            <div>
-                <p class="text-lg font-semibold">Planilha de Temperatura</p>
-                <p class="mt-1 text-sm text-grafite/60">Controle de temperatura dos setores</p>
-            </div>
-            <span class="mt-auto text-sm font-semibold text-azul transition group-hover:translate-x-1">Abrir →</span>
-        </a>
-    </div>
+    <section class="audix-guide"><div><span class="audix-eyebrow">DO CADASTRO À IMPRESSÃO</span><h2>Uma rotina mais simples.</h2></div><ol><li><b>01</b><span>Escolha o controle</span></li><li><b>02</b><span>Selecione o supermercado</span></li><li><b>03</b><span>Edite e imprima a planilha</span></li></ol></section>
+</div>
 @endsection
