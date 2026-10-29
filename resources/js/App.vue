@@ -640,12 +640,7 @@ onBeforeUnmount(() => {
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
             <section class="planilha-controles min-w-0 flex min-h-0 flex-col gap-5 xl:h-full">
                 <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
-                <Teleport to="#topo-supermercado" :disabled="!embutido">
-                    <div v-if="nomeSupermercado" class="shrink-0 rounded-2xl border border-grafite/10 bg-white px-5 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
-                        <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
-                    </div>
-                </Teleport>
+                
                 <!-- Conteúdo abaixo do card: rola por dentro e é cortado na borda do card -->
                 <div class="planilha-controles-conteudo flex min-h-0 flex-1 flex-col gap-5 xl:overflow-y-auto xl:pr-1">
                     <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
@@ -791,8 +786,8 @@ onBeforeUnmount(() => {
             <aside v-if="!semPrevia"
                 class="planilha-previa no-print flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:overflow-hidden">
                 <Teleport to="#topo-previa" :disabled="!embutido">
-                <div class="flex items-center justify-between rounded-2xl border border-grafite/10 bg-white px-5 py-3">
-                    <div>
+                <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
+                    <div class="text-right">
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
                         <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
                         <p class="text-xs text-grafite/60">{{ folhas.length }} página(s) · {{ idsSelecionados.length }}
