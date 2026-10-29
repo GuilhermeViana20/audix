@@ -635,15 +635,17 @@ onBeforeUnmount(() => {
         </div>
     </div>
 
-    <div class="planilha-workspace flex min-h-screen">
-        <div class="planilha-colunas" :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
+    <div class="planilha-workspace flex min-h-screen xl:min-h-0 xl:flex-1">
+        <div class="planilha-colunas xl:h-full" :class="semPrevia ? 'grid w-full gap-6' : 'grid w-full gap-6 xl:grid-cols-[2fr_3fr]'">
             <!-- Coluna dos controles: no celular fica em cima; no computador, à esquerda -->
-            <section class="planilha-controles min-w-0 flex flex-col gap-5 xl:sticky xl:top-28 xl:self-start xl:h-[calc(100vh-8rem)]">
+            <section class="planilha-controles min-w-0 flex min-h-0 flex-col gap-5 xl:h-full">
                 <!-- Supermercado em edição: fixo no topo da coluna, acima das seções -->
-                <div v-if="nomeSupermercado" class="shrink-0 rounded-2xl bg-white p-4 shadow-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
-                    <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
-                </div>
+                <Teleport to="#topo-supermercado" :disabled="!embutido">
+                    <div v-if="nomeSupermercado" class="shrink-0 rounded-2xl border border-grafite/10 bg-white p-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-azul">Supermercado</p>
+                        <p class="text-xl font-bold">{{ nomeSupermercado }}</p>
+                    </div>
+                </Teleport>
                 <!-- Conteúdo abaixo do card: rola por dentro e é cortado na borda do card -->
                 <div class="planilha-controles-conteudo flex min-h-0 flex-1 flex-col gap-5 xl:overflow-y-auto xl:pr-1">
                     <div v-if="!embutido" class="rounded-2xl bg-white p-4 shadow-sm">
@@ -787,8 +789,9 @@ onBeforeUnmount(() => {
 
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
             <aside v-if="!semPrevia"
-                class="planilha-previa no-print flex min-w-0 flex-col gap-4 xl:sticky xl:top-28 xl:h-[calc(100vh-8rem)] xl:overflow-hidden">
-                <div class="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
+                class="planilha-previa no-print flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:overflow-hidden">
+                <Teleport to="#topo-previa" :disabled="!embutido">
+                <div class="flex items-center justify-between rounded-2xl border border-grafite/10 bg-white px-5 py-4">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
                         <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
@@ -799,6 +802,7 @@ onBeforeUnmount(() => {
                     <button class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
                         :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
                 </div>
+                </Teleport>
                 <div id="sheets-box" class="min-h-0 flex-1 xl:overflow-y-auto">
                     <div v-if="folhas.length" id="sheets" class="flex flex-col items-center gap-6 pb-6">
                         <div v-for="(f, i) in folhas" :key="i" class="sheet" :style="{ zoom: zoomPreview }">
