@@ -72,12 +72,32 @@ button:disabled {
         --audix-panel: #fff;
         --audix-line: #e5e9f1;
         --audix-muted: #697386;
+        --audix-sidebar: #fff;
+        --audix-sidebar-text: #151922;
+        --audix-sidebar-link: #4a5468;
+        --audix-sidebar-muted: #697386;
+        --audix-sidebar-hover: #f1f4fb;
+        --audix-hero: #eef2fb;
+        --audix-hero-text: #151922;
+        --audix-hero-muted: #4a5468;
+        --audix-hero-accent: #3553e0;
+        --audix-hero-eyebrow: #4063ff;
     }
 
     .dark {
         --audix-panel: #181e2b;
         --audix-line: #2b3445;
         --audix-muted: #a4aec0;
+        --audix-sidebar: #151922;
+        --audix-sidebar-text: #fff;
+        --audix-sidebar-link: #b8c0d1;
+        --audix-sidebar-muted: #a3acbf;
+        --audix-sidebar-hover: #252c3c;
+        --audix-hero: #151922;
+        --audix-hero-text: #fff;
+        --audix-hero-muted: #b9c1d2;
+        --audix-hero-accent: #b9c7ff;
+        --audix-hero-eyebrow: #a9baff;
     }
 
     .audix-shell {
@@ -93,8 +113,9 @@ button:disabled {
         width: 248px;
         padding: 36px 20px 24px;
         z-index: 40;
-        background: #151922;
-        color: #fff;
+        background: var(--audix-sidebar);
+        color: var(--audix-sidebar-text);
+        border-right: 1px solid var(--audix-line);
     }
 
     .audix-brand {
@@ -124,7 +145,7 @@ button:disabled {
     .audix-nav-label {
         font-size: 10px;
         letter-spacing: .17em;
-        color: #a3acbf;
+        color: var(--audix-sidebar-muted);
         padding: 0 14px;
         margin-bottom: 18px;
         font-weight: 600;
@@ -142,7 +163,7 @@ button:disabled {
         gap: 12px;
         padding: 14px;
         border-radius: 10px;
-        color: #b8c0d1;
+        color: var(--audix-sidebar-link);
         font-size: 13px;
         font-weight: 500;
         transition: background .18s, color .18s;
@@ -155,8 +176,8 @@ button:disabled {
     }
 
     .audix-nav-link:hover {
-        background: #252c3c;
-        color: white;
+        background: var(--audix-sidebar-hover);
+        color: var(--audix-sidebar-text);
     }
 
     .audix-nav-link.is-active {
@@ -168,7 +189,7 @@ button:disabled {
     .audix-sidebar-bottom {
         margin-top: auto;
         padding: 24px 14px 0;
-        border-top: 1px solid #ffffff16;
+        border-top: 1px solid var(--audix-line);
         display: flex;
         align-items: center;
         gap: 14px;
@@ -177,7 +198,7 @@ button:disabled {
     .audix-sidebar-bottom p {
         font-size: 11px;
         line-height: 1.6;
-        color: #a3acbf;
+        color: var(--audix-sidebar-muted);
     }
 
     .audix-small-mark {
@@ -243,8 +264,9 @@ button:disabled {
         position: relative;
         overflow: hidden;
         border-radius: 22px;
-        background: #151922;
-        color: white;
+        background: var(--audix-hero);
+        color: var(--audix-hero-text);
+        border: 1px solid var(--audix-line);
         min-height: 290px;
         padding: 40px;
         gap: 20px;
@@ -264,7 +286,7 @@ button:disabled {
     }
 
     .audix-hero .audix-eyebrow {
-        color: #a9baff;
+        color: var(--audix-hero-eyebrow);
     }
 
     .audix-hero h1 {
@@ -276,11 +298,11 @@ button:disabled {
     }
 
     .audix-hero h1 span {
-        color: #b9c7ff;
+        color: var(--audix-hero-accent);
     }
 
     .audix-hero p {
-        color: #b9c1d2;
+        color: var(--audix-hero-muted);
         font-size: 14px;
         line-height: 1.7;
         max-width: 480px;
@@ -732,4 +754,10 @@ textarea:focus-visible {
         opacity: 1 !important;
         translate: none !important;
     }
+}
+
+/* Logo conforme o tema: versão branca no escuro, colorida no claro */
+html:not(.dark) .so-tema-escuro,
+.dark .so-tema-claro {
+    display: none !important;
 }

@@ -10,7 +10,7 @@
 @endphp
 <aside class="audix-sidebar" aria-label="Navegação principal">
     <a class="audix-brand" href="{{ route('inicio') }}" aria-label="Audix — início">
-        <img src="/images/audix-logo-branco.png" alt="audix">
+        <img src="/images/audix-logo-branco.png" alt="audix" class="so-tema-escuro"><img src="/images/audix-logo.png" alt="audix" class="so-tema-claro">
     </a>
     <p class="audix-nav-label">ÁREA DE TRABALHO</p>
     <nav class="audix-nav">

@@ -8,7 +8,7 @@
             <p>Organize as rotinas dos supermercados e prepare suas planilhas de monitoramento com praticidade.</p>
             <a href="{{ route('supermercados.index') }}" class="audix-primary">Gerenciar supermercados <span aria-hidden="true">↗</span></a>
         </div>
-        <div class="audix-hero-art" aria-hidden="true"><div class="audix-hero-logo-wrap"><img src="/images/audix-logo-branco.png" alt="" class="audix-hero-logo"></div></div>
+        <div class="audix-hero-art" aria-hidden="true"><div class="audix-hero-logo-wrap"><img src="/images/audix-logo-branco.png" alt="" class="audix-hero-logo so-tema-escuro"><img src="/images/audix-logo.png" alt="" class="audix-hero-logo so-tema-claro"></div></div>
     </section>
     <div class="audix-section-heading" data-reveal><div><span class="audix-eyebrow">ROTINA ORGANIZADA</span><h2>Seus controles</h2></div><p>Escolha uma planilha para começar</p></div>
     <div class="audix-control-grid" data-stagger>
