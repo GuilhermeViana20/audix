@@ -790,9 +790,7 @@ onBeforeUnmount(() => {
                     <div class="text-right">
                         <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
                         <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
-                        <p class="text-xs text-grafite/60">{{ folhas.length }} página(s) · {{ idsSelecionados.length }}
-                            seção(ões) ·
-                            A4 paisagem</p>
+                        
                     </div>
                     <button class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
                         :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
