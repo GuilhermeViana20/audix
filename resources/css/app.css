@@ -311,7 +311,7 @@ button:disabled {
         align-items: center;
         justify-content: center;
         flex-direction: column;
-        background: radial-gradient(ellipse, #4063ff25, transparent 70%);
+        background: #4063ff0d;
     }
 
     .audix-hero-art>span {
@@ -666,9 +666,8 @@ button:disabled {
     pointer-events: none;
 }
 @keyframes audix-logo-entrar {
-    0% { opacity: 0; transform: translateY(22px) scale(.94); filter: blur(10px); }
-    60% { opacity: 1; filter: blur(0); }
-    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    0% { opacity: 0; transform: translateY(22px) scale(.94); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes audix-logo-flutuar {
     0%, 100% { transform: translateY(0); }

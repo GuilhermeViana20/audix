@@ -57,13 +57,7 @@
             padding: 30px;
             border: 1px solid var(--sm-border);
             border-radius: 22px;
-            background:
-                radial-gradient(
-                    ellipse at top right,
-                    #4063ff12,
-                    transparent 60%
-                ),
-                var(--sm-panel);
+            background: var(--sm-panel);
         }
 
         .sm-cabecalho::before {
