@@ -10,8 +10,8 @@
         </div>
         <div class="audix-hero-art" aria-hidden="true"><div class="audix-hero-logo-wrap"><img src="/images/audix-logo-branco.png" alt="" class="audix-hero-logo"></div></div>
     </section>
-    <div class="audix-section-heading"><div><span class="audix-eyebrow">ROTINA ORGANIZADA</span><h2>Seus controles</h2></div><p>Escolha uma planilha para começar</p></div>
-    <div class="audix-control-grid">
+    <div class="audix-section-heading" data-reveal><div><span class="audix-eyebrow">ROTINA ORGANIZADA</span><h2>Seus controles</h2></div><p>Escolha uma planilha para começar</p></div>
+    <div class="audix-control-grid" data-stagger>
         @foreach ([['temperatura', '01', 'Temperatura', 'Acompanhe as temperaturas dos setores e equipamentos.', 'Monitoramento térmico'], ['higiene', '02', 'Higiene e limpeza', 'Padronize a limpeza dos ambientes e as rotinas de higienização.', 'Higiene ambiental'], ['pragas', '03', 'Controle de pragas', 'Organize as inspeções e o controle integrado de pragas.', 'Controle integrado']] as [$codigo, $numero, $nome, $descricao, $categoria])
             <a class="audix-control-card" href="{{ route('planilhas.supermercados', $codigo) }}">
                 <div class="audix-card-top"><span class="audix-card-icon">@include('partials.icone', ['icone' => $codigo])</span><span class="audix-card-number">{{ $numero }}</span></div>
@@ -20,6 +20,6 @@
             </a>
         @endforeach
     </div>
-    <section class="audix-guide"><div><span class="audix-eyebrow">DO CADASTRO À IMPRESSÃO</span><h2>Uma rotina mais simples.</h2></div><ol><li><b>01</b><span>Escolha o controle</span></li><li><b>02</b><span>Selecione o supermercado</span></li><li><b>03</b><span>Edite e imprima a planilha</span></li></ol></section>
+    <section class="audix-guide" data-reveal><div><span class="audix-eyebrow">DO CADASTRO À IMPRESSÃO</span><h2>Uma rotina mais simples.</h2></div><ol><li><b>01</b><span>Escolha o controle</span></li><li><b>02</b><span>Selecione o supermercado</span></li><li><b>03</b><span>Edite e imprima a planilha</span></li></ol></section>
 </div>
 @endsection

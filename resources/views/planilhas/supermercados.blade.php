@@ -504,7 +504,7 @@
                 </div>
             </div>
 
-            <div class="sm-grade" id="sm-grade">
+            <div class="sm-grade" id="sm-grade" data-stagger>
                 @foreach ($supermercados as $supermercado)
                     <a
                         href="{{ route($rotaControle, $supermercado) }}"

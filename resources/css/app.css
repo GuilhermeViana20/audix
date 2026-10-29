@@ -683,3 +683,57 @@ button:disabled {
     .audix-hero-logo,
     .audix-hero-logo-wrap::after { animation: none; }
 }
+
+/* ---------- Animações do site ---------- */
+@keyframes audix-subir {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+}
+html.js [data-reveal] {
+    opacity: 0;
+    translate: 0 16px;
+    transition: opacity .6s cubic-bezier(.2, .8, .2, 1) var(--d, 0ms), translate .6s cubic-bezier(.2, .8, .2, 1) var(--d, 0ms);
+}
+html.js [data-reveal].is-visible {
+    opacity: 1;
+    translate: 0 0;
+}
+.audix-hero-content {
+    animation: audix-subir .9s cubic-bezier(.2, .8, .2, 1) both;
+}
+.audix-control-card,
+.sm-cartao {
+    transition: translate .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s ease, border-color .35s ease;
+}
+.audix-control-card:hover,
+.sm-cartao:hover {
+    translate: 0 -4px;
+}
+button,
+.audix-primary {
+    transition: transform .15s ease, background-color .2s ease, opacity .2s ease;
+}
+button:active:not(:disabled),
+.audix-primary:active {
+    transform: scale(.97);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(64 99 255 / .25);
+    transition: box-shadow .2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+    html.js [data-reveal],
+    .audix-hero-content,
+    .audix-control-card,
+    .sm-cartao,
+    button,
+    .audix-primary {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        translate: none !important;
+    }
+}
