@@ -31,10 +31,17 @@ class Supermercado extends Model
     {
         abort_unless(array_key_exists($tipo, Planilha::TIPOS), 404);
 
-        return $this->planilhas()->firstOrCreate(
+        $planilha = $this->planilhas()->firstOrCreate(
             ['tipo' => $tipo],
             ['nome' => Planilha::TIPOS[$tipo]],
         );
+
+        // Mantém o nome padronizado mesmo em planilhas criadas antes da mudança.
+        if ($planilha->nome !== Planilha::TIPOS[$tipo]) {
+            $planilha->update(['nome' => Planilha::TIPOS[$tipo]]);
+        }
+
+        return $planilha;
     }
 
     /** Logo: o link da imagem informado no cadastro. */

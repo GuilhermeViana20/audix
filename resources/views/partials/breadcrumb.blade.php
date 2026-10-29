@@ -1,5 +1,5 @@
 @php($destaque = ($variante ?? '') === 'destaque')
-<nav aria-label="Você está em" class="{{ $destaque ? 'inline-flex max-w-full items-center rounded-2xl bg-azul px-5 py-2.5 text-sm text-white shadow-lg shadow-azul/30' : 'mb-6 text-sm' }}">
+<nav aria-label="Você está em" class="{{ $destaque ? 'inline-flex max-w-full items-center rounded-xl bg-[linear-gradient(135deg,#4063ff,#2f4fe0)] px-4 py-2 text-[13px] text-white' : 'mb-6 text-sm' }}">
     <ol class="flex min-w-0 flex-wrap items-center gap-1.5 {{ $destaque ? 'text-white/70' : 'text-grafite/60' }}">
         @foreach ($itens as $item)
             <li class="flex items-center gap-1.5">
