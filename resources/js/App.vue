@@ -679,7 +679,7 @@ onBeforeUnmount(() => {
                                 <article v-for="(s, idx) in ordenadas" :key="s.id"
                                     class="flex min-w-0 flex-col rounded-xl border p-3 transition"
                                     :class="atual?.id === s.id ? 'col-span-full border-azul bg-azul/5' : 'border-grafite/10 bg-offwhite'">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex cursor-pointer items-center gap-2" @click="atual?.id === s.id ? fechar() : abrir(s)">
                                         <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-azul/10 text-[11px] font-bold text-azul">{{ String(idx + 1).padStart(2, '0') }}</span>
                                         <label class="flex min-w-0 items-center gap-2 text-sm font-bold" @click.stop>
                                             <input type="checkbox" v-model="selecionadas[s.id]" class="accent-azul h-4 w-4 shrink-0">
@@ -687,19 +687,15 @@ onBeforeUnmount(() => {
                                         </label>
                                         <button class="ml-auto shrink-0 px-1 text-red-500" title="Remover seção" @click.stop="excluirSecao(s)">×</button>
                                     </div>
-                                    <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-grafite/50">
+                                    <div class="mt-2 flex cursor-pointer flex-wrap items-center gap-3 text-xs text-grafite/50" @click="atual?.id === s.id ? fechar() : abrir(s)">
                                         <span>{{ s.linhas.length }} linhas</span>
                                         <button class="text-azul font-medium" @click.stop="renomear(s)">Renomear</button>
-                                        <button class="ml-auto font-semibold text-azul" @click="atual?.id === s.id ? fechar() : abrir(s)">{{ atual?.id === s.id ? 'Fechar ▲' : 'Editar ▼' }}</button>
+                                        <button class="ml-auto font-semibold text-azul" @click.stop="atual?.id === s.id ? fechar() : abrir(s)">{{ atual?.id === s.id ? 'Fechar ▲' : 'Editar ▼' }}</button>
                                     </div>
 
-                                    <ul v-if="atual?.id !== s.id" class="mt-2 max-h-44 space-y-1 overflow-y-auto border-t border-grafite/10 pt-2 text-xs">
-                                        <li v-for="(l, i) in s.linhas" :key="l.id ?? i"
-                                            :class="l.tipo === 'grupo' ? 'mt-1 font-bold uppercase text-grafite' : 'text-grafite/70'">{{ l.texto || '—' }}</li>
-                                        <li v-if="!s.linhas.length" class="text-grafite/40">Sem linhas ainda</li>
-                                    </ul>
+                                    
 
-                                    <template v-else>
+                                    <template v-if="atual?.id === s.id">
                                         <div class="p-1">
                                         <div class="flex items-center justify-end">
                                             <span class="text-xs font-semibold"
