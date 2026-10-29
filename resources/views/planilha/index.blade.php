@@ -23,12 +23,15 @@
     <div class="planilha-topo shrink-0 border-b border-grafite/10 bg-white">
         @include('partials.cabecalho', ['largura' => 'max-w-none'])
         <div class="planilha-breadcrumb flex flex-wrap items-center justify-between gap-3 px-4 pt-3 pb-3 md:px-8">
+            <div class="flex min-w-0 items-center gap-3">
             @include('partials.breadcrumb', ['itens' => [
                 ['nome' => 'Início', 'url' => route('inicio')],
                 ['nome' => $nomeTipo, 'url' => route('planilhas.supermercados', $tipo)],
                 ['nome' => $supermercado?->nome ?? 'Supermercado'],
             ]])
-            <div id="topo-previa"></div>
+            </div>
+            <div id="topo-titulo" class="min-w-0 flex-1 text-center"></div>
+            <div id="topo-acoes" class="flex items-center gap-2"></div>
         </div>
     </div>
     <div id="app" class="px-4 pb-6 pt-4 md:px-8 xl:flex xl:min-h-0 xl:flex-1 xl:flex-col xl:overflow-hidden xl:pb-4"></div>

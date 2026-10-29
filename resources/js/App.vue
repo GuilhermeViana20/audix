@@ -662,12 +662,15 @@ onBeforeUnmount(() => {
                                     @click="ordenadas.forEach(s => selecionadas[s.id] = true)">Marcar todas</button>
                                 <button class="text-azul font-medium"
                                     @click="ordenadas.forEach(s => selecionadas[s.id] = false)">Nenhuma</button>
+                                <Teleport to="#topo-acoes" :disabled="!embutido">
                                 <label
-                                    class="ml-auto cursor-pointer rounded-xl bg-azul px-3 py-1.5 font-semibold text-white"
+                                    class="ml-auto inline-flex cursor-pointer items-center gap-2 rounded-full bg-azul px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-azul/30 transition hover:bg-[#3152e8]"
                                     :class="lendoPdf && 'pointer-events-none opacity-50'">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
                                     {{ lendoPdf ? 'Lendo PDF…' : 'Importar PDF' }}
                                     <input type="file" accept="application/pdf" class="hidden" @change="escolherPdf">
                                 </label>
+                                </Teleport>
                             </div>
                             <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b
                                     class="text-grafite">{{ planilha.nome }}</b></p>
@@ -785,16 +788,13 @@ onBeforeUnmount(() => {
             <!-- Coluna da direita: pré-visualização em HTML (mesmo layout da folha A4); imprime pelo navegador -->
             <aside v-if="!semPrevia"
                 class="planilha-previa no-print flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:overflow-hidden">
-                <Teleport to="#topo-previa" :disabled="!embutido">
-                <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-                    <div class="text-right">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-azul">Pré-visualização</p>
-                        <p class="text-lg font-bold">{{ planilha?.nome || 'Planilha' }}</p>
-                        
-                    </div>
-                    <button class="rounded-xl bg-azul px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
-                        :disabled="!folhas.length" @click="imprimir">Imprimir / PDF</button>
-                </div>
+                <Teleport to="#topo-titulo" :disabled="!embutido">
+                    <p class="truncate text-base font-bold">{{ planilha?.nome || 'Planilha' }}</p>
+                </Teleport>
+                <Teleport to="#topo-acoes" :disabled="!embutido">
+                    <button
+                        class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-600/30 transition hover:bg-emerald-700 disabled:opacity-40"
+                        :disabled="!folhas.length" @click="imprimir"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>Imprimir / PDF</button>
                 </Teleport>
                 <div id="sheets-box" class="min-h-0 flex-1 xl:overflow-y-auto">
                     <div v-if="folhas.length" id="sheets" class="flex flex-col items-center gap-6 pb-6">
