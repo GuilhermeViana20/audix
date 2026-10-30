@@ -48,6 +48,9 @@ jobs:
             "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \
             'echo "Conectado como: $(whoami) em $(pwd)"; ls -la | head -20'
 
+      - name: Criar pastas de runtime do Laravel
+        run: mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs bootstrap/cache && touch storage/framework/views/.gitkeep storage/logs/.gitkeep
+
       - name: Enviar arquivos por SSH (tar)
         run: |
           SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT }} ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}"
