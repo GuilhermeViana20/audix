@@ -373,27 +373,30 @@
 </head>
 
 <body class="audix-shell bg-offwhite text-grafite">
-    @include('partials.cabecalho')
+    <!-- Topo padronizado com as planilhas de higiene e temperatura -->
+    <div class="planilha-topo nao-imprimir shrink-0 border-b border-grafite/10 bg-white">
+        @include('partials.cabecalho')
+        <div class="planilha-breadcrumb flex flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-8">
+            <div class="flex min-w-0 items-center gap-3 [&>nav]:mb-0">
+                @include('partials.breadcrumb', ['itens' => [
+                    ['nome' => 'Início', 'url' => route('inicio')],
+                    ['nome' => 'Controle de Pragas', 'url' => route('planilhas.supermercados', 'pragas')],
+                    ['nome' => $supermercado->nome],
+                ]])
+            </div>
+            <div class="min-w-0 flex-1 text-center">
+                <p class="truncate text-base font-bold">Planilha de Monitoramento - Controle de Pragas</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()"
+                        class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-600/30 transition hover:bg-emerald-700 disabled:opacity-40"
+                        @disabled($secoes->isEmpty())><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>Imprimir / PDF</button>
+            </div>
+        </div>
+    </div>
 
     <div class="cip-layout">
     <div class="cip-painel nao-imprimir">
-        @include('partials.breadcrumb', ['itens' => [
-            ['nome' => 'Início', 'url' => route('inicio')],
-            ['nome' => 'Controle de Pragas', 'url' => route('planilhas.supermercados', 'pragas')],
-            ['nome' => $supermercado->nome],
-        ]])
-
-        <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-azul">Controle de Pragas</p>
-                <h1 class="text-2xl font-bold tracking-tight">{{ $supermercado->nome }}</h1>
-                <p class="mt-1 text-sm text-grafite/60">Cadastre as seções e imprima uma folha por seção.</p>
-            </div>
-            <button onclick="window.print()"
-                    class="rounded-xl bg-azul px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
-                    @disabled($secoes->isEmpty())>Imprimir / PDF</button>
-        </div>
-
 
         <div class="flex flex-col gap-4">
             {{-- Seções salvas e inclusão de novas --}}
