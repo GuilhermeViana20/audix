@@ -38,7 +38,7 @@ jobs:
           CHAVE_B64: ${{ secrets.HOSTINGER_SSH_KEY_B64 }}
         run: |
           mkdir -p ~/.ssh
-          printf '%s' "$CHAVE_B64" | base64 -d > ~/.ssh/deploy_key
+          printf '%s' "$CHAVE_B64" | tr -d '[:space:]' | base64 -d > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
 
