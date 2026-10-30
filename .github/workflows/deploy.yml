@@ -32,13 +32,14 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Chave SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
-
-      - name: Registrar o servidor
-        run: ssh-keyscan -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+      - name: Preparar a chave SSH
+        env:
+          CHAVE_B64: ${{ secrets.HOSTINGER_SSH_KEY_B64 }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$CHAVE_B64" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Enviar arquivos por rsync
         run: |
@@ -50,10 +51,10 @@ jobs:
             --exclude '.env.*' \
             --exclude 'storage/' \
             --exclude 'public/storage' \
-            -e "ssh -p ${{ secrets.HOSTINGER_PORT }}" \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT }}" \
             ./ "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/"
 
       - name: Limpar cache do Laravel no servidor
         run: |
-          ssh -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \
             "cd ${{ secrets.HOSTINGER_PATH }} && php artisan optimize:clear || true"
