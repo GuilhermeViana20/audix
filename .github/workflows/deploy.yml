@@ -1,0 +1,59 @@
+name: Deploy Hostinger
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar PHP e Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Dependências PHP (sem dev)
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      - name: Preparar Node e gerar o build do front
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Chave SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
+
+      - name: Registrar o servidor
+        run: ssh-keyscan -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Enviar arquivos por rsync
+        run: |
+          rsync -avz --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'storage/' \
+            --exclude 'public/storage' \
+            -e "ssh -p ${{ secrets.HOSTINGER_PORT }}" \
+            ./ "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/"
+
+      - name: Limpar cache do Laravel no servidor
+        run: |
+          ssh -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \
+            "cd ${{ secrets.HOSTINGER_PATH }} && php artisan optimize:clear || true"
