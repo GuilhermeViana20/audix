@@ -459,19 +459,21 @@ function moverItem(lista, i, d) {
     [lista[i], lista[j]] = [lista[j], lista[i]];
 }
 
-// Ordena as linhas A–Z dentro de cada bloco; as faixas continuam no lugar e separam os blocos
+// Ordena as faixas A–Z (cada faixa leva junto as suas linhas) e as linhas A–Z dentro de cada faixa.
+// Linhas que vêm antes da primeira faixa ficam no topo.
 function ordenarBlocos(lista) {
-    const resultado = [];
-    let bloco = [];
-    const fecharBloco = () => {
-        bloco.sort((a, b) => a.texto.localeCompare(b.texto, 'pt-BR', { sensitivity: 'base', numeric: true }));
-        resultado.push(...bloco);
-        bloco = [];
-    };
+    const ordem = (a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base', numeric: true });
+    const grupos = [{ faixa: null, linhas: [] }];
     for (const item of lista) {
-        if (item.tipo === 'grupo') { fecharBloco(); resultado.push(item); } else { bloco.push(item); }
+        if (item.tipo === 'grupo') grupos.push({ faixa: item, linhas: [] });
+        else grupos[grupos.length - 1].linhas.push(item);
     }
-    fecharBloco();
+    const [topo, ...faixas] = grupos;
+    faixas.sort((g1, g2) => ordem(g1.faixa.texto, g2.faixa.texto));
+    const resultado = [...topo.linhas];
+    for (const g of faixas) {
+        resultado.push(g.faixa, ...g.linhas.sort((x, y) => ordem(x.texto, y.texto)));
+    }
     return resultado;
 }
 function ordenarEditor() {
