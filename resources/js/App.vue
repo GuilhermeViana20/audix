@@ -36,7 +36,7 @@ async function rede(url, opts = {}) {
     }
 }
 
-const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
+const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true, sensitivity: 'base' })));
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
 // Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
 const ALTURA_LINHA_PX = 20; // altura fixa de toda linha/faixa da grade (px)
@@ -464,7 +464,7 @@ function ordenarBlocos(lista) {
     const resultado = [];
     let bloco = [];
     const fecharBloco = () => {
-        bloco.sort((a, b) => a.texto.localeCompare(b.texto, 'pt-BR', { sensitivity: 'base' }));
+        bloco.sort((a, b) => a.texto.localeCompare(b.texto, 'pt-BR', { sensitivity: 'base', numeric: true }));
         resultado.push(...bloco);
         bloco = [];
     };
