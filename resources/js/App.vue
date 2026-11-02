@@ -460,7 +460,7 @@ function moverItem(lista, i, d) {
 }
 
 // Ordena as faixas A–Z (cada faixa leva junto as suas linhas) e as linhas A–Z dentro de cada faixa.
-// Linhas que vêm antes da primeira faixa ficam no topo.
+// A primeira faixa do setor e as linhas antes dela ficam no topo, na mesma ordem.
 function ordenarBlocos(lista) {
     const ordem = (a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base', numeric: true });
     const grupos = [{ faixa: null, linhas: [] }];
@@ -469,9 +469,11 @@ function ordenarBlocos(lista) {
         else grupos[grupos.length - 1].linhas.push(item);
     }
     const [topo, ...faixas] = grupos;
+    // A primeira faixa do setor fica sempre no topo; as demais são ordenadas A–Z
+    const primeira = faixas.shift();
     faixas.sort((g1, g2) => ordem(g1.faixa.texto, g2.faixa.texto));
     const resultado = [...topo.linhas];
-    for (const g of faixas) {
+    for (const g of [primeira, ...faixas].filter(Boolean)) {
         resultado.push(g.faixa, ...g.linhas.sort((x, y) => ordem(x.texto, y.texto)));
     }
     return resultado;
