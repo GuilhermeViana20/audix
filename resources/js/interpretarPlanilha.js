@@ -7,6 +7,9 @@ const TOLERANCIA_Y = 2.5; // itens na mesma altura (pt) pertencem à mesma linha
 const SOMENTE_DIA = /^\d{1,2}$/;
 const TEXTO_LONGO = 28; // caracteres a partir dos quais o texto da primeira coluna pode quebrar
 const RUIDO = /^(PLANILHA DE MONITORAMENTO|HIGIENE E LIMPEZA AMBIENTAL|ENCARREGADO|MÊS\/ANO|LOCAL|DATA)/i;
+// Rodapé da ACCP abaixo da grade (nome/e-mail e endereço). Centralizado e sem nada na primeira
+// coluna, seria lido como faixa; ao encontrá-lo, a grade da página terminou.
+const RODAPE = /ACCP\s+ALIMENTOS|ACCPCONSULTORIA|HUMBERTO\s+MONTE/i;
 
 export function agruparLinhas(itens) {
     const ordenados = [...itens].sort((a, b) => a.y - b.y || a.x - b.x);
@@ -77,6 +80,11 @@ export function interpretarPlanilha(paginas) {
                 continue;
             }
             if (colunaDias === null) continue;
+
+            if (RODAPE.test(texto(linha.itens))) {
+                colunaDias = null; // o que vier depois na página não é linha da grade
+                continue;
+            }
 
             const primeira = linha.itens.filter(i => i.x < colunaDias - 1);
             const centro = linha.itens.filter(i => i.x >= colunaDias - 1 && !SOMENTE_DIA.test(i.texto));
