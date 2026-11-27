@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Planilha;
 use App\Models\Supermercado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -88,7 +89,13 @@ class SupermercadoController extends Controller
             ])->values();
 
         return response()->json([
-            'planilha' => ['id' => $planilha->id, 'tipo' => $planilha->tipo, 'nome' => $planilha->nome],
+            'planilha' => [
+                'id' => $planilha->id,
+                'tipo' => $planilha->tipo,
+                'nome' => $planilha->nome,
+                'modelo' => $planilha->modelo ?? 'padrao',
+            ],
+            'modelos' => $tipo === 'temperatura' ? Planilha::MODELOS_TEMPERATURA : [],
             'logo_url' => $supermercado->logo_url,
             'nome_social' => $supermercado->nome_social,
             'secoes' => $secoes,

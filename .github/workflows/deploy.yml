@@ -61,6 +61,12 @@ jobs:
             --exclude='./public/storage' . \
             | $SSH "cd '${{ secrets.HOSTINGER_PATH }}' && tar xzf -"
 
+      # Aplica as migrations novas (sem --force o artisan pede confirmação em produção)
+      - name: Rodar migrations no servidor
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \
+            "cd ${{ secrets.HOSTINGER_PATH }} && php artisan migrate --force"
+
       - name: Limpar cache do Laravel no servidor
         run: |
           ssh -i ~/.ssh/deploy_key -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \

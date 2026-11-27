@@ -106,7 +106,15 @@ export function interpretarPlanilha(paginas) {
             if (cabecalhoDaGrade) {
                 colunaDias = dia1.x;
                 const titulo = texto(linha.itens.filter(i => i.x < colunaDias - 1));
-                if (titulo) secao.titulo_primeira_coluna = titulo;
+                if (paginaDeTemperatura && secao.linhas.length) {
+                    // Temperatura: a folha seguinte da seção pode começar numa faixa nova, que fica no
+                    // cabeçalho da grade; se não for a mesma faixa da folha anterior, volta a ser faixa
+                    const ultimaFaixa = secao.linhas.filter(l => l.tipo === 'grupo').at(-1);
+                    const repetido = titulo === (ultimaFaixa?.texto ?? secao.titulo_primeira_coluna);
+                    if (titulo && !repetido) secao.linhas.push({ tipo: 'grupo', texto: titulo });
+                } else if (titulo) {
+                    secao.titulo_primeira_coluna = titulo;
+                }
                 continue;
             }
             if (colunaDias === null) continue;

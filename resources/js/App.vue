@@ -104,24 +104,85 @@ function tituloDaFolha(secao, inicio) {
     }
     return secao.titulo_primeira_coluna;
 }
+// Temperatura: cada supermercado escolhe o modelo da folha (Planilha::MODELOS_TEMPERATURA)
+const modelos = ref({}); // código => nome, para o seletor
+const modeloEquipamentos = computed(() => ehTemperatura && planilha.value?.modelo === 'equipamentos');
+const METADE_TEMPERATURA_PX = 260; // 10 linhas de 26px: as grades 1 a 16 e 17 a 31 cabem na mesma folha
+const EQUIPAMENTOS_POR_FOLHA = 8; // modelo equipamentos: colunas de equipamento por folha
+// Modelo equipamentos: legenda menor, repetida em todas as folhas
+const LEGENDA_TEMPERATURA_CURTA = [
+    ['Carnes e Aves', '0° a 7°C'],
+    ['Leites e Derivados', '0° a 10°C'],
+    ['Resfriados', '0° a 10°C'],
+    ['Pescados', '0° a 3°C'],
+    ['Congelados', '-18°C a -23°C ou conforme orientação do fornecedor'],
+];
+// Peixaria: a legenda só traz os produtos do setor
+const SETOR_PEIXARIA = /PEIXARIA|PESCADO/i;
+const PRODUTOS_DA_PEIXARIA = ['Pescados', 'Congelados'];
+const legendaDoSetor = secao => SETOR_PEIXARIA.test(secao.nome)
+    ? LEGENDA_TEMPERATURA_CURTA.filter(([produto]) => PRODUTOS_DA_PEIXARIA.includes(produto))
+    : LEGENDA_TEMPERATURA_CURTA;
+const somaAlturas =linhas => linhas.reduce((total, l) => total + alturaDaLinha(l), 0);
+
+// Folhas da temperatura: cada seção é um setor e começa numa folha nova (o nome vai no campo SETOR)
+function folhasDeTemperatura(secao) {
+    if (modeloEquipamentos.value) {
+        // As linhas da seção são os equipamentos: viram colunas (os dias são as linhas da grade).
+        // Faixas não entram neste modelo; muitos equipamentos continuam em outra folha.
+        const equipamentos = secao.linhas.filter(l => l.tipo !== 'grupo');
+        const grupos = [];
+        for (let i = 0; i < equipamentos.length; i += EQUIPAMENTOS_POR_FOLHA) {
+            grupos.push(equipamentos.slice(i, i + EQUIPAMENTOS_POR_FOLHA));
+        }
+        // Cada grupo de equipamentos ocupa duas folhas (dias 1 a 16 e 17 a 31), com mais espaço para escrever
+        return (grupos.length ? grupos : [[]]).flatMap(grupo => DIAS_POR_FOLHA.map(dias => ({
+            secao, titulo: secao.nome, equipamentos: grupo, dias, legendaCurta: legendaDoSetor(secao),
+        })));
+    }
+    // Modelo padrão: se as linhas couberem em meia folha, os dias 1 a 16 e 17 a 31 ficam na mesma
+    // folha, um embaixo do outro; senão, cada metade dos dias vai numa folha
+    let inicio = 0;
+    return paginar(secao.linhas).flatMap(linhas => {
+        const titulo = tituloDaFolha(secao, inicio);
+        // Se a folha começa numa faixa, ela já está no título (ao lado dos dias): não repete no corpo
+        const corpo = linhas[0]?.tipo === 'grupo' ? linhas.slice(1) : linhas;
+        inicio += linhas.length;
+        return somaAlturas(linhas) <= METADE_TEMPERATURA_PX
+            ? [{ secao, titulo, linhas: corpo, grades: DIAS_POR_FOLHA }]
+            : DIAS_POR_FOLHA.map(dias => ({ secao, titulo, linhas: corpo, grades: [dias] }));
+    });
+}
+
+// Cada folha: { secao, titulo, linhas, grades: [dias de cada grade] } ou, no modelo equipamentos,
+// { secao, titulo, equipamentos }
 const folhas = computed(() => ordenadas.value
     .filter(s => selecionadas.value[s.id])
     .flatMap(s => {
+        if (ehTemperatura) return folhasDeTemperatura(s);
         let inicio = 0; // posição, na seção, da primeira linha desta folha
-        return paginar(s.linhas).map((linhas, i) => {
+        return paginar(s.linhas).map(linhas => {
             const titulo = tituloDaFolha(s, inicio);
-            const total = linhas.length;
             // Se a folha começa numa faixa, ela já está no título (ao lado dos números): não repete no corpo
             const corpo = linhas[0]?.tipo === 'grupo' ? linhas.slice(1) : linhas;
-            inicio += total;
-            // Na temperatura, as mesmas linhas saem em duas folhas seguidas: dias 1 a 16 e 17 a 31
-            return DIAS_POR_FOLHA.map(dias => ({ secao: s, linhas: corpo, parte: i + 1, titulo, dias }));
-        }).flat();
+            inicio += linhas.length;
+            return { secao: s, linhas: corpo, titulo, grades: DIAS_POR_FOLHA };
+        });
     }));
-// Na temperatura, a impressão começa por uma folha só com a legenda dos produtos
-const folhasDaPrevia = computed(() => (ehTemperatura && folhas.value.length
+// Temperatura (modelo padrão): a impressão começa por uma folha só com a legenda dos produtos
+const folhasDaPrevia = computed(() => (ehTemperatura && !modeloEquipamentos.value && folhas.value.length
     ? [{ legenda: true }, ...folhas.value]
     : folhas.value));
+
+async function trocarModelo(codigo) {
+    if (!planilha.value || codigo === planilha.value.modelo) return;
+    try {
+        const dados = await api(`/api/planilhas/${planilha.value.id}/modelo`, { method: 'PUT', body: JSON.stringify({ modelo: codigo }) });
+        planilha.value = { ...planilha.value, modelo: dados.modelo };
+        atualizarPreview();
+        msg('Modelo da folha atualizado');
+    } catch (e) { msg(e.message); }
+}
 
 // Ajusta o zoom das folhas para caber na coluna de pré-visualização (só na tela)
 const zoomPreview = ref(1);
@@ -178,6 +239,8 @@ async function exportarWord() {
             folhas: folhas.value,
             alturaDaLinha,
             legenda: LEGENDA_TEMPERATURA,
+            modelo: modeloEquipamentos.value ? 'equipamentos' : 'padrao',
+            legendaCurta: LEGENDA_TEMPERATURA_CURTA,
             nomeArquivo: window.AUDIX.nomeArquivo || planilha.value?.nome || 'Planilha',
         });
     } catch (e) {
@@ -218,30 +281,14 @@ function mapearSecoes(lista) {
 async function recarregarSecoes() {
     const dados = await api(`/api/supermercados/${supermercadoId.value}/planilhas/${TIPO}`);
     planilha.value = dados.planilha;
+    modelos.value = dados.modelos || {};
     logoUrl.value = dados.logo_url;
     nomeSocial.value = dados.nome_social;
     secoes.value = mapearSecoes(dados.secoes);
     dados.secoes.forEach(s => { if (selecionadas.value[s.id] === undefined) selecionadas.value[s.id] = true; });
     if (atual.value) atual.value = secoes.value.find(s => s.id === atual.value.id) || null;
-    // Temperatura com uma seção só: o editor fica sempre aberto nela
-    if (secaoUnica.value && !atual.value && secoes.value[0]) {
-        atual.value = secoes.value[0];
-        titulo.value = secoes.value[0].titulo_primeira_coluna;
-    }
     atualizarPreview();
 }
-
-// Temperatura: os setores vão nas faixas, então a planilha é uma lista única de linhas e faixas,
-// guardada numa seção só (o nome dela não aparece em lugar nenhum). Se o supermercado ainda tiver
-// várias seções de antes, a lista de seções continua aparecendo para nada ficar escondido.
-const NOME_SECAO_TEMPERATURA = 'TEMPERATURA';
-const secaoUnica = computed(() => ehTemperatura && secoes.value.length <= 1);
-async function garantirSecaoUnica() {
-    if (!ehTemperatura || secoes.value.length || !planilha.value) return;
-    await api(`/api/planilhas/${planilha.value.id}/secoes`, { method: 'POST', body: JSON.stringify({ nome: NOME_SECAO_TEMPERATURA }) });
-    await recarregarSecoes();
-}
-
 
 async function carregarSupermercado(id) {
     if (!id || !podeDescartar()) return;
@@ -252,7 +299,6 @@ async function carregarSupermercado(id) {
         titulo.value = '';
         selecionadas.value = {};
         await recarregarSecoes();
-        await garantirSecaoUnica();
         if (!embutido) history.replaceState(null, '', `/${TIPO}/${id}`);
     } catch (e) { msg(e.message); }
     finally { carregando.value = false; }
@@ -517,15 +563,7 @@ async function escolherPdf(evento) {
     try {
         const lidas = await lerPlanilhaPdf(arquivo);
         if (!lidas.length) { msg('Não encontrei seções nesse PDF'); return; }
-        // Temperatura com uma seção só: tudo o que foi lido vai para ela (as linhas são substituídas)
-        const destino = secaoUnica.value
-            ? [{
-                nome: ordenadas.value[0]?.nome || NOME_SECAO_TEMPERATURA,
-                titulo_primeira_coluna: lidas[0].titulo_primeira_coluna,
-                linhas: lidas.flatMap(s => s.linhas),
-            }]
-            : lidas;
-        rascunho.value = destino.map(s => ({
+        rascunho.value = lidas.map(s => ({
             _k: novaChave(),
             nome: s.nome,
             titulo_primeira_coluna: s.titulo_primeira_coluna,
@@ -640,7 +678,7 @@ onBeforeUnmount(() => {
 
             <div class="flex-1 space-y-5 overflow-y-auto p-4 md:p-5">
                 <div v-for="(s, i) in rascunho" :key="s._k" class="rounded-xl border border-grafite/10 p-3">
-                    <div v-if="!secaoUnica" class="flex flex-wrap items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <input v-model="s.nome" data-maiusculas placeholder="Nome da seção"
                             class="min-w-0 flex-1 rounded-lg bg-offwhite px-3 py-2 text-sm font-bold uppercase">
                         <button class="px-1 text-azul disabled:opacity-30" :disabled="i === 0"
@@ -649,7 +687,7 @@ onBeforeUnmount(() => {
                             @click="moverItem(rascunho, i, 1)">↓</button>
                         <button class="text-sm text-red-500" @click="rascunho.splice(i, 1)">Remover seção</button>
                     </div>
-                    <label class="block text-xs text-grafite/60" :class="!secaoUnica && 'mt-3'">Título da primeira coluna</label>
+                    <label class="mt-3 block text-xs text-grafite/60">Título da primeira coluna</label>
                     <input v-model="s.titulo_primeira_coluna" data-maiusculas
                         class="mt-1 w-full rounded-lg bg-offwhite px-3 py-2 text-sm">
 
@@ -680,7 +718,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <button v-if="!secaoUnica" class="w-full rounded-xl border border-dashed border-azul py-3 text-sm font-semibold text-azul"
+                <button class="w-full rounded-xl border border-dashed border-azul py-3 text-sm font-semibold text-azul"
                     @click="rascunho.push({ _k: novaChave(), nome: '', titulo_primeira_coluna: 'ÁREA DE ATENDIMENTO', linhas: [] })">+
                     Nova seção</button>
             </div>
@@ -743,14 +781,12 @@ onBeforeUnmount(() => {
                         <p v-if="aviso" class="rounded-xl bg-white px-4 py-2 text-sm shadow-sm">{{ aviso }}</p>
 
                         <div class="rounded-2xl bg-white p-4 shadow-sm" :class="carregando && 'opacity-60'">
-                            <p class="text-xs font-semibold uppercase text-grafite/50">{{ secaoUnica ? 'Linhas e faixas do arquivo' : 'Seções no arquivo' }}</p>
+                            <p class="text-xs font-semibold uppercase text-grafite/50">Seções no arquivo</p>
                             <div class="mt-3 flex gap-2 text-sm">
-                                <template v-if="!secaoUnica">
                                 <button class="text-azul font-medium"
                                     @click="ordenadas.forEach(s => selecionadas[s.id] = true)">Marcar todas</button>
                                 <button class="text-azul font-medium"
                                     @click="ordenadas.forEach(s => selecionadas[s.id] = false)">Nenhuma</button>
-                                </template>
                                 <Teleport to="#topo-acoes" :disabled="!embutido">
                                 <label
                                     class="ml-auto inline-flex cursor-pointer items-center gap-2 rounded-full bg-azul px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-azul/30 transition hover:bg-[#3152e8]"
@@ -763,13 +799,19 @@ onBeforeUnmount(() => {
                             </div>
                             <p v-if="planilha" class="mt-2 text-xs text-grafite/60">Tipo de planilha: <b
                                     class="text-grafite">{{ planilha.nome }}</b></p>
+                            <!-- Temperatura: cada supermercado tem o seu modelo de folha -->
+                            <label v-if="planilha && Object.keys(modelos).length" class="mt-3 block text-xs text-grafite/60">
+                                Modelo da folha
+                                <select :value="planilha.modelo" @change="trocarModelo($event.target.value)"
+                                    class="mt-1 block w-full rounded-xl bg-offwhite px-3 py-2 text-sm text-grafite">
+                                    <option v-for="(nome, codigo) in modelos" :key="codigo" :value="codigo">{{ nome }}</option>
+                                </select>
+                            </label>
 
                             <div class="mt-3 flex flex-col gap-3">
                                 <article v-for="(s, idx) in ordenadas" :key="s.id"
-                                    class="flex min-w-0 flex-col transition"
-                                    :class="secaoUnica ? '' : ['rounded-xl border p-3', atual?.id === s.id ? 'col-span-full border-azul bg-azul/5' : 'border-grafite/10 bg-offwhite']">
-                                    <!-- Temperatura com uma seção só: sem o cartão da seção, direto nas linhas e faixas -->
-                                    <template v-if="!secaoUnica">
+                                    class="flex min-w-0 flex-col rounded-xl border p-3 transition"
+                                    :class="atual?.id === s.id ? 'col-span-full border-azul bg-azul/5' : 'border-grafite/10 bg-offwhite'">
                                     <div class="flex cursor-pointer items-center gap-2" @click="atual?.id === s.id ? fechar() : abrir(s)">
                                         <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-azul/10 text-[11px] font-bold text-azul">{{ String(idx + 1).padStart(2, '0') }}</span>
                                         <label class="flex min-w-0 items-center gap-2 text-sm font-bold" @click.stop>
@@ -783,7 +825,6 @@ onBeforeUnmount(() => {
                                         <button class="text-azul font-medium" @click.stop="renomear(s)">Renomear</button>
                                         <button class="ml-auto font-semibold text-azul" @click.stop="atual?.id === s.id ? fechar() : abrir(s)">{{ atual?.id === s.id ? 'Fechar ▲' : 'Editar ▼' }}</button>
                                     </div>
-                                    </template>
 
                                     
 
@@ -796,7 +837,7 @@ onBeforeUnmount(() => {
                                         </div>
                                         <label class="block text-sm text-grafite/70">Título da primeira coluna</label>
                                         <div class="mt-1 flex items-center gap-2">
-                                            <button v-if="!secaoUnica" class="shrink-0 rounded-lg bg-white px-2 py-2 text-azul"
+                                            <button class="shrink-0 rounded-lg bg-white px-2 py-2 text-azul"
                                                 title="Copiar título e linhas para outra seção"
                                                 @click="abrirCopia('titulo')"><svg viewBox="0 0 24 24" class="h-4 w-4"
                                                     fill="none" stroke="currentColor" stroke-width="2"
@@ -817,7 +858,7 @@ onBeforeUnmount(() => {
                                                     <option value="linha">Linha</option>
                                                     <option value="grupo">Faixa</option>
                                                 </select>
-                                                <button v-if="l.tipo === 'grupo' && !secaoUnica"
+                                                <button v-if="l.tipo === 'grupo'"
                                                     class="shrink-0 rounded-lg bg-offwhite px-2 py-2 text-azul"
                                                     title="Copiar faixa e linhas para outra seção"
                                                     @click="abrirCopia('faixa', i)"><svg viewBox="0 0 24 24"
@@ -844,7 +885,7 @@ onBeforeUnmount(() => {
                                                 @click="adicionarLinha">+ Linha</button>
                                             <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul"
                                                 @click="adicionarGrupo">+ Faixa</button>
-                                            <button v-if="!secaoUnica" class="ml-auto rounded-xl bg-white px-3 py-2 font-medium"
+                                            <button class="ml-auto rounded-xl bg-white px-3 py-2 font-medium"
                                                 @click="copiarParaTodas">Copiar para todas</button>
                                             <select class="rounded-xl bg-white px-3 py-2 text-xs text-azul"
                                                 @change="copiarSecaoPara($event)">
@@ -862,7 +903,7 @@ onBeforeUnmount(() => {
                                 </article>
                             </div>
 
-                            <form v-if="!secaoUnica" class="mt-3 flex gap-2" @submit.prevent="adicionarSecao">
+                            <form class="mt-3 flex gap-2" @submit.prevent="adicionarSecao">
                                 <input v-model="novaSecao" data-maiusculas placeholder="Nova seção (ex.: PADARIA)"
                                     class="flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
                                 <button
@@ -927,13 +968,44 @@ onBeforeUnmount(() => {
                                     </tr>
                                 </tbody>
                             </table>
+                            <!-- Temperatura, modelo equipamentos: topo 2x2 com o setor e a legenda menor ao lado -->
+                            <div v-else-if="modeloEquipamentos" class="equip-topo">
+                                <table class="topo temp equip">
+                                    <tr>
+                                        <td style="width:50%"><b>CLIENTE:</b><span class="valor">{{ (nomeSocial || '').toUpperCase() }}</span></td>
+                                        <td style="width:50%"><b>SETOR:</b><span class="valor">{{ f.titulo }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>MÊS/ANO:</b></td>
+                                        <td><b>ENCARREGADO:</b></td>
+                                    </tr>
+                                </table>
+                                <table class="legenda-curta">
+                                    <colgroup>
+                                        <col style="width:45%">
+                                        <col style="width:55%">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>PRODUTOS</th>
+                                            <th>TEMPERATURA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="[produto, temperatura] in f.legendaCurta" :key="produto">
+                                            <td>{{ produto }}</td>
+                                            <td>{{ temperatura }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                             <table v-else-if="ehTemperatura" class="topo temp">
                                 <tr>
-                                    <!-- sem SETOR: na temperatura os setores vão nas faixas da grade -->
-                                    <td style="width:33.33%"><b>CLIENTE:</b><span class="valor">{{ (nomeSocial || '').toUpperCase() }}</span>
+                                    <td style="width:25%"><b>CLIENTE:</b><span class="valor">{{ (nomeSocial || '').toUpperCase() }}</span>
                                     </td>
-                                    <td style="width:33.33%"><b>RESPONSÁVEL:</b></td>
-                                    <td style="width:33.34%"><b>PERÍODO:</b></td>
+                                    <td style="width:25%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span></td>
+                                    <td style="width:25%"><b>RESPONSÁVEL:</b></td>
+                                    <td style="width:25%"><b>PERÍODO:</b></td>
                                 </tr>
                             </table>
 
@@ -954,16 +1026,51 @@ onBeforeUnmount(() => {
                                 </tr>
                             </table>
 
-                            <div v-if="!f.legenda" class="grade-caixa">
+                            <!-- Modelo equipamentos: dias nas linhas, um equipamento por coluna -->
+                            <div v-if="!f.legenda && modeloEquipamentos" class="grade-caixa">
+                                <table class="grade equip">
+                                    <colgroup>
+                                        <col style="width:50px">
+                                        <col style="width:70px">
+                                        <col v-for="(e, k) in f.equipamentos" :key="k">
+                                        <col v-if="!f.equipamentos.length">
+                                        <col style="width:170px">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="faixa-cabecalho">DATA</th>
+                                            <th rowspan="2" class="faixa-cabecalho">HORA</th>
+                                            <th :colspan="Math.max(1, f.equipamentos.length)" class="faixa-cabecalho">TEMPERATURA DOS EQUIPAMENTOS</th>
+                                            <th rowspan="2" class="faixa-cabecalho">ASSINATURA</th>
+                                        </tr>
+                                        <tr>
+                                            <th v-for="(e, k) in f.equipamentos" :key="k" class="equipamento">{{ e.texto }}</th>
+                                            <th v-if="!f.equipamentos.length" class="equipamento"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="d in f.dias" :key="d">
+                                            <td>{{ String(d).padStart(2, '0') }}</td>
+                                            <td></td>
+                                            <td v-for="(e, k) in f.equipamentos" :key="k"></td>
+                                            <td v-if="!f.equipamentos.length"></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Demais: uma grade por intervalo de dias (na temperatura, 1 a 16 e 17 a 31 podem dividir a folha) -->
+                            <template v-else-if="!f.legenda">
+                            <div v-for="(dias, g) in f.grades" :key="g" class="grade-caixa">
                                 <table class="grade">
                                     <colgroup>
                                         <col :style="{ width: (ehTemperatura ? LARGURA_PRIMEIRA_COLUNA_TEMPERATURA_PX : 160) + 'px' }">
-                                        <col v-for="d in f.dias" :key="d">
+                                        <col v-for="d in dias" :key="d">
                                     </colgroup>
                                     <thead>
                                         <tr>
                                             <th class="faixa-cabecalho">{{ f.titulo }}</th>
-                                            <th v-for="d in f.dias" :key="d" class="faixa-cabecalho">{{ d }}</th>
+                                            <th v-for="d in dias" :key="d" class="faixa-cabecalho">{{ d }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -972,20 +1079,21 @@ onBeforeUnmount(() => {
                                             <tr v-if="l.tipo === 'grupo' && ehTemperatura" class="faixa"
                                                 :style="{ height: alturaDaLinha(l) + 'px' }">
                                                 <td>{{ l.texto }}</td>
-                                                <td v-for="d in f.dias" :key="d">{{ d }}</td>
+                                                <td v-for="d in dias" :key="d">{{ d }}</td>
                                             </tr>
                                             <tr v-else-if="l.tipo === 'grupo'" class="faixa"
                                                 :style="{ height: alturaDaLinha(l) + 'px' }">
-                                                <td :colspan="f.dias.length + 1">{{ l.texto }}</td>
+                                                <td :colspan="dias.length + 1">{{ l.texto }}</td>
                                             </tr>
                                             <tr v-else :style="{ height: alturaDaLinha(l) + 'px' }">
                                                 <td>{{ l.texto }}</td>
-                                                <td v-for="d in f.dias" :key="d"></td>
+                                                <td v-for="d in dias" :key="d"></td>
                                             </tr>
                                         </template>
                                     </tbody>
                                 </table>
                             </div>
+                            </template>
                             <div class="rodape">
                                 <p class="rodape-nome">ACCP Alimentos &amp; Tecnologia | contato@accpconsultoria.com.br
                                 </p>
@@ -1232,9 +1340,68 @@ onBeforeUnmount(() => {
     }
 }
 
-/* Temperatura: topo com CLIENTE | RESPONSÁVEL | PERÍODO (um terço cada), sem o bloco LOCAL/DATA embaixo */
+/* Temperatura: topo com CLIENTE | SETOR | RESPONSÁVEL | PERÍODO (25% cada), sem o bloco LOCAL/DATA embaixo */
 .sheet .topo.temp td {
     border-bottom: 1px solid #000;
+}
+
+/* Temperatura, modelo equipamentos: topo 2x2 (60%) e legenda menor (40%) lado a lado */
+.sheet .equip-topo {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 4fr);
+    align-items: stretch;
+    gap: 8px;
+}
+
+.sheet .topo.temp.equip {
+    height: 100%;
+}
+
+.sheet .topo.temp.equip td {
+    height: 50%;
+}
+
+.sheet .legenda-curta {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.sheet .legenda-curta th,
+.sheet .legenda-curta td {
+    border: 1px solid #000;
+    padding: 0 4px;
+    height: 13px;
+    text-align: left;
+    font-size: 9px;
+    line-height: 10px;
+}
+
+.sheet .legenda-curta th {
+    background: #d9d9d9;
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Dias nas linhas (16 ou 15 por folha) e um equipamento por coluna; linhas altas para escrever */
+.sheet.temperatura .grade.equip th,
+.sheet.temperatura .grade.equip td {
+    height: 26px;
+    font-size: 13px;
+    line-height: 14px;
+}
+
+.sheet.temperatura .grade.equip thead th {
+    height: 20px;
+}
+
+.sheet.temperatura .grade.equip th.equipamento {
+    height: 32px;
+    padding: 2px;
+    font-size: 11px;
+    line-height: 12px;
+    background: #fff;
 }
 
 /* Folha da legenda dos produtos (uma só, no começo da impressão) */
