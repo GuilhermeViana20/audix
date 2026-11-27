@@ -481,6 +481,8 @@ async function escolherPdf(evento) {
             linhas: s.linhas.map(l => ({ _k: novaChave(), tipo: l.tipo, texto: l.texto, aviso: l.aviso || null })),
         }));
     } catch (e) {
+        // A causa real fica no console; o usuário vê só a mensagem amigável
+        console.error('[Audix] Falha ao ler o PDF', arquivo.name, e);
         msg('Não consegui ler esse PDF');
     } finally {
         lendoPdf.value = false;
