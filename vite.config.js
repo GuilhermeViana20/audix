@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/carregando.js',
                 'resources/js/toast.js',
+                'resources/js/exportarDocxPragas.js',
             ],
             refresh: true,
         }),

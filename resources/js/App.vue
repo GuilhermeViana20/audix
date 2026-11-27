@@ -112,22 +112,54 @@ function ajustarZoom() {
         zoomPreview.value = Math.max(0.3, Math.min(1, (caixa.clientWidth - 24) / 1123));
     }
 }
-// Registra o relatório (planilha impressa) e abre a impressão do navegador
+// Registra o relatório (planilha impressa ou exportada) com as seções selecionadas
+async function registrarRelatorio() {
+    if (!planilha.value || !idsSelecionados.value.length) return;
+    try {
+        await rede(`/api/planilhas/${planilha.value.id}/relatorios`, {
+            method: 'POST',
+            headers: JSON_HEADERS,
+            body: JSON.stringify({ secoes: idsSelecionados.value }),
+        });
+    } catch (e) { /* o registro não impede a impressão nem a exportação */ }
+}
+
+// Registra o relatório e abre a impressão do navegador
 async function imprimir() {
-    if (planilha.value && idsSelecionados.value.length) {
-        try {
-            await rede(`/api/planilhas/${planilha.value.id}/relatorios`, {
-                method: 'POST',
-                headers: JSON_HEADERS,
-                body: JSON.stringify({ secoes: idsSelecionados.value }),
-            });
-        } catch (e) { /* o registro não impede a impressão */ }
-    }
+    await registrarRelatorio();
     // O nome sugerido do arquivo, ao salvar como PDF, é o título da página no momento da impressão
     const tituloAnterior = document.title;
     if (window.AUDIX.nomeArquivo) document.title = window.AUDIX.nomeArquivo;
     window.print();
     document.title = tituloAnterior;
+}
+
+// Gera o .docx com as mesmas folhas da pré-visualização, para ajustes pontuais no Word
+const exportandoWord = ref(false);
+async function exportarWord() {
+    if (!folhas.value.length || exportandoWord.value) return;
+    exportandoWord.value = true;
+    pendentes.value++;
+    try {
+        await registrarRelatorio();
+        // A biblioteca do Word só é baixada quando o usuário exporta
+        const { exportarPlanilhaDocx } = await import('./exportarDocx.js');
+        await exportarPlanilhaDocx({
+            tipo: TIPO,
+            nomePlanilha: planilha.value?.nome,
+            nomeSocial: nomeSocial.value,
+            logoUrl: logoUrl.value,
+            folhas: folhas.value,
+            alturaDaLinha,
+            legenda: LEGENDA_TEMPERATURA,
+            nomeArquivo: window.AUDIX.nomeArquivo || planilha.value?.nome || 'Planilha',
+        });
+    } catch (e) {
+        msg('Não consegui gerar o arquivo Word');
+    } finally {
+        pendentes.value--;
+        exportandoWord.value = false;
+    }
 }
 
 // Assinatura do que é salvo no banco para uma seção (título + linhas).
@@ -794,6 +826,9 @@ onBeforeUnmount(() => {
                     <p class="truncate text-base font-bold">{{ planilha?.nome || 'Planilha' }}</p>
                 </Teleport>
                 <Teleport to="#topo-acoes" :disabled="!embutido">
+                    <button
+                        class="inline-flex items-center gap-2 rounded-full bg-[#2b579a] px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-[#2b579a]/30 transition hover:bg-[#1e3f73] disabled:opacity-40"
+                        :disabled="!folhas.length || exportandoWord" @click="exportarWord"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M8.5 12l1.5 6 2-4.5 2 4.5 1.5-6"/></svg>{{ exportandoWord ? 'Gerando…' : 'Exportar Word' }}</button>
                     <button
                         class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-600/30 transition hover:bg-emerald-700 disabled:opacity-40"
                         :disabled="!folhas.length" @click="imprimir"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>Imprimir / PDF</button>
