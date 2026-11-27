@@ -541,9 +541,10 @@
 
                 <table class="topo">
                     <tr>
-                        <td style="width:40%"><b>EMPRESA RESPONSÁVEL:</b></td>
-                        <td style="width:30%"><b>SEÇÃO:</b><span class="valor" data-nome-folha>{{ $secao->nome }}</span></td>
-                        <td style="width:30%"><b>ENCARREGADO:</b></td>
+                        <td style="width:25%"><b>CLIENTE:</b><span class="valor">{{ mb_strtoupper($supermercado->nome_social ?? '') }}</span></td>
+                        <td style="width:25%"><b>EMPRESA RESPONSÁVEL:</b></td>
+                        <td style="width:25%"><b>SEÇÃO:</b><span class="valor" data-nome-folha>{{ $secao->nome }}</span></td>
+                        <td style="width:25%"><b>ENCARREGADO:</b></td>
                     </tr>
                 </table>
                 <table class="topo local">

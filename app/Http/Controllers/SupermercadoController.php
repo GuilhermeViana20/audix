@@ -90,6 +90,7 @@ class SupermercadoController extends Controller
         return response()->json([
             'planilha' => ['id' => $planilha->id, 'tipo' => $planilha->tipo, 'nome' => $planilha->nome],
             'logo_url' => $supermercado->logo_url,
+            'nome_social' => $supermercado->nome_social,
             'secoes' => $secoes,
         ]);
     }

@@ -43,9 +43,19 @@ export function interpretarPlanilha(paginas) {
             // Rótulo SETOR: o nome está na mesma linha (à direita) ou na linha de baixo
             const rotulo = linha.itens.find(i => /^SETOR:?$/i.test(i.texto));
             if (rotulo) {
-                let nome = texto(semRotulo(linha.itens.filter(i => i.x > rotulo.x)));
+                // Limites da coluna SETOR: meio do caminho até os rótulos vizinhos (CLIENTE, MÊS/ANO...),
+                // para não misturar o valor de outras colunas (ex.: nome do cliente) ao nome da seção
+                const rotulos = linha.itens.filter(i => /:$/.test(i.texto));
+                const pos = rotulos.indexOf(rotulo);
+                const anterior = rotulos[pos - 1];
+                const proximo = rotulos[pos + 1];
+                const esquerda = anterior ? (anterior.x + rotulo.x) / 2 : -Infinity;
+                const direita = proximo ? (rotulo.x + proximo.x) / 2 : Infinity;
+                const naColuna = i => i.x >= esquerda && i.x < direita;
+
+                let nome = texto(semRotulo(linha.itens.filter(i => i.x > rotulo.x && i.x < direita)));
                 if (!nome && linhas[k + 1]) {
-                    nome = texto(semRotulo(linhas[k + 1].itens));
+                    nome = texto(semRotulo(linhas[k + 1].itens.filter(naColuna)));
                     k++;
                 }
                 colunaDias = null;

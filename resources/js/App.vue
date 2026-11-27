@@ -21,6 +21,7 @@ const novaSecao = ref('');
 const aviso = ref('');
 const status = ref('Tudo salvo');
 const logoUrl = ref(null);
+const nomeSocial = ref(null); // nome social do supermercado (campo CLIENTE da planilha de higiene)
 const planilha = ref(null); // { id, tipo, nome } da planilha que está sendo editada
 const versaoPreview = ref(0);
 
@@ -160,6 +161,7 @@ async function recarregarSecoes() {
     const dados = await api(`/api/supermercados/${supermercadoId.value}/planilhas/${TIPO}`);
     planilha.value = dados.planilha;
     logoUrl.value = dados.logo_url;
+    nomeSocial.value = dados.nome_social;
     secoes.value = mapearSecoes(dados.secoes);
     dados.secoes.forEach(s => { if (selecionadas.value[s.id] === undefined) selecionadas.value[s.id] = true; });
     if (atual.value) atual.value = secoes.value.find(s => s.id === atual.value.id) || null;
@@ -846,10 +848,12 @@ onBeforeUnmount(() => {
 
                             <table v-if="!ehTemperatura" class="topo">
                                 <tr>
-                                    <td style="width:33.33%"><b>ENCARREGADO:</b></td>
-                                    <td style="width:33.33%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span>
+                                    <td style="width:25%"><b>CLIENTE:</b><span class="valor">{{ (nomeSocial || '').toUpperCase() }}</span>
                                     </td>
-                                    <td style="width:33.34%"><b>MÊS/ANO:</b></td>
+                                    <td style="width:25%"><b>ENCARREGADO:</b></td>
+                                    <td style="width:25%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span>
+                                    </td>
+                                    <td style="width:25%"><b>MÊS/ANO:</b></td>
                                 </tr>
                             </table>
                             <table v-if="!ehTemperatura" class="topo local">
