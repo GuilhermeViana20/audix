@@ -41,7 +41,7 @@ const ordenadas = computed(() => [...secoes.value].sort((a, b) => a.nome.localeC
 const idsSelecionados = computed(() => ordenadas.value.filter(s => selecionadas.value[s.id]).map(s => s.id));
 // Folhas da pré-visualização HTML: uma seção pode gerar várias folhas se tiver muitas linhas.
 const ALTURA_LINHA_PX = 20; // altura fixa de toda linha/faixa da grade (px)
-const LIMITE_TEMPERATURA_PX = 500; // o box de legenda ocupa espaço no topo: cabem menos linhas
+const LIMITE_TEMPERATURA_PX = 500; // a legenda ao lado do topo ocupa altura: cabem menos linhas
 const LEGENDA_TEMPERATURA = [
     ['Leite e Derivados', '0° a 10°C'],
     ['Carnes e Aves', '0° a 7°C'],
@@ -816,18 +816,15 @@ onBeforeUnmount(() => {
                             </table>
 
                             <div v-if="ehTemperatura" class="temp-topo">
-                                <table class="temp-dados">
+                                <table class="topo temp">
                                     <tr>
-                                        <td class="rot">CLIENTE:</td>
-                                        <td class="campo"></td>
-                                        <td class="rot">SETOR:</td>
-                                        <td class="campo">{{ f.secao.nome }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="rot">RESPONSÁVEL:</td>
-                                        <td class="campo"></td>
-                                        <td class="rot">PERÍODO:</td>
-                                        <td class="campo"></td>
+                                        <td style="width:25%"><b>CLIENTE:</b><span class="valor">{{ (nomeSocial || '').toUpperCase() }}</span>
+                                        </td>
+                                        <td style="width:25%"><b>SETOR:</b><span class="valor">{{ f.secao.nome }}</span>
+                                        </td>
+                                        <!-- linha do valor em branco: o rótulo fica na mesma altura das outras colunas e sobra espaço para preencher -->
+                                        <td style="width:25%"><b>RESPONSÁVEL:</b><span class="valor">&nbsp;</span></td>
+                                        <td style="width:25%"><b>PERÍODO:</b><span class="valor">&nbsp;</span></td>
                                     </tr>
                                 </table>
                                 <table class="legenda-temp">
@@ -1127,45 +1124,29 @@ onBeforeUnmount(() => {
     }
 }
 
+/* Temperatura: topo (70%) e legenda dos produtos (30%) lado a lado */
 .sheet .temp-topo {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
-    margin-top: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    align-items: stretch;
+    gap: 8px;
 }
 
-.sheet .temp-dados {
-    border-collapse: collapse;
-    width: 62%;
-    table-layout: fixed;
-    margin-top: 0;
+/* O topo ocupa só a metade de cima da altura da legenda */
+.sheet .topo.temp {
+    align-self: start;
+    height: 50%;
 }
 
-.sheet .temp-dados td {
-    border: 1px solid #000;
-    height: 22px;
-    padding: 0 6px;
+.sheet .topo.temp td {
+    height: auto;
     vertical-align: middle;
-    font-size: 10px;
-    text-align: left;
-}
-
-.sheet .temp-dados td.rot {
-    width: 96px;
-    font-weight: bold;
-    white-space: nowrap;
-    background: #d9d9d9;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-}
-
-.sheet .temp-dados td.campo {
-    font-weight: bold;
+    padding-top: 0;
+    border-bottom: 1px solid #000;
 }
 
 .sheet .legenda-temp {
-    width: 34%;
+    width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -1185,32 +1166,6 @@ onBeforeUnmount(() => {
     font-weight: bold;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-}
-
-/* Iguala a altura dos dados e da legenda de temperatura */
-.sheet .temp-topo {
-    display: grid;
-    grid-template-columns: minmax(0, 62fr) minmax(0, 34fr);
-    align-items: stretch;
-    gap: 16px;
-    margin-top: 10px;
-}
-
-.sheet .temp-topo>.temp-dados,
-.sheet .temp-topo>.legenda-temp {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-}
-
-.sheet .temp-dados tr {
-    height: 50%;
-}
-
-.sheet .temp-dados td {
-    height: auto;
-    padding: 6px;
-    vertical-align: middle;
 }
 
 /* Temperatura: controles e folhas com rolagens independentes. */
