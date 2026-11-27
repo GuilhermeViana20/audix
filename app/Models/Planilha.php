@@ -10,7 +10,13 @@ class Planilha extends Model
 {
     protected $table = 'planilhas';
 
-    protected $fillable = ['supermercado_id', 'tipo', 'nome'];
+    protected $fillable = ['supermercado_id', 'tipo', 'nome', 'modelo'];
+
+    /** Modelos (layouts) da folha de temperatura: código => nome exibido no seletor. */
+    public const MODELOS_TEMPERATURA = [
+        'padrao' => 'Legenda na primeira folha; dias 1 a 16 e 17 a 31',
+        'equipamentos' => 'Equipamentos em colunas e dias nas linhas; legenda em todas as folhas',
+    ];
 
     /** Tipos de planilha disponíveis: código => nome exibido. */
     public const TIPOS = [

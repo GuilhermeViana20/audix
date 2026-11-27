@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::post('planilhas/{planilha}/secoes', [SecaoController::class, 'store']);
         Route::post('planilhas/{planilha}/importacao', [\App\Http\Controllers\ImportacaoPlanilhaController::class, 'store']);
         Route::post('planilhas/{planilha}/relatorios', [RelatorioController::class, 'store']);
+        Route::put('planilhas/{planilha}/modelo', [\App\Http\Controllers\PlanilhaController::class, 'atualizarModelo']);
         Route::put('secoes/{secao}', [SecaoController::class, 'update']);
         Route::delete('secoes/{secao}', [SecaoController::class, 'destroy']);
 

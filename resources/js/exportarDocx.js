@@ -256,8 +256,7 @@ const GRADE = {
     temperatura: { primeiraColuna: 130, fonte: 11, cabecalho: 26, faixaComDias: true },
 };
 
-function gradeDeLinhas(folha, alturaDaLinha, medidas) {
-    const dias = folha.dias || Array.from({ length: 31 }, (_, i) => i + 1);
+function gradeDeLinhas(folha, dias, alturaDaLinha, medidas) {
     const larguras = colunasDaGrade(LARGURA, larguraPx(medidas.primeiraColuna), dias.length);
     const fonte = { tamanho: medidas.fonte };
     const celulasComDias = titulo => [
@@ -298,16 +297,17 @@ function topoHigiene(folha, nomeSocial) {
     ], larguras);
 }
 
-// Temperatura: CLIENTE | RESPONSÁVEL | PERÍODO, um terço cada, numa linha só (os setores vão nas faixas)
-function topoTemperatura(nomeSocial) {
-    const terco = Math.floor(LARGURA / 3);
-    const larguras = [terco, terco, LARGURA - 2 * terco];
+// Temperatura: CLIENTE | SETOR | RESPONSÁVEL | PERÍODO, 25% cada, numa linha só
+function topoTemperatura(folha, nomeSocial) {
+    const quarto = Math.floor(LARGURA / 4);
+    const larguras = [quarto, quarto, quarto, LARGURA - 3 * quarto];
     const topo = { alinhamentoVertical: VerticalAlign.TOP, margemTopo: twips(4) };
     return tabela([
         linhaTabela([
             celula(campo('CLIENTE:', (nomeSocial || '').toUpperCase()), { largura: larguras[0], ...topo }),
-            celula(campo('RESPONSÁVEL:'), { largura: larguras[1], ...topo }),
-            celula(campo('PERÍODO:'), { largura: larguras[2], ...topo }),
+            celula(campo('SETOR:', folha.secao.nome), { largura: larguras[1], ...topo }),
+            celula(campo('RESPONSÁVEL:'), { largura: larguras[2], ...topo }),
+            celula(campo('PERÍODO:'), { largura: larguras[3], ...topo }),
         ], 36),
     ], larguras);
 }
@@ -329,6 +329,86 @@ function tabelaLegenda(legenda) {
     ], larguras);
 }
 
+// ---------- Temperatura, modelo equipamentos ----------
+// Topo 2x2 (CLIENTE | SETOR / MÊS/ANO | ENCARREGADO) com 60% e a legenda menor com 40%, lado a lado
+function topoEquipamentos(folha, nomeSocial, legenda) {
+    const vao = larguraPx(8);
+    const larguraTopo = Math.round((LARGURA - vao) * 0.6);
+    const larguraLegenda = LARGURA - vao - larguraTopo;
+
+    const meio = Math.floor(larguraTopo / 2);
+    const largurasTopo = [meio, larguraTopo - meio];
+    const noTopo = { alinhamentoVertical: VerticalAlign.TOP, margemTopo: twips(4) };
+    // Cada linha do topo tem metade da altura da legenda (cabeçalho + 5 itens, o último em duas linhas)
+    const topo = tabela([
+        linhaTabela([
+            celula(campo('CLIENTE:', (nomeSocial || '').toUpperCase()), { largura: largurasTopo[0], ...noTopo }),
+            celula(campo('SETOR:', folha.titulo), { largura: largurasTopo[1], ...noTopo }),
+        ], 44),
+        linhaTabela([
+            celula(campo('MÊS/ANO:'), { largura: largurasTopo[0], ...noTopo }),
+            celula(campo('ENCARREGADO:'), { largura: largurasTopo[1], ...noTopo }),
+        ], 44),
+    ], largurasTopo);
+
+    const produto = Math.round(larguraLegenda * 0.45);
+    const largurasLegenda = [produto, larguraLegenda - produto];
+    const item = (conteudo, largura, negrito, fundo) => celula(
+        texto(conteudo, { tamanho: 9, negrito, alinhamento: AlignmentType.LEFT }),
+        { largura, fundo, margemEsquerda: twips(4) },
+    );
+    const tabelaLegenda = tabela([
+        linhaTabela([item('PRODUTOS', largurasLegenda[0], true, CINZA), item('TEMPERATURA', largurasLegenda[1], true, CINZA)], 13),
+        ...legenda.map(([nome, temperatura]) => linhaTabela([
+            item(nome, largurasLegenda[0], false),
+            item(temperatura, largurasLegenda[1], false),
+        ], 13)),
+    ], largurasLegenda);
+
+    // Tabela externa sem bordas só para posicionar os blocos; a célula precisa terminar em parágrafo
+    const fimDaCelula = () => new Paragraph({ spacing: { line: 20, lineRule: LineRuleType.EXACT }, children: [] });
+    return tabela([
+        linhaTabela([
+            celula([topo, fimDaCelula()], { largura: larguraTopo, alinhamentoVertical: VerticalAlign.TOP }),
+            celula(new Paragraph({}), { largura: vao }),
+            celula([tabelaLegenda, fimDaCelula()], { largura: larguraLegenda, alinhamentoVertical: VerticalAlign.TOP }),
+        ], 0),
+    ], [larguraTopo, vao, larguraLegenda], { bordas: SEM_BORDAS });
+}
+
+// DATA | HORA | um equipamento por coluna | ASSINATURA, com os dias da folha (1 a 16 ou 17 a 31) nas linhas
+function gradeEquipamentos(folha) {
+    const quantidade = Math.max(1, folha.equipamentos.length);
+    const [data, hora, assinatura] = [larguraPx(50), larguraPx(70), larguraPx(170)];
+    const resto = LARGURA - data - hora - assinatura;
+    const cada = Math.floor(resto / quantidade);
+    const largurasEquip = Array(quantidade).fill(cada);
+    largurasEquip[quantidade - 1] += resto - cada * quantidade;
+    const larguras = [data, hora, ...largurasEquip, assinatura];
+
+    const fonte = { tamanho: 13 };
+    const cinza = (conteudo, largura, extra = {}) => celula(texto(conteudo, { ...fonte, negrito: true }), { largura, fundo: CINZA, ...extra });
+    const nomes = folha.equipamentos.length ? folha.equipamentos.map(e => e.texto) : [''];
+    const cabecalho1 = linhaTabela([
+        cinza('DATA', data, { linhas: 2 }),
+        cinza('HORA', hora, { linhas: 2 }),
+        cinza('TEMPERATURA DOS EQUIPAMENTOS', resto, { colunas: quantidade }),
+        cinza('ASSINATURA', assinatura, { linhas: 2 }),
+    ], 20, { cabecalho: true });
+    // Na segunda linha do cabeçalho, as células mescladas na vertical continuam (vMerge) pelo docx
+    const cabecalho2 = linhaTabela(
+        nomes.map((nome, i) => celula(texto(nome, { tamanho: 11 }), { largura: largurasEquip[i] })),
+        32, { cabecalho: true },
+    );
+    const dias = (folha.dias ?? Array.from({ length: 31 }, (_, i) => i + 1)).map(dia => linhaTabela([
+        celula(texto(String(dia).padStart(2, '0'), fonte), { largura: data }),
+        celula(new Paragraph({}), { largura: hora }),
+        ...largurasEquip.map(l => celula(new Paragraph({}), { largura: l })),
+        celula(new Paragraph({}), { largura: assinatura }),
+    ], 26, { exata: true }));
+    return tabela([cabecalho1, cabecalho2, ...dias], larguras);
+}
+
 /**
  * Exporta as folhas de higiene ou temperatura.
  * @param {object} opcoes
@@ -336,27 +416,42 @@ function tabelaLegenda(legenda) {
  * @param {string} opcoes.nomePlanilha  nome da planilha (título da higiene)
  * @param {string|null} opcoes.nomeSocial
  * @param {string|null} opcoes.logoUrl
- * @param {Array} opcoes.folhas          folhas já paginadas: { secao, linhas, titulo, dias }
+ * @param {Array} opcoes.folhas          folhas já paginadas: { secao, titulo, linhas, grades } ou,
+ *                                       no modelo equipamentos, { secao, titulo, equipamentos }
  * @param {Function} opcoes.alturaDaLinha  altura (px) de cada linha/faixa, a mesma da pré-visualização
- * @param {Array} [opcoes.legenda]       legenda de temperaturas: [produto, temperatura]
+ * @param {Array} [opcoes.legenda]       legenda de temperaturas (folha própria no modelo padrão)
+ * @param {'padrao'|'equipamentos'} [opcoes.modelo]  modelo da folha de temperatura
+ * @param {Array} [opcoes.legendaCurta]  legenda menor, em todas as folhas do modelo equipamentos
  * @param {string} opcoes.nomeArquivo
  */
-export async function exportarPlanilhaDocx({ tipo, nomePlanilha, nomeSocial, logoUrl, folhas, alturaDaLinha, legenda = [], nomeArquivo }) {
+export async function exportarPlanilhaDocx({ tipo, nomePlanilha, nomeSocial, logoUrl, folhas, alturaDaLinha, legenda = [], modelo = 'padrao', legendaCurta = [], nomeArquivo }) {
     const temperatura = tipo === 'temperatura';
+    const equipamentos = temperatura && modelo === 'equipamentos';
     const [logoAccp, logoSupermercado] = await Promise.all([carregarImagem('/images/acoop.png'), carregarImagem(logoUrl)]);
     const titulo = temperatura
         ? ['CONTROLE DE TEMPERATURA']
         : ['PLANILHA DE MONITORAMENTO', (nomePlanilha || 'HIGIENE E LIMPEZA AMBIENTAL').toUpperCase()];
 
-    const secoes = folhas.map(folha => secaoDaFolha([
-        cabecalhoLogos({ logoAccp, logoSupermercado, titulo }),
-        espaco(1),
-        temperatura ? topoTemperatura(nomeSocial) : topoHigiene(folha, nomeSocial),
-        espaco(12),
-        gradeDeLinhas(folha, alturaDaLinha, temperatura ? GRADE.temperatura : GRADE.higiene),
-    ]));
-    // Temperatura: a primeira folha é só a legenda dos produtos
-    if (temperatura && legenda.length) {
+    const secoes = folhas.map(folha => secaoDaFolha(equipamentos
+        ? [
+            cabecalhoLogos({ logoAccp, logoSupermercado, titulo }),
+            espaco(1),
+            topoEquipamentos(folha, nomeSocial, folha.legendaCurta ?? legendaCurta),
+            espaco(10),
+            gradeEquipamentos(folha),
+        ]
+        : [
+            cabecalhoLogos({ logoAccp, logoSupermercado, titulo }),
+            espaco(1),
+            temperatura ? topoTemperatura(folha, nomeSocial) : topoHigiene(folha, nomeSocial),
+            // Uma grade por intervalo de dias (na temperatura, 1 a 16 e 17 a 31 podem dividir a folha)
+            ...folha.grades.flatMap(dias => [
+                espaco(12),
+                gradeDeLinhas(folha, dias, alturaDaLinha, temperatura ? GRADE.temperatura : GRADE.higiene),
+            ]),
+        ]));
+    // Temperatura, modelo padrão: a primeira folha é só a legenda dos produtos
+    if (temperatura && !equipamentos && legenda.length) {
         secoes.unshift(secaoDaFolha([
             cabecalhoLogos({ logoAccp, logoSupermercado, titulo }),
             espaco(16),
