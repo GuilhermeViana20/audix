@@ -23,7 +23,7 @@
 @php($LARG_NOME = 160)
 @php($LARG_DIA = 28.39)
 @php($LARG_TOTAL = $LARG_NOME + 31 * $LARG_DIA)
-@php($TERCO = round($LARG_TOTAL / 3, 2))
+@php($QUARTO = round($LARG_TOTAL / 4, 2))
 @php($METADE = round($LARG_TOTAL / 2, 2))
 @foreach ($paginas as $pagina)
     @php($secao = $pagina['secao'])
@@ -53,14 +53,16 @@
             </tr>
         </table>
 
-        {{-- Topo: ENCARREGADO | SETOR | MÊS/ANO (33,3% cada) --}}
+        {{-- Topo: CLIENTE | ENCARREGADO | SETOR | MÊS/ANO (25% cada) --}}
         <table class="planilha topo" style="width:{{ $LARG_TOTAL }}px;">
             <colgroup>
-                <col style="width:{{ $TERCO }}px;">
-                <col style="width:{{ $TERCO }}px;">
-                <col style="width:{{ $LARG_TOTAL - 2 * $TERCO }}px;">
+                <col style="width:{{ $QUARTO }}px;">
+                <col style="width:{{ $QUARTO }}px;">
+                <col style="width:{{ $QUARTO }}px;">
+                <col style="width:{{ $LARG_TOTAL - 3 * $QUARTO }}px;">
             </colgroup>
             <tr>
+                <td><b>CLIENTE:</b><span class="valor">{{ mb_strtoupper($supermercado->nome_social ?? '') }}</span></td>
                 <td><b>ENCARREGADO:</b></td>
                 <td><b>SETOR:</b><span class="valor">{{ $secao->nome }}</span></td>
                 <td><b>MÊS/ANO:</b></td>
