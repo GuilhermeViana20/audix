@@ -15,7 +15,16 @@
     </script>
     <title>Controle de Pragas - {{ $supermercado->nome_social ?: $supermercado->nome }}</title>
     <script>document.documentElement.classList.add('js');</script>
-    @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js'])
+    @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js', 'resources/js/exportarDocxPragas.js'])
+    <script>
+        // Dados das folhas para a exportação em Word (as seções são lidas da tela)
+        window.AUDIX_PRAGAS = {
+            nomeSocial: @json($supermercado->nome_social),
+            logoUrl: @json($supermercado->logo_url),
+            nomeArquivo: @json('Planilha Pragas - '.$supermercado->nome),
+            pragas: @json($pragas->map(fn ($p) => ['codigo' => $p->codigo, 'nome' => $p->nome, 'imagem' => $p->imagem_caminho])->values()),
+        };
+    </script>
     <style>
         /* Folha A4 paisagem (297 x 210 mm a 96 dpi = 1123 x 794 px) */
         .folha { width: 1123px; height: 794px; box-sizing: border-box; padding: 22px 36px; background: #fff; color: #000;
@@ -388,6 +397,9 @@
                 <p class="truncate text-base font-bold">Planilha de Monitoramento - Controle de Pragas</p>
             </div>
             <div class="flex items-center gap-2">
+                <button type="button" id="exportar-word"
+                        class="inline-flex items-center gap-2 rounded-full bg-[#2b579a] px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-[#2b579a]/30 transition hover:bg-[#1e3f73] disabled:opacity-40"
+                        @disabled($secoes->isEmpty())><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M8.5 12l1.5 6 2-4.5 2 4.5 1.5-6"/></svg><span data-rotulo>Exportar Word</span></button>
                 <button onclick="window.print()"
                         class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-600/30 transition hover:bg-emerald-700 disabled:opacity-40"
                         @disabled($secoes->isEmpty())><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>Imprimir / PDF</button>
