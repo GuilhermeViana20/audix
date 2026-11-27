@@ -22,6 +22,18 @@ export default defineConfig({
             },
         }),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                // O worker do pdf.js vem como .mjs; alguns servidores (ex.: Hostinger) entregam .mjs
+                // como text/plain e o navegador recusa o módulo. Em .js, o MIME é sempre de JavaScript.
+                assetFileNames: (asset) => {
+                    const nome = asset.names?.[0] ?? asset.name ?? '';
+                    return nome.endsWith('.mjs') ? 'assets/[name]-[hash].js' : 'assets/[name]-[hash][extname]';
+                },
+            },
+        },
+    },
     server: {
         host: '0.0.0.0',
         port: 5173,
