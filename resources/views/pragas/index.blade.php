@@ -15,7 +15,7 @@
     </script>
     <title>Controle de Pragas - {{ $supermercado->nome_social ?: $supermercado->nome }}</title>
     <script>document.documentElement.classList.add('js');</script>
-    @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js', 'resources/js/exportarDocxPragas.js'])
+    @vite(['resources/css/app.css', 'resources/js/carregando.js', 'resources/js/toast.js', 'resources/js/exportarDocxPragas.js', 'resources/js/maiusculas.js'])
     <script>
         // Dados das folhas para a exportação em Word (as seções são lidas da tela)
         window.AUDIX_PRAGAS = {
@@ -436,7 +436,7 @@
                                     @csrf
                                     @method('PUT')
                                     <label for="nome-secao-{{ $secao->id }}">Nome da seção</label>
-                                    <input id="nome-secao-{{ $secao->id }}" name="nome" value="{{ $secao->nome }}" required maxlength="120" autocomplete="off">
+                                    <input id="nome-secao-{{ $secao->id }}" name="nome" value="{{ $secao->nome }}" required maxlength="120" autocomplete="off" data-maiusculas>
                                     <p class="cip-edicao-status" role="status" aria-live="polite"></p>
                                     <div class="cip-edicao-acoes">
                                         <button type="button" data-cancelar>Cancelar</button>
@@ -492,7 +492,7 @@
                     @csrf
                     <label for="nova-secao" class="text-xs font-semibold uppercase tracking-wide text-grafite/50">Nova seção</label>
                     <div class="mt-2 flex gap-2">
-                        <input id="nova-secao" maxlength="120" placeholder="Ex.: FLV"
+                        <input id="nova-secao" maxlength="120" placeholder="Ex.: FLV" data-maiusculas
                                class="min-w-0 flex-1 rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-grafite/10 focus:outline-none focus:ring-2 focus:ring-azul">
                         <button type="button" id="adicionar-secao" class="rounded-xl bg-white px-4 text-sm font-semibold text-azul ring-1 ring-azul/30 transition hover:bg-azul/5">Adicionar</button>
                     </div>
