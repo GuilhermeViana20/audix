@@ -10,6 +10,7 @@ const RUIDO = /^(PLANILHA DE MONITORAMENTO|HIGIENE E LIMPEZA AMBIENTAL|ENCARREGA
 // Rodapé da ACCP abaixo da grade (nome/e-mail e endereço). Centralizado e sem nada na primeira
 // coluna, seria lido como faixa; ao encontrá-lo, a grade da página terminou.
 const RODAPE = /ACCP\s+ALIMENTOS|ACCPCONSULTORIA|HUMBERTO\s+MONTE/i;
+const SECAO_SEM_SETOR = 'TEMPERATURA'; // nome da seção quando o PDF não tem SETOR no topo
 
 export function agruparLinhas(itens) {
     const ordenados = [...itens].sort((a, b) => a.y - b.y || a.x - b.x);
@@ -33,12 +34,21 @@ export function interpretarPlanilha(paginas) {
     const secoes = [];
     let secao = null;
     let colunaDias = null; // x do dia 1: tudo à esquerda dele é a primeira coluna
+    const obterSecao = nome => {
+        let s = secoes.find(x => x.nome === nome);
+        if (!s) {
+            s = { nome, titulo_primeira_coluna: 'ÁREA DE ATENDIMENTO', linhas: [] };
+            secoes.push(s);
+        }
+        return s;
+    };
 
     for (const itens of paginas) {
         // Cada página começa com o cabeçalho; o que vem antes do SETOR não pertence à seção anterior
         secao = null;
         colunaDias = null;
         const linhas = agruparLinhas(itens);
+        const paginaDeTemperatura = linhas.some(l => /CONTROLE DE TEMPERATURA/i.test(texto(l.itens)));
 
         for (let k = 0; k < linhas.length; k++) {
             const linha = linhas[k];
@@ -53,27 +63,47 @@ export function interpretarPlanilha(paginas) {
                 const anterior = rotulos[pos - 1];
                 const proximo = rotulos[pos + 1];
                 const esquerda = anterior ? (anterior.x + rotulo.x) / 2 : -Infinity;
-                const direita = proximo ? (rotulo.x + proximo.x) / 2 : Infinity;
+                // Sem rótulo à direita (temperatura: topo 2x2 com a legenda ao lado), a coluna tem a mesma
+                // largura da anterior; assim a legenda não entra no nome
+                const direita = proximo ? (rotulo.x + proximo.x) / 2
+                    : anterior ? rotulo.x + (rotulo.x - anterior.x) / 2 : Infinity;
                 const naColuna = i => i.x >= esquerda && i.x < direita;
 
                 let nome = texto(semRotulo(linha.itens.filter(i => i.x > rotulo.x && i.x < direita)));
-                if (!nome && linhas[k + 1]) {
-                    nome = texto(semRotulo(linhas[k + 1].itens.filter(naColuna)));
-                    k++;
+                // Na temperatura a legenda ao lado do topo intercala linhas: vale a primeira com texto na coluna
+                for (let j = k + 1; !nome && j <= k + 3 && linhas[j]; j++) {
+                    nome = texto(semRotulo(linhas[j].itens.filter(naColuna)));
+                    if (nome) k = j;
                 }
                 colunaDias = null;
-                        secao = secoes.find(s => s.nome === nome) || null;
-                if (!secao) {
-                    secao = { nome, titulo_primeira_coluna: 'ÁREA DE ATENDIMENTO', linhas: [] };
-                    secoes.push(secao);
-                }
+                secao = obterSecao(nome);
                 continue;
             }
-            if (!secao) continue;
 
-            // Cabeçalho da grade: linha com o dia 1 (e o 31). O que está à esquerda é o título.
-            const dia1 = linha.itens.find(i => i.texto === '1');
-            if (dia1 && linha.itens.some(i => i.texto === '31')) {
+            // Cabeçalho da grade: linha com o dia 1 e o 31 (ou o 16, na temperatura dividida em duas
+            // folhas). O que está à esquerda é o título.
+            const dia = n => linha.itens.find(i => i.texto === String(n));
+            const dia1 = dia(1);
+            // Folha com os dias 17 a 31: repete as linhas da folha anterior (dias 1 a 16), então é ignorada
+            if (!dia1 && dia(17) && dia(31)) {
+                colunaDias = null;
+                continue;
+            }
+            const cabecalhoDaGrade = dia1 && (dia(31) || dia(16));
+            // Topo sem SETOR (temperatura: os setores vão nas faixas): a grade entra numa seção só,
+            // que o usuário renomeia na importação
+            if (!secao && cabecalhoDaGrade && paginaDeTemperatura) {
+                secao = obterSecao(SECAO_SEM_SETOR);
+            }
+            if (!secao) continue;
+            // Com a grade já começada, uma linha com os dias é faixa (temperatura: a faixa repete o
+            // cabeçalho, com o texto na primeira coluna)
+            if (cabecalhoDaGrade && colunaDias !== null && paginaDeTemperatura) {
+                const textoFaixa = texto(linha.itens.filter(i => i.x < colunaDias - 1));
+                if (textoFaixa) secao.linhas.push({ tipo: 'grupo', texto: textoFaixa });
+                continue;
+            }
+            if (cabecalhoDaGrade) {
                 colunaDias = dia1.x;
                 const titulo = texto(linha.itens.filter(i => i.x < colunaDias - 1));
                 if (titulo) secao.titulo_primeira_coluna = titulo;

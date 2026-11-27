@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/carregando.js',
                 'resources/js/toast.js',
                 'resources/js/exportarDocxPragas.js',
+                'resources/js/maiusculas.js',
             ],
             refresh: true,
         }),

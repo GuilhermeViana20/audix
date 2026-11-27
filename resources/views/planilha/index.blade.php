@@ -16,7 +16,7 @@
         })();
     </script>
     <title>{{ $tipo === 'temperatura' ? 'Planilha Temperatura' : 'Planilha Limpeza' }} - {{ $supermercado?->nome }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/toast.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/toast.js', 'resources/js/maiusculas.js'])
 </head>
 <body class="audix-shell xl:flex xl:h-screen xl:flex-col xl:overflow-hidden {{ $tipo === 'temperatura' ? 'tela-temperatura' : '' }} bg-offwhite text-grafite">
     <!-- Topo fixo: menu, navegação e títulos num fundo branco único; o restante rola à parte -->
