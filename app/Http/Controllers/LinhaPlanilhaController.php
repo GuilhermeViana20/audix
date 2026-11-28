@@ -29,11 +29,25 @@ class LinhaPlanilhaController extends Controller
             'linhas.*.tipo' => ['required', 'in:linha,grupo'],
             'linhas.*.texto' => ['nullable', 'string', 'max:255'],
             'titulo_primeira_coluna' => ['nullable', 'string', 'max:120'],
+            // Tabela de produtos e temperatura do setor; null volta à tabela padrão
+            'legenda' => ['sometimes', 'nullable', 'array', 'max:30'],
+            'legenda.*' => ['array', 'size:2'],
+            'legenda.*.*' => ['nullable', 'string', 'max:150'],
         ]);
 
         DB::transaction(function () use ($secao, $dados) {
             if (filled($dados['titulo_primeira_coluna'] ?? null)) {
                 $secao->update(['titulo_primeira_coluna' => $dados['titulo_primeira_coluna']]);
+            }
+
+            if (array_key_exists('legenda', $dados)) {
+                // Linhas sem produto e sem temperatura são descartadas
+                $legenda = collect($dados['legenda'] ?? [])
+                    ->map(fn ($l) => [trim($l[0] ?? ''), trim($l[1] ?? '')])
+                    ->filter(fn ($l) => $l[0] !== '' || $l[1] !== '')
+                    ->values()
+                    ->all();
+                $secao->update(['legenda' => $legenda ?: null]);
             }
 
             $secao->linhas()->delete();

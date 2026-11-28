@@ -117,12 +117,49 @@ const LEGENDA_TEMPERATURA_CURTA = [
     ['Pescados', '0° a 3°C'],
     ['Congelados', '-18°C a -23°C ou conforme orientação do fornecedor'],
 ];
-// Peixaria: a legenda só traz os produtos do setor
-const SETOR_PEIXARIA = /PEIXARIA|PESCADO/i;
-const PRODUTOS_DA_PEIXARIA = ['Pescados', 'Congelados'];
-const legendaDoSetor = secao => SETOR_PEIXARIA.test(secao.nome)
-    ? LEGENDA_TEMPERATURA_CURTA.filter(([produto]) => PRODUTOS_DA_PEIXARIA.includes(produto))
-    : LEGENDA_TEMPERATURA_CURTA;
+// Setores com legenda própria (pelo nome do setor); os demais usam a legenda curta
+const LEGENDAS_POR_SETOR = [
+    {
+        setor: /PEIXARIA|PESCADO/i,
+        legenda: [
+            ['Pescados', '0° a 3°C'],
+            ['Congelados', '-18°C a -23°C ou conforme orientação do fornecedor'],
+        ],
+    },
+    {
+        setor: /\bFLV\b|HORTIFRUTI|FRUTAS/i,
+        legenda: [
+            ['"In Natura"', 'Temperatura ambiente'],
+            ['Folhosos e frutas sensíveis', 'Até 10°C'],
+            ['Pré-processados resfriados', 'Até 10°C ou conforme fabricante'],
+            ['Massas frescas', 'Até 6°C c/ tolerância até 7°C ou conforme fabricante'],
+        ],
+    },
+    {
+        setor: /PADARIA/i,
+        legenda: [
+            ['Sobremesas', 'Até 6°C'],
+            ['Salgados, recheios, sopas e pratos quentes', 'Não inferior a 65°C'],
+            ['Carnes preparadas', 'Não inferior a 65°C'],
+            ['Resfriados', '0°C a 10°C'],
+            ['Congelados', '-18°C a -23°C ou conforme orientação do fornecedor'],
+        ],
+    },
+];
+const legendaPadraoDoSetor = secao => LEGENDAS_POR_SETOR.find(({ setor }) => setor.test(secao.nome))?.legenda
+    ?? LEGENDA_TEMPERATURA_CURTA;
+// A tabela editada na seção (salva no banco) vale mais que a padrão do setor
+function legendaDoSetor(secao) {
+    const editada = (secao.legenda || []).filter(([produto, temperatura]) => (produto || '').trim() || (temperatura || '').trim());
+    return editada.length ? editada : legendaPadraoDoSetor(secao);
+}
+function personalizarLegenda() {
+    atual.value.legenda = legendaPadraoDoSetor(atual.value).map(([produto, temperatura]) => [produto, temperatura]);
+}
+function restaurarLegenda() {
+    if (!window.confirm('Voltar à tabela padrão deste setor? As linhas editadas serão descartadas ao salvar.')) return;
+    atual.value.legenda = null;
+}
 const somaAlturas =linhas => linhas.reduce((total, l) => total + alturaDaLinha(l), 0);
 
 // Folhas da temperatura: cada seção é um setor e começa numa folha nova (o nome vai no campo SETOR)
@@ -253,7 +290,7 @@ async function exportarWord() {
 
 // Assinatura do que é salvo no banco para uma seção (título + linhas).
 function assinatura(s, tit) {
-    return JSON.stringify({ t: tit, l: s.linhas.map(l => [l.tipo, l.texto]) });
+    return JSON.stringify({ t: tit, l: s.linhas.map(l => [l.tipo, l.texto]), g: s.legenda ?? null });
 }
 const estaSujo = computed(() => !!atual.value && assinatura(atual.value, titulo.value) !== atual.value._salvo);
 const textoStatus = computed(() => ['Salvando…', 'Erro ao salvar'].includes(status.value)
@@ -413,6 +450,7 @@ async function salvarSecao() {
             body: JSON.stringify({
                 linhas: s.linhas.map(l => ({ tipo: l.tipo, texto: l.texto })),
                 titulo_primeira_coluna: tit,
+                legenda: s.legenda ?? null,
             }),
         });
         s.titulo_primeira_coluna = tit;
@@ -878,6 +916,37 @@ onBeforeUnmount(() => {
                                             </div>
                                         </div>
 
+                                        <!-- Temperatura, modelo equipamentos: tabela de produtos e temperatura do setor -->
+                                        <div v-if="modeloEquipamentos" class="mt-4 rounded-xl bg-white p-3">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <span class="text-sm font-bold">Tabela de produtos e temperatura</span>
+                                                <span v-if="!atual.legenda" class="text-xs text-grafite/50">(padrão do setor)</span>
+                                                <button v-if="atual.legenda" class="ml-auto text-xs font-medium text-azul"
+                                                    @click="restaurarLegenda">Voltar à tabela padrão</button>
+                                            </div>
+                                            <table v-if="!atual.legenda" class="mt-2 w-full text-xs">
+                                                <tr v-for="([produto, temperatura], i) in legendaDoSetor(atual)" :key="i">
+                                                    <td class="py-1 pr-2 font-medium">{{ produto }}</td>
+                                                    <td class="py-1 text-grafite/70">{{ temperatura }}</td>
+                                                </tr>
+                                            </table>
+                                            <button v-if="!atual.legenda"
+                                                class="mt-2 rounded-xl bg-offwhite px-3 py-2 text-sm font-medium text-azul"
+                                                @click="personalizarLegenda">Editar tabela</button>
+                                            <template v-else>
+                                                <div v-for="(item, i) in atual.legenda" :key="i" class="mt-2 flex items-center gap-2">
+                                                    <input v-model="item[0]" placeholder="Produto"
+                                                        class="min-w-0 flex-1 rounded-xl bg-offwhite px-3 py-2 text-sm">
+                                                    <input v-model="item[1]" placeholder="Temperatura"
+                                                        class="min-w-0 flex-[1.4] rounded-xl bg-offwhite px-3 py-2 text-sm">
+                                                    <button class="px-1 text-red-500" title="Remover linha"
+                                                        @click="atual.legenda.splice(i, 1)">×</button>
+                                                </div>
+                                                <button class="mt-2 rounded-xl bg-offwhite px-3 py-2 text-sm font-medium text-azul"
+                                                    @click="atual.legenda.push(['', ''])">+ Produto</button>
+                                            </template>
+                                        </div>
+
                                         <div class="mt-4 flex flex-wrap gap-2 text-sm">
                                             <button class="rounded-xl bg-white px-3 py-2 font-medium text-azul"
                                                 @click="ordenarEditor">Ordenar A–Z</button>
@@ -992,7 +1061,7 @@ onBeforeUnmount(() => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="[produto, temperatura] in f.legendaCurta" :key="produto">
+                                        <tr v-for="([produto, temperatura], i) in f.legendaCurta" :key="i">
                                             <td>{{ produto }}</td>
                                             <td>{{ temperatura }}</td>
                                         </tr>
@@ -1357,11 +1426,14 @@ onBeforeUnmount(() => {
     height: 100%;
 }
 
+/* Altura fixa para preencher MÊS/ANO e ENCARREGADO, mesmo quando a legenda do setor é curta (peixaria) */
 .sheet .topo.temp.equip td {
-    height: 50%;
+    height: 44px;
 }
 
+/* A legenda fica com as linhas compactas, sem esticar até a altura do topo */
 .sheet .legenda-curta {
+    align-self: start;
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;

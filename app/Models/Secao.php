@@ -10,7 +10,11 @@ class Secao extends Model
 {
     protected $table = 'secoes';
 
-    protected $fillable = ['planilha_id', 'nome', 'titulo_primeira_coluna', 'ordem'];
+    protected $fillable = ['planilha_id', 'nome', 'titulo_primeira_coluna', 'legenda', 'ordem'];
+
+    protected $casts = [
+        'legenda' => 'array',
+    ];
 
     protected $attributes = [
         'titulo_primeira_coluna' => 'ÁREA DE ATENDIMENTO',
