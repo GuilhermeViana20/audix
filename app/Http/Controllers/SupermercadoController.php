@@ -81,6 +81,7 @@ class SupermercadoController extends Controller
                 'id' => $secao->id,
                 'nome' => $secao->nome,
                 'titulo_primeira_coluna' => $secao->titulo_primeira_coluna,
+                'legenda' => $secao->legenda,
                 'linhas' => $secao->linhas->map(fn ($l) => [
                     'id' => $l->id,
                     'tipo' => $l->tipo,

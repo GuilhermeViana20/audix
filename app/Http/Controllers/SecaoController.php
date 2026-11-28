@@ -90,6 +90,7 @@ class SecaoController extends Controller
                 'planilha_id' => $planilhaDestino->id,
                 'nome' => $secao->nome,
                 'titulo_primeira_coluna' => $secao->titulo_primeira_coluna,
+                'legenda' => $secao->legenda,
                 'ordem' => (int) Secao::where('planilha_id', $planilhaDestino->id)->max('ordem') + 1,
             ]);
 
